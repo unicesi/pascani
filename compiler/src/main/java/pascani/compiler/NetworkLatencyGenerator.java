@@ -47,9 +47,6 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 /**
- * TODO: remember to register interfaces to be duplicated, to generate adapters
- * only once
- * 
  * TODO: Check if producing events blocks the execution. If so, make
  * {@link MessageProducer} a {@link Thread}
  * 
