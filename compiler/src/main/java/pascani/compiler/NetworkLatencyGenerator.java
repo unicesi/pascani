@@ -75,7 +75,7 @@ import com.google.common.collect.Lists;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class LatencyProbeGenerator {
+public class NetworkLatencyGenerator {
 
 	private final String interfacePath;
 	public static final String REFERENCE_FIELD_NAME = "reference";
@@ -132,7 +132,7 @@ public class LatencyProbeGenerator {
 	private final boolean durableExchange;
 
 	/**
-	 * Creates a network latency probe generator.
+	 * TODO: documentation
 	 * 
 	 * @param interfacePath
 	 *            The file path of the original interface's source code
@@ -150,7 +150,7 @@ public class LatencyProbeGenerator {
 	 * @param durableExchange
 	 *            Whether the exchange is durable or not
 	 */
-	public LatencyProbeGenerator(final String interfacePath,
+	public NetworkLatencyGenerator(final String interfacePath,
 			final String host, final int port, final String virtualHost,
 			final String username, final String password,
 			final String exchange, final String routingKey,
@@ -166,14 +166,6 @@ public class LatencyProbeGenerator {
 		this.durableExchange = durableExchange;
 	}
 
-	/**
-	 * Duplicates the service interface adding a {@link NetworkLatencyEvent}
-	 * parameter to each declared method
-	 * 
-	 * @return The modified source code
-	 * @throws FileNotFoundException
-	 *             If the original service interface file is not found
-	 */
 	public JavaInterfaceSource modifiedInterface() throws FileNotFoundException {
 		File file = new File(interfacePath);
 		JavaInterfaceSource modifiedInterface = Roaster.parse(
@@ -211,17 +203,6 @@ public class LatencyProbeGenerator {
 		return modifiedInterface;
 	}
 
-	/**
-	 * Creates an adapter implementation of the modified service interface. Each
-	 * method implementation contains the initial {@link NetworkLatencyEvent}
-	 * measurement.
-	 * 
-	 * @param modified
-	 *            The modified service interface
-	 * @return The adapter's source code
-	 * @throws FileNotFoundException
-	 *             If the original service interface file is not found
-	 */
 	public JavaClassSource initialAdapter(final JavaInterfaceSource modified)
 			throws FileNotFoundException {
 
@@ -314,17 +295,6 @@ public class LatencyProbeGenerator {
 		return javaClass;
 	}
 
-	/**
-	 * Creates an adapter implementation of the modified service interface. Each
-	 * method implementation contains the final {@link NetworkLatencyEvent}
-	 * measurement.
-	 * 
-	 * @param modified
-	 *            The modified service interface
-	 * @return The adapter's source code
-	 * @throws FileNotFoundException
-	 *             If the original service interface file is not found
-	 */
 	public JavaClassSource finalAdapter(final JavaInterfaceSource modified)
 			throws FileNotFoundException {
 
@@ -398,13 +368,6 @@ public class LatencyProbeGenerator {
 		return javaClass;
 	}
 
-	/**
-	 * Creates an implementation of the network probe. The created class extends
-	 * {@link ExternalProbe}, setting the queuing server's connection data.
-	 * 
-	 * @param modified The modified service interface
-	 * @return The created source code
-	 */
 	public JavaClassSource probe(final JavaInterfaceSource modified) {
 
 		File file = new File(this.interfacePath);
