@@ -59,6 +59,11 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	protected final BasicProbe<T> probe;
 
 	/**
+	 * The context in which this probe is used
+	 */
+	protected final pascani.lang.Runtime.Context context;
+
+	/**
 	 * Creates an instance connected to a RabbitMQ server, making the recorded
 	 * events reachable for external components.
 	 * 
@@ -81,6 +86,8 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 *            A unique name among all the {@link Probe} instances. This name
 	 *            is necessary for external components to send RPC requests to
 	 *            this probe.
+	 * @param context
+	 *            The context in which this probe is used
 	 * @throws IOException
 	 *             If an I/O problem is encountered in the initialization of the
 	 *             RabbitMQ RPC server
@@ -90,7 +97,8 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 */
 	public CustomProbe(final String host, final int port,
 			final String virtualHost, final String username,
-			final String password, String routingKey) throws IOException,
+			final String password, String routingKey,
+			pascani.lang.Runtime.Context context) throws IOException,
 			TimeoutException {
 
 		this.endPoint = new EndPoint.Builder(host, port, virtualHost)
@@ -98,6 +106,17 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 
 		this.server = new RabbitMQRpcServer(endPoint, routingKey);
 		this.probe = new BasicProbe<T>(server);
+		this.context = context;
+
+		registerProbeAsListener();
+	}
+
+	/**
+	 * Registers the probe as an event listener
+	 */
+	private void registerProbeAsListener() {
+		pascani.lang.Runtime.getRuntimeInstance(this.context)
+				.registerEventListener(this.probe);
 	}
 
 	/**
