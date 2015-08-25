@@ -36,6 +36,7 @@ import pascani.compiler.templates.NetworkLatencyTemplates;
 import pascani.compiler.util.FilenameProposal;
 import pascani.lang.Event;
 import pascani.lang.events.NetworkLatencyEvent;
+import pascani.lang.infrastructure.ExternalProbe;
 import pascani.lang.infrastructure.MessageProducer;
 import pascani.lang.infrastructure.rabbitmq.EndPoint;
 import pascani.lang.infrastructure.rabbitmq.RabbitMQProducer;
@@ -109,6 +110,16 @@ public class NetworkLatencyGenerator {
 	private final String virtualHost;
 
 	/**
+	 * The message queuing server's username
+	 */
+	private final String username;
+
+	/**
+	 * The message queuing server's password
+	 */
+	private final String password;
+
+	/**
 	 * The probes' exchange
 	 */
 	private final String exchange;
@@ -144,12 +155,15 @@ public class NetworkLatencyGenerator {
 	 */
 	public NetworkLatencyGenerator(final String interfacePath,
 			final String host, final int port, final String virtualHost,
+			final String username, final String password,
 			final String exchange, final String routingKey,
 			final boolean durableExchange) {
 		this.interfacePath = interfacePath;
 		this.host = host;
 		this.port = port;
 		this.virtualHost = virtualHost;
+		this.username = username;
+		this.password = password;
 		this.exchange = exchange;
 		this.routingKey = routingKey;
 		this.durableExchange = durableExchange;
@@ -229,7 +243,8 @@ public class NetworkLatencyGenerator {
 		// A constructor to initialize the producer
 		String constructorBody = NetworkLatencyTemplates
 				.getProducerInitialization(PRODUCER_FIELD_NAME, host, port,
-						virtualHost, exchange, routingKey, durableExchange);
+						virtualHost, username, password, exchange, routingKey,
+						durableExchange);
 
 		javaClass.addMethod().setName(javaClass.getName())
 				.setBody(constructorBody).setConstructor(true);
@@ -320,7 +335,8 @@ public class NetworkLatencyGenerator {
 		// A constructor to initialize the producer
 		String constructorBody = NetworkLatencyTemplates
 				.getProducerInitialization(PRODUCER_FIELD_NAME, host, port,
-						virtualHost, exchange, routingKey, durableExchange);
+						virtualHost, username, password, exchange, routingKey,
+						durableExchange);
 
 		javaClass.addMethod().setName(javaClass.getName())
 				.setBody(constructorBody).setConstructor(true);
@@ -351,6 +367,32 @@ public class NetworkLatencyGenerator {
 
 			classMethod.setBody(body);
 		}
+
+		return javaClass;
+	}
+
+	public JavaClassSource probe(final JavaInterfaceSource modified) {
+
+		File file = new File(this.interfacePath);
+		String className = new FilenameProposal("NetworkLatencyProbe.java",
+				file.getParentFile()).getNewName();
+
+		JavaClassSource javaClass = Roaster.create(JavaClassSource.class);
+
+		// Set general properties
+		javaClass.setName(className);
+		javaClass.setPackage(modified.getPackage());
+		javaClass.setSuperType(ExternalProbe.class.getSimpleName() + "<"
+				+ NetworkLatencyEvent.class.getSimpleName() + ">");
+
+		// Add imports
+		javaClass.addImport(ExternalProbe.class);
+		javaClass.addImport(NetworkLatencyEvent.class);
+
+		String body = NetworkLatencyTemplates.getProbeInitialization(host,
+				port, virtualHost, username, password, exchange, routingKey);
+		javaClass.addMethod().setConstructor(true).setBody(body)
+				.addThrows(Exception.class);
 
 		return javaClass;
 	}
