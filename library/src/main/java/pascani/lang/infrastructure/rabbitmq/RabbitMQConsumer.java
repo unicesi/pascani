@@ -87,7 +87,7 @@ public class RabbitMQConsumer extends MessageConsumer implements Consumer {
 				pascani.lang.Runtime.Context.MONITOR);
 	}
 
-	@Override public void startConsuming() {
+	@Override protected void startConsuming() {
 		Channel channel = this.endPoint.channel();
 
 		try {
