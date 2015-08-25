@@ -70,21 +70,22 @@ public class RabbitMQConsumer extends MessageConsumer implements Consumer {
 	 *            The queue from which messages are consumed
 	 * @param tag
 	 *            The consumer tag for this consumer
-	 * 
+	 * @param context
+	 *            The context in which this consumer is used
 	 * @throws IOException
 	 *             Is thrown if an I/O problem is encountered
 	 * @throws TimeoutException
 	 *             Is thrown if there is a connection time out when connecting
 	 *             to the RabbitMQ server
 	 */
-	public RabbitMQConsumer(EndPoint endPoint, String queue, String tag)
-			throws IOException, TimeoutException {
+	public RabbitMQConsumer(EndPoint endPoint, String queue, String tag,
+			pascani.lang.Runtime.Context context) throws IOException,
+			TimeoutException {
 
 		this.endPoint = endPoint;
 		this.queueName = queue;
 		this.consumerTag = tag;
-		this.eventProducer = new EventProducer<Event<?>>(
-				pascani.lang.Runtime.Context.MONITOR);
+		this.eventProducer = new EventProducer<Event<?>>(context);
 	}
 
 	@Override protected void startConsuming() {
