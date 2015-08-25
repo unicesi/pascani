@@ -38,7 +38,7 @@ import pascani.lang.Event;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class MessageConsumer implements Runnable {
+public abstract class MessageConsumer extends Thread {
 
 	/**
 	 * The logger
@@ -48,7 +48,7 @@ public abstract class MessageConsumer implements Runnable {
 	/**
 	 * Starts consuming messages from the queue
 	 */
-	public abstract void startConsuming();
+	protected abstract void startConsuming();
 
 	/**
 	 * Delegates the event handling to an interested component; this may be
@@ -59,7 +59,7 @@ public abstract class MessageConsumer implements Runnable {
 	 */
 	public abstract void delegateEventHandling(Event<?> event);
 
-	public final void run() {
+	@Override public final void run() {
 		startConsuming();
 	}
 
