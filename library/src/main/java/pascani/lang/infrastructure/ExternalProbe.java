@@ -81,7 +81,7 @@ public class ExternalProbe<T extends Event<?>> extends CustomProbe<T> {
 	 */
 	public ExternalProbe(final String host, final int port,
 			final String virtualHost, final String username,
-			final String password, String routingKey) throws IOException,
+			final String password, final String routingKey) throws IOException,
 			TimeoutException {
 
 		super(host, port, virtualHost, username, password, routingKey);
