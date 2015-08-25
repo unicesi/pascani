@@ -41,22 +41,22 @@ import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcServer;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public final class CustomProbe<T extends Event<?>> implements Probe<T> {
+public class CustomProbe<T extends Event<?>> implements Probe<T> {
 
 	/**
 	 * A RabbitMQ end point (a connection to the server)
 	 */
-	private final EndPoint endPoint;
+	protected final EndPoint endPoint;
 
 	/**
 	 * The RPC server listening for RPC requests
 	 */
-	private final RpcServer server;
+	protected final RpcServer server;
 
 	/**
 	 * The {@link Probe} instance to record events and process RPC requests
 	 */
-	private final BasicProbe<T> probe;
+	protected final BasicProbe<T> probe;
 
 	/**
 	 * Creates an instance connected to a RabbitMQ server, making the recorded
