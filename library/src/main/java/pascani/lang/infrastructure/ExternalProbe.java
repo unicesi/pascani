@@ -84,10 +84,12 @@ public class ExternalProbe<T extends Event<?>> extends CustomProbe<T> {
 			final String password, final String routingKey) throws IOException,
 			TimeoutException {
 
-		super(host, port, virtualHost, username, password, routingKey);
+		super(host, port, virtualHost, username, password, routingKey,
+				pascani.lang.Runtime.Context.PROBE);
 
 		String queue = super.endPoint.channel().queueDeclare().getQueue();
-		this.consumer = new RabbitMQConsumer(super.endPoint, queue, routingKey);
+		this.consumer = new RabbitMQConsumer(super.endPoint, queue, routingKey,
+				pascani.lang.Runtime.Context.PROBE);
 		this.consumer.start();
 	}
 
