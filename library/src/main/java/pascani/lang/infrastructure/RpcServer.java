@@ -72,7 +72,7 @@ public abstract class RpcServer extends Thread {
 	 * 
 	 * @see java.lang.Thread#run()
 	 */
-	@Override public void run() {
+	@Override public final void run() {
 		try {
 			startProcessingRequests();
 		} catch (Exception e) {
