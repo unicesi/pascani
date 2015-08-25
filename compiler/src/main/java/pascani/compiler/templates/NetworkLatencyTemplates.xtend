@@ -33,7 +33,7 @@ class NetworkLatencyTemplates {
 	 * return measurement ends) for a modified interface, measuring network latency data.
 	 */
 	def static String initialAdapterMethod(String startVar, String eventVar, List<String> eventParams, String eVar,
-		boolean isVoid, String referenceVar, String producerVar, String methodName, String methodReturn, 
+		boolean isVoid, String referenceVar, String producerVar, String methodName, String methodReturn,
 		Collection<String> paramNames) {
 
 		var params = if(paramNames.size > 0) ", " + Joiner.on(", ").join(paramNames) else "";
@@ -107,11 +107,14 @@ class NetworkLatencyTemplates {
 	/**
 	 * Produces a code block for initializing the message producer inside each adapter
 	 */
-	def static String getProducerInitialization(String producerVar, String host, int port, 
-		String virtualHost, String exchange, String routingKey, boolean durableExchange) {
+	def static String getProducerInitialization(String producerVar, String host, int port, String virtualHost,
+		String username, String password, String exchange, String routingKey, boolean durableExchange) {
 		'''
 			try {
-				EndPoint endPoint = new EndPoint.Builder("«host»", «port», "«virtualHost»").build();
+				EndPoint endPoint = 
+					new EndPoint.Builder("«host»", «port», "«virtualHost»")
+					.withAuthentication("«username»", "«password»")
+					.build();
 				
 				List<Class<? extends «Event.simpleName»<?>>> classes = 
 					new ArrayList<Class<? extends «Event.simpleName»<?>>>();
@@ -122,6 +125,16 @@ class NetworkLatencyTemplates {
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
+		'''
+	}
+
+	/**
+	 * Producer a code block for initializing the network probe
+	 */
+	def static String getProbeInitialization(String host, int port, String virtualHost, 
+		String username, String password, String exchange, String routingKey) {
+		'''
+		super("«host»", «port», "«virtualHost»", "«username»", "«password»", "«routingKey»");
 		'''
 	}
 
