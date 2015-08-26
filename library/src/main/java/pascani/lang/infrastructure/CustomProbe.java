@@ -90,8 +90,11 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 		// Create the corresponding queue, and then create a binding between the
 		// queue and the probes exchange
 		String queue = routingKey;
+		String exchange = pascani.lang.Runtime.getRuntimeInstance(context)
+				.getEnvironment().get("probes_exchange");
+		
 		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
-		this.endPoint.channel().queueBind(queue, "probes_exchange", routingKey);
+		this.endPoint.channel().queueBind(queue, exchange, routingKey);
 
 		this.server = new RabbitMQRpcServer(endPoint, routingKey);
 		this.probe = new BasicProbe<T>(server);
