@@ -18,9 +18,6 @@
  */
 package pascani.lang.infrastructure;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
 import pascani.lang.Event;
 import pascani.lang.Probe;
 import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer;
@@ -58,34 +55,19 @@ public class ExternalProbe<T extends Event<?>> extends CustomProbe<T> {
 	 * recorded events from this probe.
 	 * </p>
 	 * 
-	 * @param host
-	 *            The RabbitMQ server's host
-	 * @param port
-	 *            The RabbitMQ server's AQMP port
-	 * @param virtualHost
-	 *            The RabbitMQ server's virtual host
-	 * @param username
-	 *            The RabbitMQ user
-	 * @param password
-	 *            The RabbitMQ password
+	 * @param uri
+	 *            The RabbitMQ connection URI
 	 * @param routingKey
 	 *            A unique name among all the {@link Probe} instances. This name
 	 *            is necessary for external components to send RPC requests to
 	 *            this probe.
-	 * @throws IOException
-	 *             If an I/O problem is encountered in the initialization of the
-	 *             RabbitMQ RPC server
-	 * @throws TimeoutException
-	 *             If there is a connection time out when connecting to the
-	 *             RabbitMQ server
+	 * @throws Exception
+	 *             If something bad happens. Check exceptions in
+	 *             {@link CustomProbe#CustomProbe(String, String, pascani.lang.Runtime.Context)}
 	 */
-	public ExternalProbe(final String host, final int port,
-			final String virtualHost, final String username,
-			final String password, final String routingKey) throws IOException,
-			TimeoutException {
-
-		super(host, port, virtualHost, username, password, routingKey,
-				pascani.lang.Runtime.Context.PROBE);
+	public ExternalProbe(final String uri, final String routingKey)
+			throws Exception {
+		super(uri, routingKey, pascani.lang.Runtime.Context.PROBE);
 
 		String queue = super.endPoint.channel().queueDeclare().getQueue();
 		this.consumer = new RabbitMQConsumer(super.endPoint, queue, routingKey,
