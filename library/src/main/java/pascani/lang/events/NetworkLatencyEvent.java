@@ -207,11 +207,11 @@ public class NetworkLatencyEvent implements Event<Double> {
 	 *            The initial timestamp of the time window
 	 * @param end
 	 *            The final timestamp of the time window
-	 * @return {@code true} if the range [{@code start}, {@code end}] contains
-	 *         the final timestamp {@code this} object
+	 * @return Whether the range [{@code start}, {@code end}] contains
+	 *         the final timestamp this object
 	 */
 	public boolean isInTimeWindow(long start, long end) {
-		return Range.closed(start, end).contains(end);
+		return Range.closed(start, end).contains(this.end);
 	}
 
 	/**
