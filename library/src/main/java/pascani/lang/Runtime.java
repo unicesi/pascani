@@ -147,7 +147,7 @@ public class Runtime {
 		boolean ok = false;
 
 		try {
-			input = new FileInputStream("config.properties");
+			input = getClass().getClassLoader().getResourceAsStream("pascani.properties");
 			config.load(input);
 			ok = true;
 		} catch (FileNotFoundException e) {
@@ -158,7 +158,7 @@ public class Runtime {
 
 			if (!ok) {
 				// Set defaults
-				config.put("uri", "amqp://guest:guest@172.16.205.127:5672");
+				config.put("uri", "amqp://guest:guest@localhost:5672");
 				config.put("variables_model_exchange",
 						"variables_model_exchange");
 				config.put("probes_exchange", "probes_exchange");
