@@ -92,8 +92,8 @@ public class RabbitMQConsumer extends MessageConsumer implements Consumer {
 		Channel channel = this.endPoint.channel();
 
 		try {
-			// start consuming (auto-acknowledged) messages
-			channel.basicConsume(this.queueName, true, this.consumerTag, this);
+			// start consuming (non auto-acknowledged) messages
+			channel.basicConsume(this.queueName, false, this.consumerTag, this);
 		} catch (IOException e) {
 			logger.error("Error consuming message from RabbitMQ consumer", e);
 		}
@@ -109,6 +109,9 @@ public class RabbitMQConsumer extends MessageConsumer implements Consumer {
 
 		Event<?> event = (Event<?>) SerializationUtils.deserialize(body);
 		delegateEventHandling(event);
+
+		// Acknowledge the received message after it has been handled
+		this.endPoint.channel().basicAck(envelope.getDeliveryTag(), false);
 	}
 
 	public void handleConsumeOk(final String consumerTag) {
