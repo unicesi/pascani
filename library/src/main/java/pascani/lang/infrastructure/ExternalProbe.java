@@ -69,9 +69,8 @@ public class ExternalProbe<T extends Event<?>> extends CustomProbe<T> {
 			throws Exception {
 		super(uri, routingKey, pascani.lang.Runtime.Context.PROBE);
 
-		String queue = super.endPoint.channel().queueDeclare().getQueue();
-		this.consumer = new RabbitMQConsumer(super.endPoint, queue, routingKey,
-				pascani.lang.Runtime.Context.PROBE);
+		this.consumer = new RabbitMQConsumer(super.endPoint, routingKey,
+				routingKey, pascani.lang.Runtime.Context.PROBE);
 		this.consumer.start();
 	}
 
