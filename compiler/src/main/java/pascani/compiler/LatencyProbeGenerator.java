@@ -26,11 +26,13 @@ import java.util.List;
 import java.util.UUID;
 
 import org.jboss.forge.roaster.Roaster;
+import org.jboss.forge.roaster.model.Type;
 import org.jboss.forge.roaster.model.source.Import;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
 import org.jboss.forge.roaster.model.source.JavaInterfaceSource;
 import org.jboss.forge.roaster.model.source.MethodSource;
 import org.jboss.forge.roaster.model.source.ParameterSource;
+import org.jboss.forge.roaster.model.util.Types;
 
 import pascani.compiler.templates.NetworkLatencyTemplates;
 import pascani.compiler.util.FilenameProposal;
@@ -234,9 +236,17 @@ public class LatencyProbeGenerator {
 		javaClass.addMethod().setName(javaClass.getName())
 				.setBody(constructorBody).setConstructor(true);
 
-		Function<String, String> getClass = new Function<String, String>() {
-			public String apply(String input) {
-				return input + ".getClass()";
+		Function<Object, String> getClass = new Function<Object, String>() {
+			public String apply(Object parameter) {
+				Type<?> type = ((ParameterSource<?>) parameter).getType();
+				String name = type.toString();
+
+				if (type.toString().indexOf("<") > -1) {
+					name = name.substring(0, name.indexOf('<'))
+							+ name.substring(name.lastIndexOf('>') + 1);
+				}
+
+				return Types.toSimpleName(name) + ".class";
 			}
 		};
 
@@ -262,7 +272,7 @@ public class LatencyProbeGenerator {
 
 			String paramTypesArray = new FilenameProposal("paramTypes", names)
 					.getNewName();
-			Collection<String> paramTypes = Collections2.transform(names,
+			Collection<String> paramTypes = Collections2.transform(parameters,
 					getClass);
 
 			eventParams.add("UUID.randomUUID()");
