@@ -94,7 +94,7 @@ public final class RabbitMQProducer extends MessageProducer {
 	@Override protected void publish(Event<?> event) throws IOException {
 		byte[] data = SerializationUtils.serialize(event);
 		BasicProperties props = new BasicProperties.Builder()
-				.messageId(event.identifier().toString()).deliveryMode(1)
+				.messageId(event.identifier().toString()).deliveryMode(2)
 				.priority(0).type(event.getClass().getCanonicalName()).build();
 
 		Channel c = endPoint.channel();
