@@ -114,7 +114,7 @@ public class NetworkLatencyEvent implements Event<Double> {
 		this.transactionId = transactionId;
 		this.start = start;
 		this.end = end;
-		this.latency = this.start - this.end;
+		this.latency = this.end - this.start;
 		this.caller = caller;
 		this.callee = callee;
 		this._return = _return;
