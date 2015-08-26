@@ -44,7 +44,7 @@ public class RabbitMQRpcServer extends RpcServer {
 	 * 
 	 * @author Miguel Jiménez - Initial contribution and API
 	 */
-	protected class InternalRpcServer extends RpcServer2 {
+	protected class InternalRpcServer extends com.rabbitmq.client.RpcServer {
 		public InternalRpcServer(Channel channel, String queueName)
 				throws IOException {
 			super(channel, queueName);
@@ -74,9 +74,8 @@ public class RabbitMQRpcServer extends RpcServer {
 	 * queue.
 	 * 
 	 * @param endPoint
-	 * @param RpcRequestQueueName
+	 * @param rpcQueueName
 	 *            The queue designated for RPC requests
-	 * 
 	 * @throws IOException
 	 *             If an I/O problem is encountered in the initialization of the
 	 *             actual RabbitMQ RPC server
@@ -84,21 +83,21 @@ public class RabbitMQRpcServer extends RpcServer {
 	 *             If there is a connection time out when connecting to the
 	 *             RabbitMQ server
 	 */
-	public RabbitMQRpcServer(final EndPoint endPoint,
-			String RpcRequestQueueName) throws IOException, TimeoutException {
-		super(RpcRequestQueueName);
+	public RabbitMQRpcServer(final EndPoint endPoint, String rpcQueueName)
+			throws IOException, TimeoutException {
+		super(rpcQueueName);
 
 		this.endPoint = endPoint;
-
-		// More information on the queue name:
-		// https://www.rabbitmq.com/direct-reply-to.html
-		this.server = new InternalRpcServer(this.endPoint.channel(),
-				"amq.rabbitmq.reply-to");
+		this.endPoint.channel().queueDeclare(rpcQueueName, false, true, true, null);
+		this.server = new InternalRpcServer(this.endPoint.channel(), rpcQueueName);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see pascani.runtime.infrastructure.RpcServer#startProcessingRequests(pascani.lang.Probe)
+	 * 
+	 * @see
+	 * pascani.runtime.infrastructure.RpcServer#startProcessingRequests(pascani
+	 * .lang.Probe)
 	 */
 	@Override public void startProcessingRequests() throws IOException {
 		this.server.mainloop();
