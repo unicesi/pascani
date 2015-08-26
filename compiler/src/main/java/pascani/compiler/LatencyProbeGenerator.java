@@ -92,29 +92,9 @@ public class LatencyProbeGenerator {
 	};
 
 	/**
-	 * The message queuing server's host
+	 * The message queuing server's connection URI
 	 */
-	private final String host;
-
-	/**
-	 * The message queuing server's port
-	 */
-	private final int port;
-
-	/**
-	 * The message queuing server's virtual host
-	 */
-	private final String virtualHost;
-
-	/**
-	 * The message queuing server's username
-	 */
-	private final String username;
-
-	/**
-	 * The message queuing server's password
-	 */
-	private final String password;
+	private final String uri;
 
 	/**
 	 * The probes' exchange
@@ -136,12 +116,8 @@ public class LatencyProbeGenerator {
 	 * 
 	 * @param interfacePath
 	 *            The file path of the original interface's source code
-	 * @param host
-	 *            The message queuing server's host
-	 * @param port
-	 *            The message queuing server's port
-	 * @param virtualHost
-	 *            The message queuing server's virtual host
+	 * @param uri
+	 *            The queuing server's connection URI
 	 * @param exchange
 	 *            The probes' exchange
 	 * @param routingKey
@@ -150,17 +126,11 @@ public class LatencyProbeGenerator {
 	 * @param durableExchange
 	 *            Whether the exchange is durable or not
 	 */
-	public LatencyProbeGenerator(final String interfacePath,
-			final String host, final int port, final String virtualHost,
-			final String username, final String password,
+	public LatencyProbeGenerator(final String interfacePath, final String uri,
 			final String exchange, final String routingKey,
 			final boolean durableExchange) {
 		this.interfacePath = interfacePath;
-		this.host = host;
-		this.port = port;
-		this.virtualHost = virtualHost;
-		this.username = username;
-		this.password = password;
+		this.uri = uri;
 		this.exchange = exchange;
 		this.routingKey = routingKey;
 		this.durableExchange = durableExchange;
@@ -258,9 +228,8 @@ public class LatencyProbeGenerator {
 
 		// A constructor to initialize the producer
 		String constructorBody = NetworkLatencyTemplates
-				.getProducerInitialization(PRODUCER_FIELD_NAME, host, port,
-						virtualHost, username, password, exchange, routingKey,
-						durableExchange);
+				.getProducerInitialization(PRODUCER_FIELD_NAME, this.uri,
+						this.exchange, this.routingKey, this.durableExchange);
 
 		javaClass.addMethod().setName(javaClass.getName())
 				.setBody(constructorBody).setConstructor(true);
@@ -361,9 +330,8 @@ public class LatencyProbeGenerator {
 
 		// A constructor to initialize the producer
 		String constructorBody = NetworkLatencyTemplates
-				.getProducerInitialization(PRODUCER_FIELD_NAME, host, port,
-						virtualHost, username, password, exchange, routingKey,
-						durableExchange);
+				.getProducerInitialization(PRODUCER_FIELD_NAME, this.uri,
+						this.exchange, this.routingKey, this.durableExchange);
 
 		javaClass.addMethod().setName(javaClass.getName())
 				.setBody(constructorBody).setConstructor(true);
@@ -402,7 +370,8 @@ public class LatencyProbeGenerator {
 	 * Creates an implementation of the network probe. The created class extends
 	 * {@link ExternalProbe}, setting the queuing server's connection data.
 	 * 
-	 * @param modified The modified service interface
+	 * @param modified
+	 *            The modified service interface
 	 * @return The created source code
 	 */
 	public JavaClassSource probe(final JavaInterfaceSource modified) {
@@ -423,8 +392,8 @@ public class LatencyProbeGenerator {
 		javaClass.addImport(ExternalProbe.class);
 		javaClass.addImport(NetworkLatencyEvent.class);
 
-		String body = NetworkLatencyTemplates.getProbeInitialization(host,
-				port, virtualHost, username, password, exchange, routingKey);
+		String body = NetworkLatencyTemplates.getProbeInitialization(this.uri,
+				this.exchange, this.routingKey);
 		javaClass.addMethod().setConstructor(true).setBody(body)
 				.addThrows(Exception.class);
 

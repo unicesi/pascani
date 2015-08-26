@@ -107,14 +107,11 @@ class NetworkLatencyTemplates {
 	/**
 	 * Produces a code block for initializing the message producer inside each adapter
 	 */
-	def static String getProducerInitialization(String producerVar, String host, int port, String virtualHost,
-		String username, String password, String exchange, String routingKey, boolean durableExchange) {
+	def static String getProducerInitialization(String producerVar, String uri, String exchange, 
+		String routingKey, boolean durableExchange) {
 		'''
 			try {
-				EndPoint endPoint = 
-					new EndPoint.Builder("«host»", «port», "«virtualHost»")
-					.withAuthentication("«username»", "«password»")
-					.build();
+				EndPoint endPoint = new EndPoint("«uri»");
 				
 				List<Class<? extends «Event.simpleName»<?>>> classes = 
 					new ArrayList<Class<? extends «Event.simpleName»<?>>>();
@@ -131,10 +128,9 @@ class NetworkLatencyTemplates {
 	/**
 	 * Producer a code block for initializing the network probe
 	 */
-	def static String getProbeInitialization(String host, int port, String virtualHost, 
-		String username, String password, String exchange, String routingKey) {
+	def static String getProbeInitialization(String uri, String exchange, String routingKey) {
 		'''
-		super("«host»", «port», "«virtualHost»", "«username»", "«password»", "«routingKey»");
+		super("«uri»", "«routingKey»");
 		'''
 	}
 
