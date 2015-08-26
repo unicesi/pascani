@@ -33,14 +33,16 @@ class NetworkLatencyTemplates {
 	 * return measurement ends) for a modified interface, measuring network latency data.
 	 */
 	def static String initialAdapterMethod(String startVar, String eventVar, List<String> eventParams, String eVar,
-		boolean isVoid, String referenceVar, String producerVar, String methodName, String methodReturn,
-		Collection<String> paramNames) {
+		String paramTypesVar, Collection<String> paramTypes, boolean isVoid, String referenceVar, String producerVar,
+		String methodName, String methodReturn, Collection<String> paramNames) {
 
 		var params = if(paramNames.size > 0) ", " + Joiner.on(", ").join(paramNames) else "";
 		val _return = if(!isVoid) new FilenameProposal("_return", paramNames).newName;
 
 		'''
 			long «startVar» = System.nanoTime();
+			«getParameterTypesArray(paramTypesVar, paramTypes)»
+			
 			«NetworkLatencyEvent.simpleName» «eventVar» = null;
 			try {
 				«eventVar» = new «NetworkLatencyEvent.simpleName»(«Joiner.on(", ").join(eventParams)»);
@@ -88,7 +90,7 @@ class NetworkLatencyTemplates {
 					«eventVar».methodCaller(),
 					«eventVar».methodProvider(),
 					«_return»,
-					«eventVar».getMethodInformation(),
+					«eventVar».getParameterTypes(),
 					«eventVar».getActualMethodParameters()
 				);
 				
@@ -98,17 +100,10 @@ class NetworkLatencyTemplates {
 	}
 
 	/**
-	 * Simple template for getting a method based on the name and the parameters types
-	 */
-	def static String getMethod(String name, Collection<String> paramTypes) '''
-		this.getClass().getMethod("«name»", «Joiner.on(", ").join(paramTypes)»)
-	'''
-
-	/**
 	 * Produces a code block for initializing the message producer inside each adapter
 	 */
-	def static String getProducerInitialization(String producerVar, String uri, String exchange, 
-		String routingKey, boolean durableExchange) {
+	def static String getProducerInitialization(String producerVar, String uri, String exchange, String routingKey,
+		boolean durableExchange) {
 		'''
 			try {
 				EndPoint endPoint = new EndPoint("«uri»");
@@ -126,11 +121,23 @@ class NetworkLatencyTemplates {
 	}
 
 	/**
+	 * Produces a class array initialization containing a given list of class objects
+	 */
+	def static String getParameterTypesArray(String arrayVar, Collection<String> paramTypes) {
+		'''
+			Class<?>[] «arrayVar» = new Class<?>[«paramTypes.size»];
+			«FOR index : 0 ..< paramTypes.size»
+				«arrayVar»[«index»] = «paramTypes.get(index)»;
+			«ENDFOR»
+		'''
+	}
+
+	/**
 	 * Producer a code block for initializing the network probe
 	 */
 	def static String getProbeInitialization(String uri, String exchange, String routingKey) {
 		'''
-		super("«uri»", "«routingKey»");
+			super("«uri»", "«routingKey»");
 		'''
 	}
 

@@ -259,6 +259,9 @@ public class LatencyProbeGenerator {
 					.getNewName();
 			String exceptionParam = new FilenameProposal("e", names)
 					.getNewName();
+
+			String paramTypesArray = new FilenameProposal("paramTypes", names)
+					.getNewName();
 			Collection<String> paramTypes = Collections2.transform(names,
 					getClass);
 
@@ -267,12 +270,11 @@ public class LatencyProbeGenerator {
 			eventParams.add(_interface.getName() + ".class");
 			eventParams.add(_interface.getName() + ".class");
 			eventParams.add("null");
-			eventParams.add(NetworkLatencyTemplates.getMethod(
-					classMethod.getName(), paramTypes));
-			eventParams.add(Joiner.on(", ").join(names));
+			eventParams.add(paramTypesArray);
 
 			String body = NetworkLatencyTemplates.initialAdapterMethod(
 					startParam, eventParam, eventParams, exceptionParam,
+					paramTypesArray, paramTypes,
 					classMethod.isReturnTypeVoid(), REFERENCE_FIELD_NAME,
 					PRODUCER_FIELD_NAME, classMethod.getName(), classMethod
 							.getReturnType().getSimpleName(), names);
