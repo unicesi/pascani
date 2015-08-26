@@ -18,7 +18,7 @@
  */
 package pascani.lang.events;
 
-import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.UUID;
 
 import pascani.lang.Event;
@@ -75,14 +75,14 @@ public class NetworkLatencyEvent implements Event<Double> {
 	private final Class<?> callee;
 
 	/**
-	 * The method being called
-	 */
-	private final Method method;
-
-	/**
 	 * The actual method return
 	 */
 	private final Object _return;
+	
+	/**
+	 * The parameter types of the method
+	 */
+	private final Class<?>[] parameterTypes;
 
 	/**
 	 * The actual parameters within the method call
@@ -102,14 +102,14 @@ public class NetworkLatencyEvent implements Event<Double> {
 	 *            The class providing the method
 	 * @param _return
 	 *            The actual method return
-	 * @param method
-	 *            The method being called
+	 * @param parameterTypes
+	 *            The parameter types of the method
 	 * @param parameters
 	 *            The actual parameters within the method call
 	 */
 	public NetworkLatencyEvent(final UUID transactionId, final long start,
 			final long end, final Class<?> caller, final Class<?> callee,
-			final Object _return, final Method method, Object... parameters) {
+			final Object _return, final Class<?>[] parameterTypes, Object... parameters) {
 		this.id = UUID.randomUUID();
 		this.transactionId = transactionId;
 		this.start = start;
@@ -117,8 +117,8 @@ public class NetworkLatencyEvent implements Event<Double> {
 		this.latency = this.start - this.end;
 		this.caller = caller;
 		this.callee = callee;
-		this.method = method;
 		this._return = _return;
+		this.parameterTypes = parameterTypes;
 		this.parameters = parameters;
 	}
 
@@ -140,15 +140,15 @@ public class NetworkLatencyEvent implements Event<Double> {
 	 *            The class providing the method
 	 * @param _return
 	 *            The actual method return
-	 * @param method
-	 *            The method being called
+	 * @param parameterTypes
+	 *            The parameter types of the method
 	 * @param parameters
 	 *            The actual parameters within the method call
 	 */
 	public NetworkLatencyEvent(final UUID transactionId, final long start,
 			final Class<?> caller, final Class<?> callee, final Object _return,
-			final Method method, Object... parameters) {
-		this(transactionId, start, 0, caller, callee, _return, method,
+			final Class<?>[] parameterTypes, Object... parameters) {
+		this(transactionId, start, 0, caller, callee, _return, parameterTypes,
 				parameters);
 	}
 
@@ -163,7 +163,7 @@ public class NetworkLatencyEvent implements Event<Double> {
 	 */
 	public NetworkLatencyEvent(final NetworkLatencyEvent event, final long end) {
 		this(event.transactionId, event.start, end, event.caller, event.callee,
-				event._return, event.method, event.parameters);
+				event._return, event.parameterTypes, event.parameters);
 	}
 
 	public UUID identifier() {
@@ -186,8 +186,8 @@ public class NetworkLatencyEvent implements Event<Double> {
 		return this.callee;
 	}
 
-	public Method getMethodInformation() {
-		return this.method;
+	public Class<?>[] getParameterTypes() {
+		return this.parameterTypes;
 	}
 
 	public Object[] getActualMethodParameters() {
@@ -226,7 +226,7 @@ public class NetworkLatencyEvent implements Event<Double> {
 		sb.append(identifier().toString() + "\t");
 		sb.append(this.caller.getCanonicalName() + "\t");
 		sb.append(this.callee.getCanonicalName() + "\t");
-		sb.append(this.method.toString() + "\t");
+		sb.append(Arrays.toString(parameterTypes) + "\t");
 		sb.append(this.start + "\t");
 		sb.append(this.end + "\t");
 		sb.append(value());
