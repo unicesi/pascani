@@ -18,9 +18,7 @@
  */
 package pascani.lang.infrastructure;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 import pascani.lang.Event;
 import pascani.lang.Probe;
@@ -72,38 +70,22 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 * recorded events from this probe.
 	 * </p>
 	 * 
-	 * @param host
-	 *            The RabbitMQ server's host
-	 * @param port
-	 *            The RabbitMQ server's AQMP port
-	 * @param virtualHost
-	 *            The RabbitMQ server's virtual host
-	 * @param username
-	 *            The RabbitMQ user
-	 * @param password
-	 *            The RabbitMQ password
+	 * @param uri
+	 *            The RabbitMQ connection URI
 	 * @param routingKey
 	 *            A unique name among all the {@link Probe} instances. This name
 	 *            is necessary for external components to send RPC requests to
 	 *            this probe.
 	 * @param context
 	 *            The context in which this probe is used
-	 * @throws IOException
-	 *             If an I/O problem is encountered in the initialization of the
-	 *             RabbitMQ RPC server
-	 * @throws TimeoutException
-	 *             If there is a connection time out when connecting to the
-	 *             RabbitMQ server
+	 * @throws Exception
+	 *             If something bad happens. Check exceptions in
+	 *             {@link EndPoint#EndPoint(String)}
 	 */
-	public CustomProbe(final String host, final int port,
-			final String virtualHost, final String username,
-			final String password, String routingKey,
-			pascani.lang.Runtime.Context context) throws IOException,
-			TimeoutException {
+	public CustomProbe(final String uri, String routingKey,
+			pascani.lang.Runtime.Context context) throws Exception {
 
-		this.endPoint = new EndPoint.Builder(host, port, virtualHost)
-				.withAuthentication(username, password).build();
-
+		this.endPoint = new EndPoint(uri);
 		this.server = new RabbitMQRpcServer(endPoint, routingKey);
 		this.probe = new BasicProbe<T>(server);
 		this.context = context;
