@@ -27,8 +27,9 @@ import pascani.lang.Event;
 import com.google.common.collect.Lists;
 
 /**
- * This class encapsulates the average calculation for a {@link List} or array
- * of {@link Event} objects with numerical value.
+ * This class stores the value of numeric-based events (i.e., events whose value
+ * is a {@link Number}) into a {@link DescriptiveStatistics} instance, to easily
+ * calculate statistics on a list or array of events.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
