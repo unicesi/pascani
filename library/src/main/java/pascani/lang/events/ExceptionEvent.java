@@ -59,11 +59,53 @@ public class ExceptionEvent implements Event<Exception> {
 	 */
 	private final Exception exception;
 
-	public ExceptionEvent(final UUID transactionId, final Exception exception) {
+	/**
+	 * The class in which the exception was raised
+	 */
+	private final Class<?> clazz;
+
+	/**
+	 * The method that raised the exception
+	 */
+	private final String methodName;
+
+	/**
+	 * The formal parameters of the method
+	 */
+	private final Class<?>[] parameters;
+
+	/**
+	 * The arguments with which the method was called
+	 */
+	private final Object[] arguments;
+
+	/**
+	 * Creates an instance having all of the parameters
+	 * 
+	 * @param transactionId
+	 *            The transaction of which this event makes part
+	 * @param exception
+	 *            The actual Exception
+	 * @param clazz
+	 *            The class in which the exception was raised
+	 * @param methodName
+	 *            The method that raised the exception
+	 * @param parameters
+	 *            The formal parameters of the method
+	 * @param arguments
+	 *            The arguments with which the method was called
+	 */
+	public ExceptionEvent(final UUID transactionId, final Exception exception,
+			final Class<?> clazz, final String methodName,
+			final Class<?>[] parameters, final Object... arguments) {
+		this.timestamp = System.nanoTime();
 		this.id = UUID.randomUUID();
 		this.transactionId = transactionId;
 		this.exception = exception;
-		this.timestamp = System.nanoTime();
+		this.clazz = clazz;
+		this.methodName = methodName;
+		this.parameters = parameters;
+		this.arguments = arguments;
 	}
 
 	public UUID identifier() {
@@ -76,6 +118,22 @@ public class ExceptionEvent implements Event<Exception> {
 
 	public Exception value() {
 		return this.exception;
+	}
+	
+	public Class<?> clazz() {
+		return this.clazz;
+	}
+	
+	public String methodName() {
+		return this.methodName;
+	}
+	
+	public Class<?>[] parameters() {
+		return this.parameters;
+	}
+	
+	public Object[] arguments() {
+		return this.arguments;
 	}
 
 	public List<Event<Exception>> children() {
