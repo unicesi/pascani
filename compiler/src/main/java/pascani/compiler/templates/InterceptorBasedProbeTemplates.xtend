@@ -21,7 +21,7 @@ package pascani.compiler.templates
 class InterceptorBasedProbeTemplates {
 
 	/**
-	 * TODO: documentation
+	 * Produces the necessary code to initialize the {@link CustomProbe}
 	 */
 	def static String getProbeConstructor(String uri, String routingKey) {
 		'''

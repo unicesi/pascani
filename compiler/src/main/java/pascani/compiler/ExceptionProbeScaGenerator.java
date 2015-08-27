@@ -35,7 +35,10 @@ import pascani.lang.events.ExceptionEvent;
 import pascani.lang.util.EventProducer;
 
 /**
- * TODO: documentation
+ * This class generates the necessary source code to automatically caught
+ * {@link Exception} objects in service executions. As the generated code is
+ * compliant with the SCA specification, and the FraSCAti middleware, the
+ * mechanism for intercepting the service execution is an Intent composite.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */

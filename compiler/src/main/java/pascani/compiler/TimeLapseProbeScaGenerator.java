@@ -17,7 +17,10 @@ import pascani.lang.events.TimeLapseEvent;
 import pascani.lang.util.EventProducer;
 
 /**
- * TODO: documentation
+ * This class generates the necessary source code to automatically measure
+ * execution time in service executions. As the generated code is compliant with
+ * the SCA specification, and the FraSCAti middleware, the mechanism for
+ * intercepting the service execution is an Intent composite.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
@@ -26,10 +29,13 @@ public class TimeLapseProbeScaGenerator extends InterceptorBasedProbeGenerator {
 	public TimeLapseProbeScaGenerator(String directoryPath) {
 		super(directoryPath, "TimeLapseProbe");
 	}
-	
+
 	/*
 	 * (non-Javadoc)
-	 * @see pascani.compiler.InterceptorBasedProbeGenerator#interceptor(java.lang.String)
+	 * 
+	 * @see
+	 * pascani.compiler.InterceptorBasedProbeGenerator#interceptor(java.lang
+	 * .String)
 	 */
 	@Override public JavaClassSource interceptor(final String packageName) {
 		File directory = new File(path);
@@ -52,7 +58,7 @@ public class TimeLapseProbeScaGenerator extends InterceptorBasedProbeGenerator {
 
 		// Add an event producer
 		String producerVar = "producer";
-		
+
 		FieldSource<?> field = javaClass.addField();
 		field.setType(EventProducer.class.getSimpleName() + "<"
 				+ TimeLapseEvent.class.getSimpleName() + ">");

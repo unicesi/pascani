@@ -8,6 +8,7 @@ import org.jboss.forge.roaster.model.source.MethodSource;
 
 import pascani.compiler.templates.InterceptorBasedProbeTemplates;
 import pascani.compiler.util.NameProposal;
+import pascani.lang.Probe;
 import pascani.lang.events.ExceptionEvent;
 import pascani.lang.infrastructure.CustomProbe;
 
@@ -15,7 +16,9 @@ import pascani.lang.infrastructure.CustomProbe;
  * TODO: The probe must be initialized. The initialization code must be
  * generated
  * 
- * TODO: documentation
+ * Generates the source code of a {@link Probe} for interceptor-based
+ * measurements. For example, (i) generation of {@link ExceptionEvent} objects
+ * from intercepting service executions, or (ii) execution time measurement.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
@@ -28,7 +31,7 @@ public abstract class InterceptorBasedProbeGenerator {
 
 	/**
 	 * The intended probe name; for instance "ExceptionProbe". It may change if
-	 * an existing file under the same parent directory has the same name
+	 * an existing file under the same parent directory has the same name.
 	 */
 	protected final String probeName;
 
@@ -39,24 +42,30 @@ public abstract class InterceptorBasedProbeGenerator {
 	}
 
 	/**
-	 * TODO: documentation
+	 * Generates the necessary code to intercept service executions and generate
+	 * events of interest.
 	 * 
 	 * @param packageName
-	 * @return
+	 *            The package of the generated java class
+	 * @return an object encapsulating the java source code
 	 */
 	public abstract JavaClassSource interceptor(String packageName);
 
 	/**
-	 * TODO: documentation
+	 * Generates a class extending {@link CustomProbe} with the corresponding
+	 * connection information.
 	 * 
 	 * @param packageName
+	 *            The package of the generated java class
 	 * @param uri
+	 *            The RabbitMQ connection URI
 	 * @param routingKey
-	 * @return
+	 *            The routing key designated to this probe
+	 * @return an object encapsulating the java source code
 	 */
 	public JavaClassSource probe(final String packageName, final String uri,
 			final String routingKey) {
-		
+
 		File directory = new File(this.path);
 		String className = new NameProposal(this.probeName + ".java", directory)
 				.getNewName();
@@ -73,8 +82,8 @@ public abstract class InterceptorBasedProbeGenerator {
 		javaClass.setSuperType(CustomProbe.class.getSimpleName() + "<"
 				+ ExceptionEvent.class.getSimpleName() + ">");
 
-		String constructorBody = InterceptorBasedProbeTemplates.getProbeConstructor(
-				uri, routingKey);
+		String constructorBody = InterceptorBasedProbeTemplates
+				.getProbeConstructor(uri, routingKey);
 
 		MethodSource<?> constructor = javaClass.addMethod();
 		constructor.setConstructor(true);

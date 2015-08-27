@@ -30,14 +30,13 @@ import org.apache.logging.log4j.Logger;
 
 import pascani.lang.infrastructure.MessageProducer;
 import pascani.lang.monitors.AbstractMonitor;
+import pascani.lang.util.EventProducer;
 
 import com.google.common.eventbus.EventBus;
 
 /**
- * TODO: class description
- * 
- * The default runtime for an independent subsystem; i.e., a SCA composite, an
- * EJB, an OSGi bundle, etc.
+ * This class serves as event bus for all measurement components generating
+ * events, such as {@link EventProducer} and {@link Probe} instances.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
@@ -45,9 +44,8 @@ public class Runtime {
 
 	/**
 	 * Specifies whether this runtime resides in the context of a {@link Probe},
-	 * an {@link AbstractMonitor} or in the measurement library.
-	 * 
-	 * TODO: specify the measurement library class
+	 * an {@link AbstractMonitor} or a {@link Probe} in the context of the
+	 * measurement library.
 	 * 
 	 * @author Miguel Jiménez - Initial contribution and API
 	 */
@@ -56,7 +54,9 @@ public class Runtime {
 	}
 
 	/**
-	 * TODO
+	 * A Map storing {@link pascani.lang.Runtime} instances. Useful when a
+	 * system is being measured by {@link Probe} instances and custom
+	 * measurement mechanisms
 	 */
 	private final static Map<String, pascani.lang.Runtime> runtimes = new HashMap<String, Runtime>();
 
@@ -132,7 +132,7 @@ public class Runtime {
 	public void registerEventListener(Object listener) {
 		this.eventBus.register(listener);
 	}
-	
+
 	public Map<String, String> getEnvironment() {
 		return this.environment;
 	}
@@ -146,7 +146,8 @@ public class Runtime {
 		boolean ok = false;
 
 		try {
-			input = getClass().getClassLoader().getResourceAsStream("pascani.properties");
+			input = getClass().getClassLoader().getResourceAsStream(
+					"pascani.properties");
 			config.load(input);
 			ok = true;
 		} catch (FileNotFoundException e) {
@@ -174,8 +175,8 @@ public class Runtime {
 				}
 			}
 		}
-		
-		for(Object key : config.keySet()) {
+
+		for (Object key : config.keySet()) {
 			String name = (String) key;
 			environment.put(name, config.getProperty(name));
 		}

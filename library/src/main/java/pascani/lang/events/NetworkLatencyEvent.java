@@ -26,7 +26,8 @@ import pascani.lang.Event;
 import com.google.common.collect.Range;
 
 /**
- * TODO
+ * Implementation of {@link Event} for measuring method calls' latency,
+ * specially useful to measure network latency in remote methods execution.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */

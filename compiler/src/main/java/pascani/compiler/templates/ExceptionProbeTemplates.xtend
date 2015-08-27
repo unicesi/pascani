@@ -6,23 +6,23 @@ import pascani.lang.events.ExceptionEvent
 import pascani.lang.util.EventProducer
 
 class ExceptionProbeTemplates {
-	
+
 	/**
-	 * TODO: documentation
+	 * Initializes the {@link EventProducer} within the service interceptor
 	 */
 	def static String getProducerInitialization(String producerVar) {
 		'''
 			this.«producerVar» = new «EventProducer.simpleName»<«ExceptionEvent.simpleName»>(pascani.lang.Runtime.Context.PROBE);
 		'''
 	}
-	
+
 	/**
-	 * TODO: documentation
+	 * Generates the code to intercept service executions and caught {@link Exception} raised in the execution
 	 */
 	def static String getInterceptorMethodBody(String producerVar, String intentJointPointVar) {
 
 		var names = Lists.newArrayList(producerVar, intentJointPointVar);
-		
+
 		val _return = new NameProposal("_return", names).newName;
 		val cause = new NameProposal("cause", names).newName;
 		val event = new NameProposal("event", names).newName;
@@ -49,5 +49,5 @@ class ExceptionProbeTemplates {
 			return «_return»;
 		'''
 	}
-	
+
 }

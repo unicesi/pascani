@@ -8,7 +8,7 @@ import pascani.lang.events.TimeLapseEvent
 class TimeLapseProbeTemplates {
 
 	/**
-	 * TODO: documentation
+	 * Initializes the {@link EventProducer} within the service interceptor
 	 */
 	def static String getProducerInitialization(String producerVar) {
 		'''
@@ -17,12 +17,12 @@ class TimeLapseProbeTemplates {
 	}
 
 	/**
-	 * TODO: documentation
+	 * Generates the code to intercept service executions and measure the execution time
 	 */
 	def static String getInterceptorMethodBody(String producerVar, String intentJointPointVar) {
 
 		var names = Lists.newArrayList(producerVar, intentJointPointVar);
-		
+
 		val _return = new NameProposal("_return", names).newName;
 		val event = new NameProposal("event", names).newName;
 		val start = new NameProposal("start", names).newName;

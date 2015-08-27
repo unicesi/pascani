@@ -30,14 +30,22 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 
 /**
- * TODO: documentation
+ * Utility class to choose (files, variables) names avoiding collisions with
+ * sibling elements.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class NameProposal {
 
+	/**
+	 * An initial name. If there is no collision with sibling elements, the name
+	 * remains equal
+	 */
 	private final String intendedName;
 
+	/**
+	 * Sibling names (e.g., file names within the same parent)
+	 */
 	private final Collection<String> siblingsNames;
 
 	public NameProposal(final String intendedName, final File parentDirectory) {
@@ -69,6 +77,11 @@ public class NameProposal {
 		this.siblingsNames = siblingsNames;
 	}
 
+	/**
+	 * @return a name that does not collide with sibling elements. If there was
+	 *         a collision, an index is added as suffix until there is no
+	 *         collision
+	 */
 	public String getNewName() {
 		String definitiveName = this.intendedName;
 		int index = 0;
