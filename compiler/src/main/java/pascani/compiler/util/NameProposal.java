@@ -34,13 +34,13 @@ import com.google.common.collect.Collections2;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class FilenameProposal {
+public class NameProposal {
 
 	private final String intendedName;
 
 	private final Collection<String> siblingsNames;
 
-	public FilenameProposal(final String intendedName, final File parentDirectory) {
+	public NameProposal(final String intendedName, final File parentDirectory) {
 		final String extension = FilenameUtils.getExtension(intendedName);
 
 		// List java files within the parent directory
@@ -64,7 +64,7 @@ public class FilenameProposal {
 		this.siblingsNames = siblingsNames;
 	}
 
-	public FilenameProposal(String intendedName, Collection<String> siblingsNames) {
+	public NameProposal(String intendedName, Collection<String> siblingsNames) {
 		this.intendedName = intendedName;
 		this.siblingsNames = siblingsNames;
 	}

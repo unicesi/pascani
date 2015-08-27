@@ -35,7 +35,7 @@ import org.jboss.forge.roaster.model.source.ParameterSource;
 import org.jboss.forge.roaster.model.util.Types;
 
 import pascani.compiler.templates.NetworkLatencyTemplates;
-import pascani.compiler.util.FilenameProposal;
+import pascani.compiler.util.NameProposal;
 import pascani.lang.Event;
 import pascani.lang.events.NetworkLatencyEvent;
 import pascani.lang.infrastructure.ExternalProbe;
@@ -152,7 +152,7 @@ public class LatencyProbeGenerator {
 				JavaInterfaceSource.class, file);
 
 		// Choose a name
-		String interfaceName = new FilenameProposal(file.getName(),
+		String interfaceName = new NameProposal(file.getName(),
 				file.getParentFile()).getNewName();
 
 		modifiedInterface.setName(interfaceName);
@@ -164,7 +164,7 @@ public class LatencyProbeGenerator {
 			Collection<String> names = Collections2.transform(parameters,
 					this.getName);
 
-			String parameterName = new FilenameProposal(EVENT_PARAMETER_NAME,
+			String parameterName = new NameProposal(EVENT_PARAMETER_NAME,
 					names).getNewName();
 			String parameter = NetworkLatencyEvent.class.getSimpleName() + " "
 					+ parameterName;
@@ -198,7 +198,7 @@ public class LatencyProbeGenerator {
 			throws FileNotFoundException {
 
 		File file = new File(this.interfacePath);
-		String className = new FilenameProposal(modified.getName()
+		String className = new NameProposal(modified.getName()
 				+ "InitialImpl.java", file.getParentFile()).getNewName();
 
 		JavaInterfaceSource _interface = Roaster.parse(
@@ -261,16 +261,16 @@ public class LatencyProbeGenerator {
 					this.getName);
 
 			// Method's body
-			String eventParam = new FilenameProposal(EVENT_PARAMETER_NAME,
+			String eventParam = new NameProposal(EVENT_PARAMETER_NAME,
 					names).getNewName();
 			List<String> eventParams = new ArrayList<String>();
 
-			String startParam = new FilenameProposal("start", names)
+			String startParam = new NameProposal("start", names)
 					.getNewName();
-			String exceptionParam = new FilenameProposal("e", names)
+			String exceptionParam = new NameProposal("e", names)
 					.getNewName();
 
-			String paramTypesArray = new FilenameProposal("paramTypes", names)
+			String paramTypesArray = new NameProposal("paramTypes", names)
 					.getNewName();
 			Collection<String> paramTypes = Collections2.transform(parameters,
 					getClass);
@@ -312,7 +312,7 @@ public class LatencyProbeGenerator {
 			throws FileNotFoundException {
 
 		File file = new File(this.interfacePath);
-		String className = new FilenameProposal(modified.getName()
+		String className = new NameProposal(modified.getName()
 				+ "FinalImpl.java", file.getParentFile()).getNewName();
 
 		JavaInterfaceSource _interface = Roaster.parse(
@@ -362,9 +362,9 @@ public class LatencyProbeGenerator {
 
 			// Method's body
 			String eventParam = names.get(0);
-			String newEventParam = new FilenameProposal(eventParam, names)
+			String newEventParam = new NameProposal(eventParam, names)
 					.getNewName();
-			String endParam = new FilenameProposal("end", names).getNewName();
+			String endParam = new NameProposal("end", names).getNewName();
 
 			// Remove the event parameter
 			names.remove(0);
@@ -391,7 +391,7 @@ public class LatencyProbeGenerator {
 	public JavaClassSource probe(final JavaInterfaceSource modified) {
 
 		File file = new File(this.interfacePath);
-		String className = new FilenameProposal("NetworkLatencyProbe.java",
+		String className = new NameProposal("NetworkLatencyProbe.java",
 				file.getParentFile()).getNewName();
 
 		JavaClassSource javaClass = Roaster.create(JavaClassSource.class);

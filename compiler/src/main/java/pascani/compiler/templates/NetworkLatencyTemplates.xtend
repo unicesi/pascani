@@ -22,9 +22,9 @@ import pascani.lang.events.NetworkLatencyEvent
 import com.google.common.base.Joiner
 import java.util.List
 import java.util.Collection
-import pascani.compiler.util.FilenameProposal
 import pascani.lang.infrastructure.rabbitmq.RabbitMQProducer
 import pascani.lang.Event
+import pascani.compiler.util.NameProposal
 
 class NetworkLatencyTemplates {
 
@@ -37,7 +37,7 @@ class NetworkLatencyTemplates {
 		String methodName, String methodReturn, Collection<String> paramNames) {
 
 		var params = if(paramNames.size > 0) ", " + Joiner.on(", ").join(paramNames) else "";
-		val _return = if(!isVoid) new FilenameProposal("_return", paramNames).newName;
+		val _return = if(!isVoid) new NameProposal("_return", paramNames).newName;
 
 		'''
 			long «startVar» = System.nanoTime();
@@ -70,8 +70,8 @@ class NetworkLatencyTemplates {
 	def static String finalAdapterMethod(String endVar, String eventVar, String newEventVar, boolean isVoid,
 		String referenceVar, String producerVar, String methodName, Collection<String> paramNames) {
 
-		val _return = if(!isVoid) new FilenameProposal("_return", paramNames).newName;
-		val _returnEvent = if(!isVoid) new FilenameProposal("_returnEvent", paramNames).newName;
+		val _return = if(!isVoid) new NameProposal("_return", paramNames).newName;
+		val _returnEvent = if(!isVoid) new NameProposal("_returnEvent", paramNames).newName;
 
 		'''
 			long «endVar» = System.nanoTime();
