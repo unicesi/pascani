@@ -26,7 +26,7 @@ import pascani.lang.Event;
 import com.google.common.collect.Range;
 
 /**
- * 
+ * TODO
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
@@ -78,7 +78,12 @@ public class NetworkLatencyEvent implements Event<Double> {
 	 * The actual method return
 	 */
 	private final Object _return;
-	
+
+	/**
+	 * The name of method
+	 */
+	private final String methodName;
+
 	/**
 	 * The parameter types of the method
 	 */
@@ -102,6 +107,8 @@ public class NetworkLatencyEvent implements Event<Double> {
 	 *            The class providing the method
 	 * @param _return
 	 *            The actual method return
+	 * @param methodName
+	 *            The name of the method
 	 * @param parameterTypes
 	 *            The parameter types of the method
 	 * @param parameters
@@ -109,7 +116,8 @@ public class NetworkLatencyEvent implements Event<Double> {
 	 */
 	public NetworkLatencyEvent(final UUID transactionId, final long start,
 			final long end, final Class<?> caller, final Class<?> callee,
-			final Object _return, final Class<?>[] parameterTypes, Object... parameters) {
+			final Object _return, final String methodName,
+			final Class<?>[] parameterTypes, Object... parameters) {
 		this.id = UUID.randomUUID();
 		this.transactionId = transactionId;
 		this.start = start;
@@ -118,6 +126,7 @@ public class NetworkLatencyEvent implements Event<Double> {
 		this.caller = caller;
 		this.callee = callee;
 		this._return = _return;
+		this.methodName = methodName;
 		this.parameterTypes = parameterTypes;
 		this.parameters = parameters;
 	}
@@ -140,6 +149,8 @@ public class NetworkLatencyEvent implements Event<Double> {
 	 *            The class providing the method
 	 * @param _return
 	 *            The actual method return
+	 * @param methodName
+	 *            The name of the method
 	 * @param parameterTypes
 	 *            The parameter types of the method
 	 * @param parameters
@@ -147,9 +158,10 @@ public class NetworkLatencyEvent implements Event<Double> {
 	 */
 	public NetworkLatencyEvent(final UUID transactionId, final long start,
 			final Class<?> caller, final Class<?> callee, final Object _return,
-			final Class<?>[] parameterTypes, Object... parameters) {
-		this(transactionId, start, 0, caller, callee, _return, parameterTypes,
-				parameters);
+			final String methodName, final Class<?>[] parameterTypes,
+			Object... parameters) {
+		this(transactionId, start, 0, caller, callee, _return, methodName,
+				parameterTypes, parameters);
 	}
 
 	/**
@@ -163,7 +175,8 @@ public class NetworkLatencyEvent implements Event<Double> {
 	 */
 	public NetworkLatencyEvent(final NetworkLatencyEvent event, final long end) {
 		this(event.transactionId, event.start, end, event.caller, event.callee,
-				event._return, event.parameterTypes, event.parameters);
+				event._return, event.methodName, event.parameterTypes,
+				event.parameters);
 	}
 
 	public UUID identifier() {
@@ -185,6 +198,10 @@ public class NetworkLatencyEvent implements Event<Double> {
 	public Class<?> methodProvider() {
 		return this.callee;
 	}
+	
+	public String getMethodName() {
+		return this.methodName;
+	}
 
 	public Class<?>[] getParameterTypes() {
 		return this.parameterTypes;
@@ -193,8 +210,8 @@ public class NetworkLatencyEvent implements Event<Double> {
 	public Object[] getActualMethodParameters() {
 		return this.parameters;
 	}
-	
-	public Object getActualMethodReturn(){
+
+	public Object getActualMethodReturn() {
 		return this._return;
 	}
 
@@ -207,8 +224,8 @@ public class NetworkLatencyEvent implements Event<Double> {
 	 *            The initial timestamp of the time window
 	 * @param end
 	 *            The final timestamp of the time window
-	 * @return Whether the range [{@code start}, {@code end}] contains
-	 *         the final timestamp this object
+	 * @return Whether the range [{@code start}, {@code end}] contains the final
+	 *         timestamp this object
 	 */
 	public boolean isInTimeWindow(long start, long end) {
 		return Range.closed(start, end).contains(this.end);
