@@ -24,11 +24,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import pascani.lang.Event;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.math.DoubleMath;
 
 /**
  * This class encapsulates the average calculation for a {@link List} or array
@@ -36,38 +32,34 @@ import com.google.common.math.DoubleMath;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public final class EventsAverage {
+public final class EventsStats {
 
 	private final List<? extends Event<? extends Number>> events;
 
-	public EventsAverage(List<? extends Event<? extends Number>> events) {
+	public EventsStats(List<? extends Event<? extends Number>> events) {
 		this.events = events;
 	}
 
-	public EventsAverage(Event<? extends Number>... events) {
+	public EventsStats(Event<? extends Number>... events) {
 		this(Lists.newArrayList(events));
 	}
 
 	/**
-	 * Calculates the average among the events' values.
+	 * Adds the events' (numerical) values to a {@link DescriptiveStatistics}
+	 * instance.
 	 * 
-	 * @return the average for the numerical value events
+	 * @return an object maintaining a dataset of values of a single statistical
+	 *         variable to compute descriptive statistics based on the events'
+	 *         values
 	 */
-	public double value() {
-		Function<Event<? extends Number>, Double> getValue = new Function<Event<? extends Number>, Double>() {
-			public Double apply(Event<? extends Number> event) {
-				return event.value().doubleValue();
-			}
-		};
-		
+	public DescriptiveStatistics statistics() {
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		Iterable<? extends Number> iterable = Iterables.transform(this.events, getValue);
-		
-		for(Number v : iterable) {
-			stats.addValue(v.doubleValue());
+
+		for (Event<? extends Number> event : this.events) {
+			stats.addValue(event.value().doubleValue());
 		}
-		
-		return stats.getMean();
+
+		return stats;
 	}
 
 }
