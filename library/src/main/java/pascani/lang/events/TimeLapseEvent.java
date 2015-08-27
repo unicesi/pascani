@@ -65,20 +65,20 @@ public final class TimeLapseEvent implements Event<Double> {
 	/**
 	 * Creates an instance having all the required data
 	 * 
-	 * @param id
-	 *            The unique identifier of the event
+	 * @param transactionId
+	 *            The transaction of which this event makes part
 	 * @param start
 	 *            The initial time
 	 * @param end
 	 *            The final time
 	 */
-	private TimeLapseEvent(final UUID transactionId, final UUID id,
-			final long start, final long end) {
-		this.id = id;
+	private TimeLapseEvent(final UUID transactionId, final long start,
+			final long end) {
+		this.id = UUID.randomUUID();
 		this.transactionId = transactionId;
 		this.start = start;
 		this.end = end;
-		this.value = this.start - this.end;
+		this.value = this.end - this.start;
 	}
 
 	/**
@@ -90,20 +90,7 @@ public final class TimeLapseEvent implements Event<Double> {
 	 *            A previous instance of {@code this} event
 	 */
 	public TimeLapseEvent(final TimeLapseEvent event, final long end) {
-		this(event.transactionId, event.id, event.start, end);
-	}
-
-	/**
-	 * Creates an instance having both initial and final timestamp
-	 * 
-	 * @param start
-	 *            The initial time
-	 * @param end
-	 *            The final time
-	 */
-	public TimeLapseEvent(final UUID transactionId, final long start,
-			final long end) {
-		this(transactionId, UUID.randomUUID(), start, end);
+		this(event.transactionId, event.start, end);
 	}
 
 	/**
