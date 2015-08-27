@@ -226,7 +226,7 @@ public class LatencyProbeGenerator {
 
 		// Add a producer
 		javaClass.addField().setName(PRODUCER_FIELD_NAME)
-				.setType(MessageProducer.class).setPrivate();
+				.setType(MessageProducer.class).setPrivate().setFinal(true);
 
 		// A constructor to initialize the producer
 		String constructorBody = NetworkLatencyTemplates
@@ -340,7 +340,7 @@ public class LatencyProbeGenerator {
 
 		// Add a producer
 		javaClass.addField().setName(PRODUCER_FIELD_NAME)
-				.setType(MessageProducer.class).setPrivate();
+				.setType(MessageProducer.class).setPrivate().setFinal(true);
 
 		// A constructor to initialize the producer
 		String constructorBody = NetworkLatencyTemplates
