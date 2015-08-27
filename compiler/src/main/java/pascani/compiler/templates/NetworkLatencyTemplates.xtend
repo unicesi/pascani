@@ -90,6 +90,7 @@ class NetworkLatencyTemplates {
 					«eventVar».methodCaller(),
 					«eventVar».methodProvider(),
 					«_return»,
+					«eventVar».getMethodName(),
 					«eventVar».getParameterTypes(),
 					«eventVar».getActualMethodParameters()
 				);

@@ -280,6 +280,7 @@ public class LatencyProbeGenerator {
 			eventParams.add(_interface.getName() + ".class");
 			eventParams.add(_interface.getName() + ".class");
 			eventParams.add("null");
+			eventParams.add("\"" + classMethod.getName() + "\"");
 			eventParams.add(paramTypesArray);
 			eventParams.add(Joiner.on(", ").join(names));
 
