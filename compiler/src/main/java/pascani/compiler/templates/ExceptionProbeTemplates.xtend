@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The SLR Support Tools. If not, see <http://www.gnu.org/licenses/>.
  */
- package pascani.compiler.templates
+package pascani.compiler.templates
 
 import com.google.common.collect.Lists
 import pascani.compiler.util.NameProposal
@@ -24,25 +24,31 @@ import pascani.lang.events.ExceptionEvent
 import pascani.lang.util.EventProducer
 
 class ExceptionProbeTemplates {
-	
+
+	/**
+	 * TODO: documentation
+	 */
 	def static String getProducerInitialization(String producerVar) {
 		'''
-			this.«producerVar» = new «EventProducer.simpleName»<«ExceptionEvent.simpleName»>();
+			this.«producerVar» = new «EventProducer.simpleName»<«ExceptionEvent.simpleName»>(pascani.lang.Runtime.Context.PROBE);
 		'''
 	}
-	
+
+	/**
+	 * TODO: documentation
+	 */
 	def static String getInterceptorMethodBody(String producerVar, String intentJointPointVar) {
-		
+
 		var names = Lists.newArrayList(producerVar, intentJointPointVar);
 		val _return = new NameProposal("_return", names).newName;
 		names.add(_return);
-		
+
 		val cause = new NameProposal("cause", names).newName;
 		names.add(cause);
-		
+
 		val event = new NameProposal("event", names).newName;
 		names.add(event);
-		
+
 		'''
 			Object «_return» = null;
 			try {
@@ -65,5 +71,14 @@ class ExceptionProbeTemplates {
 			return «_return»;
 		'''
 	}
-	
+
+	/**
+	 * TODO: documentation
+	 */
+	def static String getProbeConstructor(String uri, String routingKey) {
+		'''
+			super("«uri»", "«routingKey»", pascani.lang.Runtime.Context.PROBE);
+		'''
+	}
+
 }

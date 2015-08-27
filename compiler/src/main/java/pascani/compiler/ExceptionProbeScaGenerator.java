@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.UUID;
 
 import org.jboss.forge.roaster.Roaster;
+import org.jboss.forge.roaster.model.source.FieldSource;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
 import org.jboss.forge.roaster.model.source.MethodSource;
 import org.osoa.sca.annotations.Scope;
@@ -31,10 +32,12 @@ import org.ow2.frascati.tinfi.api.IntentJoinPoint;
 import pascani.compiler.templates.ExceptionProbeTemplates;
 import pascani.compiler.util.NameProposal;
 import pascani.lang.events.ExceptionEvent;
+import pascani.lang.infrastructure.CustomProbe;
 import pascani.lang.util.EventProducer;
 
 /**
- * TODO: Generate the probe source code
+ * TODO: The probe must be initialized. The initialization code must be
+ * generated
  * 
  * TODO: documentation
  * 
@@ -43,10 +46,13 @@ import pascani.lang.util.EventProducer;
 public class ExceptionProbeScaGenerator {
 
 	/**
-	 * The directory in which the java file will be written
+	 * The directory in which the java files will be written
 	 */
 	private final String path;
 
+	/**
+	 * The name of the event producer within the intercepter class
+	 */
 	public static final String PRODUCER_FIELD_NAME = "producer";
 
 	public ExceptionProbeScaGenerator(final String directoryPath) {
@@ -67,13 +73,16 @@ public class ExceptionProbeScaGenerator {
 
 		// Set general properties
 		javaClass.setPackage(packageName);
-		javaClass.addAnnotation(Scope.class).setStringValue("value", "COMPOSITE");
+		javaClass.addAnnotation(Scope.class).setStringValue("value",
+				"COMPOSITE");
 		javaClass.setName(className);
 		javaClass.addInterface(IntentHandler.class);
-		
+
 		// Add an event producer
-		javaClass.addField().setType(EventProducer.class)
-				.setName(PRODUCER_FIELD_NAME).setPrivate().setFinal(true);
+		FieldSource<?> field = javaClass.addField();
+		field.setType(EventProducer.class.getSimpleName() + "<"
+				+ ExceptionEvent.class.getSimpleName() + ">");
+		field.setName(PRODUCER_FIELD_NAME).setPrivate().setFinal(true);
 
 		String constructor = ExceptionProbeTemplates
 				.getProducerInitialization(PRODUCER_FIELD_NAME);
@@ -86,12 +95,41 @@ public class ExceptionProbeScaGenerator {
 
 		MethodSource<?> invoke = javaClass.addMethod();
 
-		invoke.addAnnotation(Override.class);
 		invoke.setReturnType(Object.class);
 		invoke.setName("invoke");
 		invoke.addThrows("Throwable");
 		invoke.addParameter(IntentJoinPoint.class, paramName);
 		invoke.setBody(invokeBody);
+		invoke.setPublic();
+
+		return javaClass;
+	}
+
+	public JavaClassSource probe(String packageName, final String uri,
+			final String routingKey) {
+		File directory = new File(this.path);
+		String className = new NameProposal("ExceptionProbe.java", directory)
+				.getNewName();
+
+		JavaClassSource javaClass = Roaster.create(JavaClassSource.class);
+
+		// Add imports
+		javaClass.addImport(CustomProbe.class);
+		javaClass.addImport(ExceptionEvent.class);
+
+		// Set general properties
+		javaClass.setPackage(packageName);
+		javaClass.setName(className);
+		javaClass.setSuperType(CustomProbe.class.getSimpleName() + "<"
+				+ ExceptionEvent.class.getSimpleName() + ">");
+
+		String constructorBody = ExceptionProbeTemplates.getProbeConstructor(
+				uri, routingKey);
+
+		MethodSource<?> constructor = javaClass.addMethod();
+		constructor.setConstructor(true);
+		constructor.setBody(constructorBody);
+		constructor.addThrows(Exception.class);
 
 		return javaClass;
 	}
