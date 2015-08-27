@@ -156,7 +156,8 @@ public final class TimeLapseEvent implements Event<Double> {
 	@Override public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getClass().getCanonicalName() + "\t");
-		sb.append(identifier().toString() + "\t");
+		sb.append(this.transactionId + "\t");
+		sb.append(this.id + "\t");
 		sb.append(this.start + "\t");
 		sb.append(this.end + "\t");
 		sb.append(value());

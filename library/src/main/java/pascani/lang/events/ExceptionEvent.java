@@ -150,7 +150,8 @@ public class ExceptionEvent implements Event<Exception> {
 	@Override public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getClass().getCanonicalName() + "\t");
-		sb.append(identifier().toString() + "\t");
+		sb.append(this.transactionId + "\t");
+		sb.append(this.id + "\t");
 		sb.append(this.clazz + "\t");
 		sb.append(this.methodName + "\t");
 		sb.append(this.parameters + "\t");
