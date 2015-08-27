@@ -234,10 +234,7 @@ public class NetworkLatencyEvent implements Event<Double> {
 	}
 
 	/**
-	 * Returns the string representation of this event for logging purposes. The
-	 * string contains [this class name, id, caller, callee, method, start, end,
-	 * value] separated by a tab character.
-	 * 
+	 * Returns the string representation of this event for logging purposes.
 	 */
 	@Override public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -245,6 +242,7 @@ public class NetworkLatencyEvent implements Event<Double> {
 		sb.append(identifier().toString() + "\t");
 		sb.append(this.caller.getCanonicalName() + "\t");
 		sb.append(this.callee.getCanonicalName() + "\t");
+		sb.append(this.methodName + "\t");
 		sb.append(Arrays.toString(parameters) + "\t");
 		sb.append(this.start + "\t");
 		sb.append(this.end + "\t");

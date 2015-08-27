@@ -151,9 +151,7 @@ public final class TimeLapseEvent implements Event<Double> {
 	}
 
 	/**
-	 * Returns the string representation of this event for logging purposes. The
-	 * string contains [this class name, id, start, end, value] separated by a
-	 * tab character.
+	 * Returns the string representation of this event for logging purposes.
 	 */
 	@Override public String toString() {
 		StringBuilder sb = new StringBuilder();

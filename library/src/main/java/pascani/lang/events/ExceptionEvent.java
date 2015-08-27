@@ -145,14 +145,15 @@ public class ExceptionEvent implements Event<Exception> {
 	}
 
 	/**
-	 * Returns the string representation of this event for logging purposes. The
-	 * string contains [this class name, id, timestamp, end, value] separated by
-	 * a tab character.
+	 * Returns the string representation of this event for logging purposes.
 	 */
 	@Override public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getClass().getCanonicalName() + "\t");
 		sb.append(identifier().toString() + "\t");
+		sb.append(this.clazz + "\t");
+		sb.append(this.methodName + "\t");
+		sb.append(this.parameters + "\t");
 		sb.append(this.timestamp + "\t");
 		sb.append(value().toString());
 
