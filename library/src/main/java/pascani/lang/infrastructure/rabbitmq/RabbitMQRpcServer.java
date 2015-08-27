@@ -74,8 +74,8 @@ public class RabbitMQRpcServer extends RpcServer {
 	 * queue.
 	 * 
 	 * @param endPoint
-	 * @param rpcQueueName
-	 *            The queue designated for RPC requests
+	 * @param routingKey
+	 *            The routing key
 	 * @throws IOException
 	 *             If an I/O problem is encountered in the initialization of the
 	 *             actual RabbitMQ RPC server
@@ -83,13 +83,26 @@ public class RabbitMQRpcServer extends RpcServer {
 	 *             If there is a connection time out when connecting to the
 	 *             RabbitMQ server
 	 */
-	public RabbitMQRpcServer(final EndPoint endPoint, String rpcQueueName)
+	public RabbitMQRpcServer(final EndPoint endPoint, String routingKey)
 			throws IOException, TimeoutException {
-		super(rpcQueueName);
+		super(pascani.lang.Runtime
+				.getRuntimeInstance(pascani.lang.Runtime.Context.PROBE)
+				.getEnvironment().get("rpc_queue_prefix")
+				+ routingKey);
 
 		this.endPoint = endPoint;
-		this.endPoint.channel().queueDeclare(rpcQueueName, false, true, true, null);
-		this.server = new InternalRpcServer(this.endPoint.channel(), rpcQueueName);
+
+		// Declare the RPC queue
+		pascani.lang.Runtime runtime = pascani.lang.Runtime
+				.getRuntimeInstance(pascani.lang.Runtime.Context.PROBE);
+		String prefix = runtime.getEnvironment().get("rpc_queue_prefix");
+		String queue = prefix + routingKey;
+		String exchange = runtime.getEnvironment().get("rpc_exchange");
+
+		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
+		this.endPoint.channel().queueBind(queue, exchange, routingKey);
+
+		this.server = new InternalRpcServer(this.endPoint.channel(), queue);
 	}
 
 	/*
