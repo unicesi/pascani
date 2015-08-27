@@ -82,7 +82,7 @@ public final class EventSet<T extends Event<?>> extends LoggingSortedSet<T> {
 	 *            The initial timestamp of the filtering criteria
 	 * @return the removed {@link Event} objects
 	 */
-	public EventSet<T> clean(final long timestamp) {
+	public synchronized EventSet<T> clean(final long timestamp) {
 		Collection<T> toRemove = filter(timestamp);
 		this.removeAll(toRemove);
 
