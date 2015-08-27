@@ -162,6 +162,7 @@ public class Runtime {
 						"variables_model_exchange");
 				config.put("probes_exchange", "probes_exchange");
 				config.put("rpc_exchange", "rpc_exchange");
+				config.put("rpc_queue_prefix", "rpc_");
 			}
 
 			if (input != null) {
