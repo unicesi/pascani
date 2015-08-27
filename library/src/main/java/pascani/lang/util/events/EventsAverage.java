@@ -20,10 +20,13 @@ package pascani.lang.util.events;
 
 import java.util.List;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import pascani.lang.Event;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.math.DoubleMath;
 
@@ -51,12 +54,20 @@ public final class EventsAverage {
 	 * @return the average for the numerical value events
 	 */
 	public double value() {
-		return DoubleMath.mean(Collections2.transform(events,
-				new Function<Event<? extends Number>, Double>() {
-					public Double apply(Event<? extends Number> event) {
-						return event.value().doubleValue();
-					}
-				}));
+		Function<Event<? extends Number>, Double> getValue = new Function<Event<? extends Number>, Double>() {
+			public Double apply(Event<? extends Number> event) {
+				return event.value().doubleValue();
+			}
+		};
+		
+		DescriptiveStatistics stats = new DescriptiveStatistics();
+		Iterable<? extends Number> iterable = Iterables.transform(this.events, getValue);
+		
+		for(Number v : iterable) {
+			stats.addValue(v.doubleValue());
+		}
+		
+		return stats.getMean();
 	}
 
 }
