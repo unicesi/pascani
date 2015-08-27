@@ -1,21 +1,3 @@
-/*
- * Copyright © 2015 Universidad Icesi
- * 
- * This file is part of the Pascani library.
- * 
- * The Pascani library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- * 
- * The Pascani library is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
- * for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with The SLR Support Tools. If not, see <http://www.gnu.org/licenses/>.
- */
 package pascani.compiler;
 
 import java.io.File;
@@ -29,9 +11,9 @@ import org.osoa.sca.annotations.Scope;
 import org.ow2.frascati.tinfi.api.IntentHandler;
 import org.ow2.frascati.tinfi.api.IntentJoinPoint;
 
-import pascani.compiler.templates.ExceptionProbeTemplates;
+import pascani.compiler.templates.TimeLapseProbeTemplates;
 import pascani.compiler.util.NameProposal;
-import pascani.lang.events.ExceptionEvent;
+import pascani.lang.events.TimeLapseEvent;
 import pascani.lang.util.EventProducer;
 
 /**
@@ -39,29 +21,26 @@ import pascani.lang.util.EventProducer;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class ExceptionProbeScaGenerator extends InterceptorBasedProbeGenerator {
+public class TimeLapseProbeScaGenerator extends InterceptorBasedProbeGenerator {
 
-	public ExceptionProbeScaGenerator(String directoryPath) {
-		super(directoryPath, "ExceptionProbe");
+	public TimeLapseProbeScaGenerator(String directoryPath) {
+		super(directoryPath, "TimeLapseProbe");
 	}
-
+	
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * pascani.compiler.InterceptorBasedProbeGenerator#interceptor(java.lang
-	 * .String)
+	 * @see pascani.compiler.InterceptorBasedProbeGenerator#interceptor(java.lang.String)
 	 */
 	@Override public JavaClassSource interceptor(final String packageName) {
 		File directory = new File(path);
-		String className = new NameProposal("ExceptionInterceptor.java",
+		String className = new NameProposal("TimeLapseInterceptor.java",
 				directory).getNewName();
 
 		JavaClassSource javaClass = Roaster.create(JavaClassSource.class);
 
 		// Add imports
 		javaClass.addImport(EventProducer.class);
-		javaClass.addImport(ExceptionEvent.class);
+		javaClass.addImport(TimeLapseEvent.class);
 		javaClass.addImport(UUID.class);
 
 		// Set general properties
@@ -73,19 +52,19 @@ public class ExceptionProbeScaGenerator extends InterceptorBasedProbeGenerator {
 
 		// Add an event producer
 		String producerVar = "producer";
-
+		
 		FieldSource<?> field = javaClass.addField();
 		field.setType(EventProducer.class.getSimpleName() + "<"
-				+ ExceptionEvent.class.getSimpleName() + ">");
+				+ TimeLapseEvent.class.getSimpleName() + ">");
 		field.setName(producerVar).setPrivate().setFinal(true);
 
-		String constructor = ExceptionProbeTemplates
+		String constructor = TimeLapseProbeTemplates
 				.getProducerInitialization(producerVar);
 		javaClass.addMethod().setConstructor(true).setBody(constructor);
 
 		// Override the invoke method
 		String paramName = "ijp";
-		String invokeBody = ExceptionProbeTemplates.getInterceptorMethodBody(
+		String invokeBody = TimeLapseProbeTemplates.getInterceptorMethodBody(
 				producerVar, paramName);
 
 		MethodSource<?> invoke = javaClass.addMethod();

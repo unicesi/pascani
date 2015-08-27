@@ -72,7 +72,7 @@ public final class TimeLapseEvent implements Event<Double> {
 	 * @param end
 	 *            The final time
 	 */
-	private TimeLapseEvent(final UUID transactionId, final long start,
+	public TimeLapseEvent(final UUID transactionId, final long start,
 			final long end) {
 		this.id = UUID.randomUUID();
 		this.transactionId = transactionId;
