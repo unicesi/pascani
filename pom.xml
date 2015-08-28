@@ -26,7 +26,6 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>library</module>
-		<module>runtime</module>
 		<module>compiler</module>
 	</modules>
 	<licenses>
