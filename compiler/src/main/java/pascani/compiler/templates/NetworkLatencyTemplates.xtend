@@ -58,7 +58,7 @@ class NetworkLatencyTemplates {
 				);
 				«producerVar».produce(«_return»);
 				
-				return («methodReturn») «_return».getActualMethodReturn();
+				return («methodReturn») «_return».methodReturn();
 			«ENDIF»
 		'''
 	}
@@ -90,9 +90,9 @@ class NetworkLatencyTemplates {
 					«eventVar».methodCaller(),
 					«eventVar».methodProvider(),
 					«_return»,
-					«eventVar».getMethodName(),
-					«eventVar».getParameterTypes(),
-					«eventVar».getActualMethodParameters()
+					«eventVar».methodName(),
+					«eventVar».methodParameters(),
+					«eventVar».methodArguments()
 				);
 				
 				return «_returnEvent»;
