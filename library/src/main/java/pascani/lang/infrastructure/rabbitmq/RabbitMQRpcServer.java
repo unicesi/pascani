@@ -24,7 +24,6 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.SerializationUtils;
 
-import pascani.lang.infrastructure.ProbeOperation;
 import pascani.lang.infrastructure.RpcRequest;
 import pascani.lang.infrastructure.RpcServer;
 
@@ -83,18 +82,18 @@ public class RabbitMQRpcServer extends RpcServer {
 	 *             If there is a connection time out when connecting to the
 	 *             RabbitMQ server
 	 */
-	public RabbitMQRpcServer(final EndPoint endPoint, String routingKey)
-			throws IOException, TimeoutException {
-		super(pascani.lang.Runtime
-				.getRuntimeInstance(pascani.lang.Runtime.Context.PROBE)
-				.getEnvironment().get("rpc_queue_prefix")
-				+ routingKey);
+	public RabbitMQRpcServer(final EndPoint endPoint, String routingKey,
+			final pascani.lang.Runtime.Context context) throws IOException,
+			TimeoutException {
+
+		super(pascani.lang.Runtime.getRuntimeInstance(context).getEnvironment()
+				.get("rpc_queue_prefix") + routingKey);
 
 		this.endPoint = endPoint;
 
 		// Declare the RPC queue
 		pascani.lang.Runtime runtime = pascani.lang.Runtime
-				.getRuntimeInstance(pascani.lang.Runtime.Context.PROBE);
+				.getRuntimeInstance(context);
 		String prefix = runtime.getEnvironment().get("rpc_queue_prefix");
 		String queue = prefix + routingKey;
 		String exchange = runtime.getEnvironment().get("rpc_exchange");
@@ -114,24 +113,6 @@ public class RabbitMQRpcServer extends RpcServer {
 	 */
 	@Override public void startProcessingRequests() throws IOException {
 		this.server.mainloop();
-	}
-
-	@Override public Serializable delegateHandling(RpcRequest request) {
-		Serializable response = null;
-		long timestamp = (Long) request.getParameter(0);
-
-		if (request.operation().equals(ProbeOperation.CLEAN))
-			response = this.probe.cleanData(timestamp);
-		else if (request.operation().equals(ProbeOperation.COUNT))
-			response = this.probe.count(timestamp);
-		else if (request.operation().equals(ProbeOperation.COUNT_AND_CLEAN))
-			response = this.probe.countAndClean(timestamp);
-		else if (request.operation().equals(ProbeOperation.FETCH))
-			response = (Serializable) this.probe.fetch(timestamp);
-		else if (request.operation().equals(ProbeOperation.FETCH_AND_CLEAN))
-			response = (Serializable) this.probe.fetchAndClean(timestamp);
-
-		return response;
 	}
 
 }

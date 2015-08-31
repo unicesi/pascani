@@ -23,7 +23,6 @@ import java.io.Serializable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import pascani.lang.Event;
 import pascani.lang.Probe;
 
 /**
@@ -50,9 +49,10 @@ public abstract class RpcServer extends Thread {
 	protected final String RPC_REQUEST_QUEUE_NAME;
 
 	/**
-	 * The {@link Probe} instance handling RPC requests
+	 * An RPC request handler. Could be either a {@link Monitor}, a
+	 * {@link Probe} or a {@link Namespace}
 	 */
-	protected Probe<? extends Event<?>> probe;
+	protected RpcRequestHandler handler;
 
 	/**
 	 * The logger
@@ -63,8 +63,14 @@ public abstract class RpcServer extends Thread {
 		this.RPC_REQUEST_QUEUE_NAME = rpcRequestQueueName;
 	}
 
-	public void setProbe(Probe<? extends Event<?>> probe) {
-		this.probe = probe;
+	/**
+	 * Sets the RPC requests handler
+	 * 
+	 * @param handler
+	 *            The RPC handler to which requests are delegated
+	 */
+	public void setHandler(RpcRequestHandler handler) {
+		this.handler = handler;
 	}
 
 	/*
@@ -92,11 +98,14 @@ public abstract class RpcServer extends Thread {
 	protected abstract void startProcessingRequests() throws Exception;
 
 	/**
-	 * Delegates the request processing to the {@link Probe} instance.
+	 * Delegates the request processing to the handler.
 	 * 
 	 * @param request
 	 *            The RPC request
+	 * @return the corresponding response
 	 */
-	public abstract Serializable delegateHandling(RpcRequest request);
+	public Serializable delegateHandling(RpcRequest request) {
+		return this.handler.handle(request);
+	}
 
 }
