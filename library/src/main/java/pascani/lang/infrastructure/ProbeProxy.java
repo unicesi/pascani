@@ -28,11 +28,10 @@ import org.apache.logging.log4j.Logger;
 
 import pascani.lang.Event;
 import pascani.lang.Probe;
-import pascani.lang.monitors.AbstractMonitor;
 
 /**
  * An implementation of {@link Probe} that makes communication transparent for
- * {@link AbstractMonitor} instances with remote {@link Probe} objects.
+ * {@link Monitor} instances with remote {@link Probe} objects.
  *
  * @param <T>
  *            The type of events the actual probe handles
@@ -86,32 +85,32 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	}
 
 	public boolean cleanData(long timestamp) {
-		RpcRequest request = new RpcRequest(ProbeOperation.CLEAN, timestamp);
+		RpcRequest request = new RpcRequest(RpcOperation.PROBE_CLEAN, timestamp);
 		byte[] response = makeActualCall(request, false);
 		return SerializationUtils.deserialize(response);
 	}
 
 	public int count(long timestamp) {
-		RpcRequest request = new RpcRequest(ProbeOperation.COUNT, timestamp);
+		RpcRequest request = new RpcRequest(RpcOperation.PROBE_COUNT, timestamp);
 		byte[] response = makeActualCall(request, 0);
 		return SerializationUtils.deserialize(response);
 	}
 
 	public int countAndClean(long timestamp) {
-		RpcRequest request = new RpcRequest(ProbeOperation.COUNT_AND_CLEAN,
+		RpcRequest request = new RpcRequest(RpcOperation.PROBE_COUNT_AND_CLEAN,
 				timestamp);
 		byte[] response = makeActualCall(request, 0);
 		return SerializationUtils.deserialize(response);
 	}
 
 	public List<T> fetch(long timestamp) {
-		RpcRequest request = new RpcRequest(ProbeOperation.FETCH, timestamp);
+		RpcRequest request = new RpcRequest(RpcOperation.PROBE_FETCH, timestamp);
 		byte[] response = makeActualCall(request, new ArrayList<T>());
 		return SerializationUtils.deserialize(response);
 	}
 
 	public List<T> fetchAndClean(long timestamp) {
-		RpcRequest request = new RpcRequest(ProbeOperation.FETCH_AND_CLEAN,
+		RpcRequest request = new RpcRequest(RpcOperation.PROBE_FETCH_AND_CLEAN,
 				timestamp);
 		byte[] response = makeActualCall(request, new ArrayList<T>());
 		return SerializationUtils.deserialize(response);
