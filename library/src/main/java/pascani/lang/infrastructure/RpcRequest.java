@@ -35,12 +35,12 @@ public final class RpcRequest implements Serializable {
 	/**
 	 * The type of operation requested
 	 */
-	private final ProbeOperation operation;
+	private final RpcOperation operation;
 
 	/**
 	 * The parameters of the requested operation
 	 */
-	private final Object[] parameters;
+	private final Serializable[] parameters;
 
 	/**
 	 * Creates an RPC request
@@ -50,17 +50,17 @@ public final class RpcRequest implements Serializable {
 	 * @param parameters
 	 *            The parameters of the requested operation
 	 */
-	public RpcRequest(final ProbeOperation operation,
-			final Object... parameters) {
+	public RpcRequest(final RpcOperation operation,
+			final Serializable... parameters) {
 		this.operation = operation;
 		this.parameters = parameters;
 	}
 
-	public ProbeOperation operation() {
+	public RpcOperation operation() {
 		return this.operation;
 	}
 
-	public Object getParameter(int index) {
+	public Serializable getParameter(int index) {
 		return this.parameters[index];
 	}
 }
