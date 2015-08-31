@@ -29,7 +29,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pascani.lang.infrastructure.MessageProducer;
-import pascani.lang.monitors.AbstractMonitor;
+import pascani.lang.infrastructure.Monitor;
+import pascani.lang.infrastructure.Namespace;
 import pascani.lang.util.EventProducer;
 
 import com.google.common.eventbus.EventBus;
@@ -43,14 +44,14 @@ import com.google.common.eventbus.EventBus;
 public class Runtime {
 
 	/**
-	 * Specifies whether this runtime resides in the context of a {@link Probe},
-	 * an {@link AbstractMonitor} or a {@link Probe} in the context of the
-	 * measurement library.
+	 * Specifies whether this runtime resides in the context of a
+	 * {@link Monitor}, a {@link Probe}, a {@link Namespace} or a {@link Probe}
+	 * in the context of the measurement library.
 	 * 
 	 * @author Miguel Jiménez - Initial contribution and API
 	 */
 	public static enum Context {
-		MONITOR, PROBE, LIBRARY
+		MONITOR, PROBE, NAMESPACE, LIBRARY
 	}
 
 	/**
@@ -159,9 +160,8 @@ public class Runtime {
 			if (!ok) {
 				// Set defaults
 				config.put("uri", "amqp://guest:guest@localhost:5672");
-				config.put("variables_model_exchange",
-						"variables_model_exchange");
 				config.put("probes_exchange", "probes_exchange");
+				config.put("namespace_exchange", "namespace_exchange");
 				config.put("rpc_exchange", "rpc_exchange");
 				config.put("rpc_queue_prefix", "rpc_");
 			}
