@@ -43,7 +43,7 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	/**
 	 * The logger
 	 */
-	protected final Logger logger = LogManager.getLogger(getClass());
+	protected final Logger logger = LogManager.getLogger(ProbeProxy.class);
 
 	/**
 	 * An RPC client configured to make requests to a specific {@link Probe}
