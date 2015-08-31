@@ -21,7 +21,6 @@ package pascani.lang.infrastructure;
 import pascani.lang.Event;
 import pascani.lang.Probe;
 import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer;
-import pascani.lang.monitors.AbstractMonitor;
 
 /**
  * This {@link Probe} implementation is specially made for grouping distributed
@@ -29,7 +28,7 @@ import pascani.lang.monitors.AbstractMonitor;
  * exchange with the routing key set to this probe's unique name.
  * 
  * <p>
- * In the same way, {@link AbstractMonitor} instances and other components can
+ * In the same way, {@link Monitor} instances and other components can
  * request data from the RPC queue, by using the routing key.
  * </p>
  * 
