@@ -16,9 +16,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The SLR Support Tools. If not, see <http://www.gnu.org/licenses/>.
  */
-package pascani.lang.monitors;
+package pascani.lang.infrastructure;
 
-import pascani.lang.infrastructure.ProbeProxy;
 
 /**
  * <p>
@@ -27,10 +26,10 @@ import pascani.lang.infrastructure.ProbeProxy;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class AbstractMonitor {
+public abstract class Monitor {
 
-	public AbstractMonitor() {
-
+	public Monitor() {
+		
 	}
 
 }
