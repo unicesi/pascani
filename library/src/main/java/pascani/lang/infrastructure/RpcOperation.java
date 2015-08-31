@@ -22,10 +22,14 @@ import pascani.lang.Probe;
 
 /**
  * An enumeration containing the types of operations provided by {@link Probe}
- * instances.
+ * and {@link Namespace} instances.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public enum ProbeOperation {
-	CLEAN, COUNT, COUNT_AND_CLEAN, FETCH, FETCH_AND_CLEAN
+public enum RpcOperation {
+	// Probe operations
+	PROBE_CLEAN, PROBE_COUNT, PROBE_COUNT_AND_CLEAN, PROBE_FETCH, PROBE_FETCH_AND_CLEAN,
+
+	// Namespace operations
+	NAMESPACE_GET_VARIABLE, NAMESPACE_SET_VARIABLE
 }
