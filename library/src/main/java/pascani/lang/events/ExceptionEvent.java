@@ -18,8 +18,6 @@
  */
 package pascani.lang.events;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 import pascani.lang.Event;
@@ -134,10 +132,6 @@ public class ExceptionEvent implements Event<Exception> {
 	
 	public Object[] arguments() {
 		return this.arguments;
-	}
-
-	public List<Event<Exception>> children() {
-		return Collections.emptyList();
 	}
 
 	public boolean isInTimeWindow(final long start, final long end) {
