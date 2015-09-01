@@ -184,6 +184,9 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	 * java.io.Serializable)
 	 */
 	public Serializable setVariable(String variable, Serializable value) {
+		if(!this.variables.containsKey(variable))
+			return null;
+		
 		synchronized (this.variables) {
 			Serializable previousValue = this.variables.get(variables);
 			ChangeEvent event = new ChangeEvent(UUID.randomUUID(),
@@ -192,7 +195,7 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 			this.variables.put(variable, value);
 			this.producer.produce(event);
 		}
-		return this.variables.get(variables);
+		return getVariable(variable);
 	}
 
 }
