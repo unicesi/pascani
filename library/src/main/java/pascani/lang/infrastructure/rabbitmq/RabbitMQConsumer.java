@@ -78,9 +78,9 @@ public class RabbitMQConsumer extends MessageConsumer implements Consumer {
 	 *             Is thrown if there is a connection time out when connecting
 	 *             to the RabbitMQ server
 	 */
-	public RabbitMQConsumer(EndPoint endPoint, String queue, String tag,
-			pascani.lang.Runtime.Context context) throws IOException,
-			TimeoutException {
+	public RabbitMQConsumer(final EndPoint endPoint, final String queue,
+			final String tag, final pascani.lang.Runtime.Context context)
+			throws IOException, TimeoutException {
 
 		this.endPoint = endPoint;
 		this.queueName = queue;
