@@ -50,7 +50,7 @@ public abstract class RpcServer extends Thread {
 
 	/**
 	 * An RPC request handler. Could be either a {@link Monitor}, a
-	 * {@link Probe} or a {@link Namespace}
+	 * {@link Probe} or a {@link AbstractNamespace}
 	 */
 	protected RpcRequestHandler handler;
 
