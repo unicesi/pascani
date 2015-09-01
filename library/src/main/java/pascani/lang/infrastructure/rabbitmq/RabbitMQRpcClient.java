@@ -21,7 +21,6 @@ package pascani.lang.infrastructure.rabbitmq;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-import pascani.lang.Probe;
 import pascani.lang.infrastructure.RpcClient;
 
 import com.rabbitmq.client.ShutdownSignalException;
@@ -45,14 +44,14 @@ public class RabbitMQRpcClient extends RpcClient {
 
 	/**
 	 * Creates an instance of a RabbitMQ RPC client, setting the RPC exchange
-	 * and a {@link Probe} routing key.
+	 * and a routing key.
 	 * 
 	 * @param endPoint
 	 *            The configured RabbitMQ end point
 	 * @param exchange
 	 *            The exchange to which messages are sent
 	 * @param routingKey
-	 *            The queue name of the target {@link Probe} instance
+	 *            The queue name of the RPC server
 	 * @throws IOException
 	 *             Is thrown if an I/O problem is encountered in the
 	 *             initialization of the actual RabbitMQ RPC client
