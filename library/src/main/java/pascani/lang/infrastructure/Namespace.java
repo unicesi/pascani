@@ -3,26 +3,30 @@ package pascani.lang.infrastructure;
 import java.io.Serializable;
 
 /**
- * TODO: documentation
- * 
  * @author Miguel Jiménez - Initial contribution and API
  */
 public interface Namespace {
-	
+
 	/**
-	 * TODO: documentation - abstract?
+	 * Gets the current value of the specified variable. If the given variable
+	 * name is not found, null is returned.
 	 * 
 	 * @param variable
-	 * @return
+	 *            The name of the variable
+	 * @return the current value of the specified variable
 	 */
 	public Serializable getVariable(String variable);
-	
+
 	/**
-	 * TODO: documentation - abstract?
+	 * Updates the current value of the specified variable. If the given
+	 * variable name is not found, null is returned.
 	 * 
 	 * @param variable
+	 *            The name of the variable
 	 * @param value
-	 * @return
+	 *            The new value
+	 * @return the current variable's value after updating it. Notice that it
+	 *         may be different than {@code value}
 	 */
 	public Serializable setVariable(String variable, Serializable value);
 
