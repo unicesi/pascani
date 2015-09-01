@@ -1,5 +1,6 @@
 package pascani.lang.infrastructure;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,8 @@ import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcServer;
 /**
  * TODO: documentation
  * 
- * TODO: produce and event when the set method is called (from here not subclasses)
+ * TODO: produce an event when the set method is called (from here not
+ * subclasses)
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
@@ -36,6 +38,11 @@ public abstract class AbstractNamespace implements Namespace, RpcRequestHandler 
 	private final MessageProducer producer;
 
 	/**
+	 * The context in which this namespace is used
+	 */
+	private final pascani.lang.Runtime.Context context;
+
+	/**
 	 * TODO: documentation
 	 * 
 	 * @param uri
@@ -44,27 +51,46 @@ public abstract class AbstractNamespace implements Namespace, RpcRequestHandler 
 	 */
 	public AbstractNamespace(final String uri, final String routingKey)
 			throws Exception {
-		this.endPoint = new EndPoint(uri);
 
-		// Create the corresponding queue, and then create a binding between the
-		// queue and the namespace exchange
+		this.context = pascani.lang.Runtime.Context.NAMESPACE;
+		this.endPoint = new EndPoint(uri);
+		this.producer = new RabbitMQProducer(endPoint, getAcceptedClasses(),
+				declareQueue(routingKey), routingKey);
+
+		this.server = new RabbitMQRpcServer(endPoint, routingKey,
+				pascani.lang.Runtime.Context.NAMESPACE);
+
+		registerProducerAsListener();
+		startRpcServer();
+	}
+
+	private void registerProducerAsListener() {
+		pascani.lang.Runtime.getRuntimeInstance(this.context)
+				.registerEventListener(this.producer);
+	}
+
+	private String declareQueue(final String routingKey) throws IOException {
+		// Create the corresponding namespace queue for the event producer, and
+		// then create a binding between the queue and the configured namespace
+		// exchange.
 		String queue = routingKey;
-		String exchange = pascani.lang.Runtime
-				.getRuntimeInstance(pascani.lang.Runtime.Context.NAMESPACE)
+		String exchange = pascani.lang.Runtime.getRuntimeInstance(this.context)
 				.getEnvironment().get("namespace_exchange");
 
 		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
 		this.endPoint.channel().queueBind(queue, exchange, routingKey);
 
+		return exchange;
+	}
+
+	private List<Class<? extends Event<?>>> getAcceptedClasses() {
 		List<Class<? extends Event<?>>> classes = new ArrayList<Class<? extends Event<?>>>();
 		classes.add(ChangeEvent.class);
 
-		// TODO: register as listener
-		this.producer = new RabbitMQProducer(endPoint, classes, exchange,
-				routingKey);
+		return classes;
+	}
 
-		this.server = new RabbitMQRpcServer(endPoint, routingKey,
-				pascani.lang.Runtime.Context.NAMESPACE);
+	private void startRpcServer() {
 		this.server.setHandler(this);
 		this.server.start();
 	}
