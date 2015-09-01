@@ -188,7 +188,7 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 			return null;
 		
 		synchronized (this.variables) {
-			Serializable previousValue = this.variables.get(variables);
+			Serializable previousValue = this.variables.get(variable);
 			ChangeEvent event = new ChangeEvent(UUID.randomUUID(),
 					previousValue, value, variable);
 
