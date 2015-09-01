@@ -73,10 +73,10 @@ public class RabbitMQConsumer extends MessageConsumer implements Consumer {
 	 * @param context
 	 *            The context in which this consumer is used
 	 * @throws IOException
-	 *             Is thrown if an I/O problem is encountered
+	 *             If an I/O problem is encountered
 	 * @throws TimeoutException
-	 *             Is thrown if there is a connection time out when connecting
-	 *             to the RabbitMQ server
+	 *             If there is a connection time out when connecting to the
+	 *             RabbitMQ server
 	 */
 	public RabbitMQConsumer(final EndPoint endPoint, final String queue,
 			final String tag, final pascani.lang.Runtime.Context context)
@@ -84,6 +84,42 @@ public class RabbitMQConsumer extends MessageConsumer implements Consumer {
 
 		this.endPoint = endPoint;
 		this.queueName = queue;
+		this.consumerTag = tag;
+		this.eventProducer = new EventProducer<Event<?>>(context);
+	}
+
+	/**
+	 * Creates a RabbitMQ message consumer consuming from an exchange. To do
+	 * this, an anonymous non-durable queue is declared and bound to the
+	 * exchange.
+	 * 
+	 * @param endPoint
+	 *            The RabbitMQ end point
+	 * @param exchange
+	 *            The exchange from which messages are consumed
+	 * @param routingKey
+	 *            The routing key of interest
+	 * @param tag
+	 *            The consumer tag for this consumer
+	 * @param context
+	 *            The context in which this consumer is used
+	 * @throws IOException
+	 *             If an I/O problem is encountered
+	 * @throws TimeoutException
+	 *             If there is a connection time out when connecting to the
+	 *             RabbitMQ server
+	 */
+	public RabbitMQConsumer(final EndPoint endPoint, final String exchange,
+			final String routingKey, final String tag,
+			final pascani.lang.Runtime.Context context) throws IOException,
+			TimeoutException {
+
+		this.endPoint = endPoint;
+		Channel channel = this.endPoint.channel();
+
+		this.queueName = channel.queueDeclare().getQueue();
+		channel.queueBind(this.queueName, exchange, routingKey);
+
 		this.consumerTag = tag;
 		this.eventProducer = new EventProducer<Event<?>>(context);
 	}
