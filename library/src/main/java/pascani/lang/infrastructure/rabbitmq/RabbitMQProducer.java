@@ -55,6 +55,28 @@ public final class RabbitMQProducer extends MessageProducer {
 
 	/**
 	 * Creates a RabbitMQ producer from an end point and a list of accepted
+	 * events' classes
+	 * 
+	 * @param endPoint
+	 *            The configured RabbitMQ end point
+	 * @param classes
+	 *            The list of event types of interest
+	 * @param exchange
+	 *            The exchange to which messages are sent
+	 * @param routingKey
+	 *            An optional queue name for directly sending the messages
+	 */
+	public RabbitMQProducer(final EndPoint endPoint,
+			final List<Class<? extends Event<?>>> classes,
+			final String exchange, final String routingKey) {
+		super(classes);
+		this.endPoint = endPoint;
+		this.exchange = exchange == null ? "" : exchange;
+		this.routingKey = routingKey == null ? "" : routingKey;
+	}
+
+	/**
+	 * Creates a RabbitMQ producer from an end point and a list of accepted
 	 * events' classes. Additionally, declares an exchange for this producer's
 	 * default channel. If it does not exist, it will be created on the server.
 	 * 
@@ -68,7 +90,6 @@ public final class RabbitMQProducer extends MessageProducer {
 	 *            An optional queue name for directly sending the messages
 	 * @param durableExchange
 	 *            Whether the exchange is durable or not
-	 * 
 	 * @throws IOException
 	 *             If an error with the exchange declaration is encountered
 	 */
@@ -76,10 +97,8 @@ public final class RabbitMQProducer extends MessageProducer {
 			final List<Class<? extends Event<?>>> classes,
 			final String exchange, final String routingKey,
 			final boolean durableExchange) throws IOException {
-		super(classes);
-		this.endPoint = endPoint;
-		this.exchange = exchange == null ? "" : exchange;
-		this.routingKey = routingKey == null ? "" : routingKey;
+
+		this(endPoint, classes, exchange, routingKey);
 		this.endPoint.channel().exchangeDeclare(this.exchange, "direct",
 				durableExchange);
 	}
