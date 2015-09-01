@@ -30,7 +30,7 @@ import org.apache.logging.log4j.Logger;
 
 import pascani.lang.infrastructure.MessageProducer;
 import pascani.lang.infrastructure.Monitor;
-import pascani.lang.infrastructure.AbstractNamespace;
+import pascani.lang.infrastructure.BasicNamespace;
 import pascani.lang.util.EventProducer;
 
 import com.google.common.eventbus.EventBus;
@@ -45,7 +45,7 @@ public class Runtime {
 
 	/**
 	 * Specifies whether this runtime resides in the context of a
-	 * {@link Monitor}, a {@link Probe}, a {@link AbstractNamespace} or a {@link Probe}
+	 * {@link Monitor}, a {@link Probe}, a {@link BasicNamespace} or a {@link Probe}
 	 * in the context of the measurement library.
 	 * 
 	 * @author Miguel Jiménez - Initial contribution and API

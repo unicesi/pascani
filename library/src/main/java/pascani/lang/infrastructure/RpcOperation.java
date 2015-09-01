@@ -22,7 +22,7 @@ import pascani.lang.Probe;
 
 /**
  * An enumeration containing the types of operations provided by {@link Probe}
- * and {@link AbstractNamespace} instances.
+ * and {@link BasicNamespace} instances.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */

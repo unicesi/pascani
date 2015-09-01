@@ -3,7 +3,10 @@ package pascani.lang.infrastructure;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import pascani.lang.Event;
 import pascani.lang.events.ChangeEvent;
@@ -19,7 +22,7 @@ import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcServer;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class AbstractNamespace implements Namespace, RpcRequestHandler {
+public class BasicNamespace implements Namespace, RpcRequestHandler {
 
 	/**
 	 * A RabbitMQ end point (a connection to the server)
@@ -43,15 +46,26 @@ public abstract class AbstractNamespace implements Namespace, RpcRequestHandler 
 	private final pascani.lang.Runtime.Context context;
 
 	/**
+	 * A map containing the variables defined in this namespace, with their
+	 * corresponding current values
+	 */
+	private final Map<String, Serializable> variables;
+
+	/**
 	 * TODO: documentation
+	 * 
+	 * The producer does not need to be registered as event listener, as only
+	 * this namespace is in charge of managing value changing for its variables
+	 * (there is no local event propagation).
 	 * 
 	 * @param uri
 	 * @param routingKey
 	 * @throws Exception
 	 */
-	public AbstractNamespace(final String uri, final String routingKey)
+	public BasicNamespace(final String uri, final String routingKey)
 			throws Exception {
 
+		this.variables = new HashMap<String, Serializable>();
 		this.context = pascani.lang.Runtime.Context.NAMESPACE;
 		this.endPoint = new EndPoint(uri);
 		this.producer = new RabbitMQProducer(endPoint, getAcceptedClasses(),
@@ -60,13 +74,7 @@ public abstract class AbstractNamespace implements Namespace, RpcRequestHandler 
 		this.server = new RabbitMQRpcServer(endPoint, routingKey,
 				pascani.lang.Runtime.Context.NAMESPACE);
 
-		registerProducerAsListener();
 		startRpcServer();
-	}
-
-	private void registerProducerAsListener() {
-		pascani.lang.Runtime.getRuntimeInstance(this.context)
-				.registerEventListener(this.producer);
 	}
 
 	private String declareQueue(final String routingKey) throws IOException {
@@ -122,7 +130,9 @@ public abstract class AbstractNamespace implements Namespace, RpcRequestHandler 
 	 * 
 	 * @see pascani.lang.infrastructure.Namespace#getVariable(java.lang.String)
 	 */
-	public abstract Serializable getVariable(String variable);
+	public Serializable getVariable(String variable) {
+		return this.variables.get(variable);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -130,6 +140,16 @@ public abstract class AbstractNamespace implements Namespace, RpcRequestHandler 
 	 * @see pascani.lang.infrastructure.Namespace#setVariable(java.lang.String,
 	 * java.io.Serializable)
 	 */
-	public abstract Serializable setVariable(String variable, Serializable value);
+	public Serializable setVariable(String variable, Serializable value) {
+		synchronized (this.variables) {
+			Serializable previousValue = this.variables.get(variables);
+			ChangeEvent event = new ChangeEvent(UUID.randomUUID(),
+					previousValue, value, variable);
+
+			this.variables.put(variable, value);
+			this.producer.produce(event);
+		}
+		return this.variables.get(variables);
+	}
 
 }
