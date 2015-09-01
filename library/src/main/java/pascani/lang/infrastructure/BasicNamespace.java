@@ -15,10 +15,16 @@ import pascani.lang.infrastructure.rabbitmq.RabbitMQProducer;
 import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcServer;
 
 /**
- * TODO: documentation
+ * This implementation provides the basic functionality of a Namespace; that is,
+ * getting a variable's current value, and setting a new value. In the latter
+ * case, a new event of type {@link ChangeEvent} is published to the namespaces
+ * exchange with the namespace name as routing key, thus allowing external
+ * components to know when a variable's value has changed.
  * 
- * TODO: produce an event when the set method is called (from here not
- * subclasses)
+ * <p>
+ * Variables are registered by means of
+ * {@link BasicNamespace#registerVariable(String, Serializable, boolean)}
+ * </p>
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
@@ -52,15 +58,24 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	private final Map<String, Serializable> variables;
 
 	/**
-	 * TODO: documentation
+	 * Creates a basic namespace connected to the RabbitMQ server, identified by
+	 * a unique routing key (the fully qualified name of the namespace).
 	 * 
+	 * <p>
 	 * The producer does not need to be registered as event listener, as only
 	 * this namespace is in charge of managing value changing for its variables
 	 * (there is no local event propagation).
+	 * </p>
 	 * 
 	 * @param uri
+	 *            The RabbitMQ connection URI
 	 * @param routingKey
+	 *            The routing key identifying this namespace within the
+	 *            namespaces exchange
 	 * @throws Exception
+	 *             If something bad happens. Check out
+	 *             {@link RabbitMQRpcServer#RabbitMQRpcServer(EndPoint, String, pascani.lang.Runtime.Context)}
+	 *             for more information.
 	 */
 	public BasicNamespace(final String uri, final String routingKey)
 			throws Exception {
@@ -101,6 +116,34 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	private void startRpcServer() {
 		this.server.setHandler(this);
 		this.server.start();
+	}
+
+	/**
+	 * Registers a new variable with an initial value. If {@code overwrite} is
+	 * {@code true} and the variable is already registered, its value is
+	 * updated, otherwise no change is performed.
+	 * 
+	 * @param name
+	 *            The name of the variable
+	 * @param initialValue
+	 *            The initial variable value
+	 * @param overwrite
+	 *            Whether to overwrite the current value in case the variable is
+	 *            already registered
+	 * @return either if the variable was registered or its value was updated
+	 */
+	protected boolean registerVariable(final String name,
+			Serializable initialValue, boolean overwrite) {
+
+		boolean registered = true;
+
+		if (!overwrite && this.variables.containsKey(name)) {
+			registered = false;
+		} else {
+			this.variables.put(name, initialValue);
+		}
+
+		return registered;
 	}
 
 	/*
