@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The SLR Support Tools. If not, see <http://www.gnu.org/licenses/>.
  */
-package pascani.lang.util.events;
+package pascani.lang.util;
 
 import java.util.Collection;
 
@@ -24,7 +24,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 
 import pascani.lang.Event;
-import pascani.lang.util.LoggingSortedSet;
 
 /**
  * A sorted set of {@link Event} objects with logging capabilities (by means of

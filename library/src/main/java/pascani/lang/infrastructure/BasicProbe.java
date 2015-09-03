@@ -23,7 +23,7 @@ import java.util.List;
 
 import pascani.lang.Event;
 import pascani.lang.Probe;
-import pascani.lang.util.events.EventSet;
+import pascani.lang.util.EventSet;
 
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
