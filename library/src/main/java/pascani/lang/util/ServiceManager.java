@@ -42,7 +42,7 @@ public class ServiceManager {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 */
-	public static <T> T bindScaService(Map<String, Object> properties, Class<T> clazz) {
+	public static <T> T bindService(Map<String, Object> properties, Class<T> clazz) {
 
 		// TODO: how to register these properties? (this method is not actually
 		// called at runtime) -> Create production rules in the Pascani grammar
