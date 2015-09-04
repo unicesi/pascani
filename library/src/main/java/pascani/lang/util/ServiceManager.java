@@ -16,10 +16,21 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The SLR Support Tools. If not, see <http://www.gnu.org/licenses/>.
  */
-package pascani.lang.sca;
+package pascani.lang.util;
 
 import java.util.Map;
 
+import pascani.lang.Event;
+import pascani.lang.infrastructure.ProbeProxy;
+import pascani.lang.infrastructure.RpcClient;
+import pascani.lang.infrastructure.rabbitmq.EndPoint;
+import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcClient;
+
+/**
+ * TODO: documentation
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class ServiceManager {
 
 	/**
@@ -31,10 +42,10 @@ public class ServiceManager {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 */
-	public static <T> T bind(Map<String, Object> properties, Class<T> clazz) {
+	public static <T> T bindScaService(Map<String, Object> properties, Class<T> clazz) {
 
 		// TODO: how to register these properties? (this method is not actually
-		// called at runtime)
+		// called at runtime) -> Create production rules in the Pascani grammar
 
 		/*
 		 * At runtime, inside Pascani, it is not important to have the actual
@@ -42,6 +53,32 @@ public class ServiceManager {
 		 * and content assist purposes.
 		 */
 		return null;
+	}
+
+	/**
+	 * 
+	 * @param routingKey
+	 * @param T
+	 * @return
+	 */
+	public static <T extends Event<?>> ProbeProxy<T> bindProbe(
+			final String routingKey, final Class<? extends Event<?>> T) {
+		
+		ProbeProxy<T> proxy = null;
+		
+		// TODO: replace with the actual values. These values must be read from a properties file
+		String exchange = "probes_exchange";
+		String uri = "Rabbitmq connection URI";
+
+		try {
+			EndPoint endPoint = new EndPoint(uri);
+			RpcClient client = new RabbitMQRpcClient(endPoint, exchange, routingKey);
+			proxy = new ProbeProxy<T>(client);
+		} catch (Exception e) {
+
+		}
+
+		return proxy;
 	}
 
 }
