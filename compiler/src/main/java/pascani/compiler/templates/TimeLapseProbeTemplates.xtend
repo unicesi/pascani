@@ -12,7 +12,7 @@ class TimeLapseProbeTemplates {
 	 */
 	def static String getProducerInitialization(String producerVar) {
 		'''
-			this.«producerVar» = new «EventProducer.simpleName»<«TimeLapseEvent.simpleName»>(pascani.lang.Runtime.Context.PROBE);
+			this.«producerVar» = new «EventProducer.simpleName»<«TimeLapseEvent.simpleName»>(PascaniRuntime.Context.PROBE);
 		'''
 	}
 

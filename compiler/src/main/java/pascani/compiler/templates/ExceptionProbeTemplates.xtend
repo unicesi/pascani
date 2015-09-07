@@ -12,7 +12,7 @@ class ExceptionProbeTemplates {
 	 */
 	def static String getProducerInitialization(String producerVar) {
 		'''
-			this.«producerVar» = new «EventProducer.simpleName»<«ExceptionEvent.simpleName»>(pascani.lang.Runtime.Context.PROBE);
+			this.«producerVar» = new «EventProducer.simpleName»<«ExceptionEvent.simpleName»>(PascaniRuntime.Context.PROBE);
 		'''
 	}
 

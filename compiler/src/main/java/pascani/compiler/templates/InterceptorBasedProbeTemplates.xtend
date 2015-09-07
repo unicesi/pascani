@@ -25,7 +25,7 @@ class InterceptorBasedProbeTemplates {
 	 */
 	def static String getProbeConstructor(String uri, String routingKey) {
 		'''
-			super("«uri»", "«routingKey»", pascani.lang.Runtime.Context.PROBE);
+			super("«uri»", "«routingKey»", PascaniRuntime.Context.PROBE);
 		'''
 	}
 

@@ -13,6 +13,7 @@ import org.ow2.frascati.tinfi.api.IntentJoinPoint;
 
 import pascani.compiler.templates.TimeLapseProbeTemplates;
 import pascani.compiler.util.NameProposal;
+import pascani.lang.PascaniRuntime;
 import pascani.lang.events.TimeLapseEvent;
 import pascani.lang.util.EventProducer;
 
@@ -45,6 +46,7 @@ public class TimeLapseProbeScaGenerator extends InterceptorBasedProbeGenerator {
 		JavaClassSource javaClass = Roaster.create(JavaClassSource.class);
 
 		// Add imports
+		javaClass.addImport(PascaniRuntime.class);
 		javaClass.addImport(EventProducer.class);
 		javaClass.addImport(TimeLapseEvent.class);
 		javaClass.addImport(UUID.class);

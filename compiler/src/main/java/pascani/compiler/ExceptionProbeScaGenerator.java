@@ -31,6 +31,7 @@ import org.ow2.frascati.tinfi.api.IntentJoinPoint;
 
 import pascani.compiler.templates.ExceptionProbeTemplates;
 import pascani.compiler.util.NameProposal;
+import pascani.lang.PascaniRuntime;
 import pascani.lang.events.ExceptionEvent;
 import pascani.lang.util.EventProducer;
 
@@ -63,6 +64,7 @@ public class ExceptionProbeScaGenerator extends InterceptorBasedProbeGenerator {
 		JavaClassSource javaClass = Roaster.create(JavaClassSource.class);
 
 		// Add imports
+		javaClass.addImport(PascaniRuntime.class);
 		javaClass.addImport(EventProducer.class);
 		javaClass.addImport(ExceptionEvent.class);
 		javaClass.addImport(UUID.class);

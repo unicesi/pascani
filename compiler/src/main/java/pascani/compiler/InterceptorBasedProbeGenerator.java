@@ -8,6 +8,7 @@ import org.jboss.forge.roaster.model.source.MethodSource;
 
 import pascani.compiler.templates.InterceptorBasedProbeTemplates;
 import pascani.compiler.util.NameProposal;
+import pascani.lang.PascaniRuntime;
 import pascani.lang.Probe;
 import pascani.lang.events.ExceptionEvent;
 import pascani.lang.infrastructure.CustomProbe;
@@ -73,6 +74,7 @@ public abstract class InterceptorBasedProbeGenerator {
 		JavaClassSource javaClass = Roaster.create(JavaClassSource.class);
 
 		// Add imports
+		javaClass.addImport(PascaniRuntime.class);
 		javaClass.addImport(CustomProbe.class);
 		javaClass.addImport(ExceptionEvent.class);
 
