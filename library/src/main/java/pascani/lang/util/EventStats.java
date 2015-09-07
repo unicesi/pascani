@@ -33,15 +33,15 @@ import com.google.common.collect.Lists;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public final class EventsStats {
+public final class EventStats {
 
 	private final Collection<? extends Event<? extends Number>> events;
 
-	public EventsStats(Collection<? extends Event<? extends Number>> events) {
+	public EventStats(Collection<? extends Event<? extends Number>> events) {
 		this.events = events;
 	}
 
-	public EventsStats(Event<? extends Number>... events) {
+	public EventStats(Event<? extends Number>... events) {
 		this(Lists.newArrayList(events));
 	}
 
