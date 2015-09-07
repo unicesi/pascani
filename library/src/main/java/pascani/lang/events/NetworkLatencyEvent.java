@@ -237,7 +237,8 @@ public class NetworkLatencyEvent implements Event<Double> {
 	/**
 	 * Returns the string representation of this event for logging purposes.
 	 */
-	@Override public String toString() {
+	@Override
+	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getClass().getCanonicalName() + "\t");
 		sb.append(this.transactionId + "\t");
@@ -255,10 +256,11 @@ public class NetworkLatencyEvent implements Event<Double> {
 
 	/**
 	 * The result is {@code true} if and only if the argument is not
-	 * {@code null}, is a {@Link LatencyEvent} object and has the same
-	 * identifier as {@code this} {@Link LatencyEvent}.
+	 * {@code null}, is a {@Link NetworkLatencyEvent} object and has the
+	 * same identifier as {@code this} {@Link NetworkLatencyEvent}.
 	 */
-	@Override public boolean equals(final Object obj) {
+	@Override
+	public boolean equals(final Object obj) {
 		if ((null == obj) || (obj.getClass() != NetworkLatencyEvent.class))
 			return false;
 
