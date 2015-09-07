@@ -83,6 +83,10 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 		}
 		return response;
 	}
+	
+	public boolean cleanData(final long start, final long end) {
+		return cleanData(start, end, null);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -96,6 +100,10 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 				end, new ArrayList<Class<T>>(eventTypes));
 		byte[] response = makeActualCall(request, false);
 		return SerializationUtils.deserialize(response);
+	}
+	
+	public int count(final long start, final long end) {
+		return count(start, end, null);
 	}
 
 	/*
@@ -111,6 +119,10 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 		byte[] response = makeActualCall(request, 0);
 		return SerializationUtils.deserialize(response);
 	}
+	
+	public int countAndClean(final long start, final long end) {
+		return countAndClean(start, end, null);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -125,6 +137,10 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 		byte[] response = makeActualCall(request, 0);
 		return SerializationUtils.deserialize(response);
 	}
+	
+	public List<T> fetch(final long start, final long end) {
+		return fetch(start, end, null);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -138,6 +154,10 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 				end, new ArrayList<Class<T>>(eventTypes));
 		byte[] response = makeActualCall(request, new ArrayList<T>());
 		return SerializationUtils.deserialize(response);
+	}
+	
+	public List<T> fetchAndClean(final long start, final long end) {
+		return fetchAndClean(start, end, null);
 	}
 
 	/*

@@ -120,6 +120,10 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	public void recordEvent(T event) {
 		this.probe.recordEvent(event);
 	}
+	
+	public boolean cleanData(final long start, final long end) {
+		return cleanData(start, end, null);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -129,6 +133,10 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	public boolean cleanData(final long start, final long end,
 			final List<Class<T>> eventTypes) {
 		return this.probe.cleanData(start, end, eventTypes);
+	}
+	
+	public int count(final long start, final long end) {
+		return count(start, end, null);
 	}
 
 	/*
@@ -140,6 +148,10 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 			final List<Class<T>> eventTypes) {
 		return this.probe.count(start, end, eventTypes);
 	}
+	
+	public int countAndClean(final long start, final long end) {
+		return countAndClean(start, end, null);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -150,6 +162,10 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 			final List<Class<T>> eventTypes) {
 		return this.probe.countAndClean(start, end, eventTypes);
 	}
+	
+	public List<T> fetch(final long start, final long end) {
+		return fetch(start, end, null);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -159,6 +175,10 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	public List<T> fetch(final long start, final long end,
 			final List<Class<T>> eventTypes) {
 		return this.probe.fetch(start, end, eventTypes);
+	}
+	
+	public List<T> fetchAndClean(final long start, final long end) {
+		return fetchAndClean(start, end, null);
 	}
 
 	/*
