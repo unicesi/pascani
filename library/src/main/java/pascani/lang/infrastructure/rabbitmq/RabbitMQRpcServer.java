@@ -24,6 +24,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.SerializationUtils;
 
+import pascani.lang.PascaniRuntime;
 import pascani.lang.infrastructure.RpcRequest;
 import pascani.lang.infrastructure.RpcServer;
 
@@ -83,10 +84,10 @@ public class RabbitMQRpcServer extends RpcServer {
 	 *             RabbitMQ server
 	 */
 	public RabbitMQRpcServer(final EndPoint endPoint, String routingKey,
-			final pascani.lang.Runtime.Context context) throws IOException,
+			final PascaniRuntime.Context context) throws IOException,
 			TimeoutException {
 
-		super(pascani.lang.Runtime.getRuntimeInstance(context).getEnvironment()
+		super(PascaniRuntime.getRuntimeInstance(context).getEnvironment()
 				.get("rpc_queue_prefix")
 				+ routingKey);
 
@@ -96,10 +97,10 @@ public class RabbitMQRpcServer extends RpcServer {
 		this.server = new InternalRpcServer(this.endPoint.channel(), queue);
 	}
 
-	private String declareQueue(final pascani.lang.Runtime.Context context,
+	private String declareQueue(final PascaniRuntime.Context context,
 			String routingKey) throws IOException {
 
-		pascani.lang.Runtime runtime = pascani.lang.Runtime
+		PascaniRuntime runtime = PascaniRuntime
 				.getRuntimeInstance(context);
 		String prefix = runtime.getEnvironment().get("rpc_queue_prefix");
 		String queue = prefix + routingKey;

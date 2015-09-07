@@ -37,11 +37,11 @@ import com.google.common.eventbus.EventBus;
 
 /**
  * This class serves as event bus for all measurement components generating
- * events, such as {@link EventProducer} and {@link Probe} instances.
+ * events, such as {@link EventProducer}.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class Runtime {
+public class PascaniRuntime {
 
 	/**
 	 * Specifies whether this runtime resides in the context of a
@@ -55,16 +55,16 @@ public class Runtime {
 	}
 
 	/**
-	 * A Map storing {@link pascani.lang.Runtime} instances. Useful when a
+	 * A Map storing {@link PascaniRuntime} instances. Useful when a
 	 * system is being measured by {@link Probe} instances and custom
 	 * measurement mechanisms
 	 */
-	private final static Map<String, pascani.lang.Runtime> runtimes = new HashMap<String, Runtime>();
+	private final static Map<String, PascaniRuntime> runtimes = new HashMap<String, PascaniRuntime>();
 
 	/**
 	 * The context in which this runtime resides
 	 */
-	private final pascani.lang.Runtime.Context context;
+	private final PascaniRuntime.Context context;
 
 	/**
 	 * The event bus for {@link Event} objects
@@ -86,7 +86,7 @@ public class Runtime {
 	 * @param context
 	 *            The context in which this runtime resides
 	 */
-	private Runtime(Context context) {
+	private PascaniRuntime(Context context) {
 		this.context = context;
 		this.eventBus = new EventBus(this.context.toString());
 		this.environment = new HashMap<String, String>();
@@ -99,9 +99,9 @@ public class Runtime {
 	 *            The context in which this runtime resides
 	 * @return a runtime singleton
 	 */
-	public static Runtime getRuntimeInstance(Context context) {
+	public static PascaniRuntime getRuntimeInstance(Context context) {
 		if (!runtimes.containsKey(context.toString())) {
-			runtimes.put(context.toString(), new Runtime(context));
+			runtimes.put(context.toString(), new PascaniRuntime(context));
 		}
 
 		return runtimes.get(context.toString());
@@ -187,7 +187,7 @@ public class Runtime {
 	/**
 	 * @return the context in which this runtime resides
 	 */
-	public final pascani.lang.Runtime.Context context() {
+	public final PascaniRuntime.Context context() {
 		return this.context;
 	}
 

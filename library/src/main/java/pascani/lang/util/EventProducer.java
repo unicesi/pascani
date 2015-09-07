@@ -19,6 +19,7 @@
 package pascani.lang.util;
 
 import pascani.lang.Event;
+import pascani.lang.PascaniRuntime;
 
 /**
  * A simple implementation to encapsulate event generation in probes, monitors
@@ -34,14 +35,14 @@ public class EventProducer<T extends Event<?>> {
 	/**
 	 * The default runtime
 	 */
-	private final pascani.lang.Runtime runtime;
+	private final PascaniRuntime runtime;
 
 	/**
 	 * @param context
 	 *            The context in which the runtime resides
 	 */
-	public EventProducer(pascani.lang.Runtime.Context context) {
-		this.runtime = pascani.lang.Runtime.getRuntimeInstance(context);
+	public EventProducer(PascaniRuntime.Context context) {
+		this.runtime = PascaniRuntime.getRuntimeInstance(context);
 	}
 
 	/**

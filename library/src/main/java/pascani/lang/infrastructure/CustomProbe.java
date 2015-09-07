@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pascani.lang.Event;
+import pascani.lang.PascaniRuntime;
 import pascani.lang.Probe;
 import pascani.lang.infrastructure.rabbitmq.EndPoint;
 import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcServer;
@@ -60,7 +61,7 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	/**
 	 * The context in which this probe is used
 	 */
-	protected final pascani.lang.Runtime.Context context;
+	protected final PascaniRuntime.Context context;
 
 	/**
 	 * Creates an instance connected to a RabbitMQ server, making the recorded
@@ -84,7 +85,7 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 *             {@link EndPoint#EndPoint(String)}
 	 */
 	public CustomProbe(final String uri, final String routingKey,
-			final pascani.lang.Runtime.Context context) throws Exception {
+			final PascaniRuntime.Context context) throws Exception {
 
 		this.context = context;
 		this.endPoint = new EndPoint(uri);
@@ -92,7 +93,7 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 		// Create the corresponding queue, and then create a binding between the
 		// queue and the probes exchange
 		String queue = routingKey;
-		String exchange = pascani.lang.Runtime.getRuntimeInstance(this.context)
+		String exchange = PascaniRuntime.getRuntimeInstance(this.context)
 				.getEnvironment().get("probes_exchange");
 
 		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
@@ -108,7 +109,7 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 * Registers the probe as an event listener
 	 */
 	private void registerProbeAsListener() {
-		pascani.lang.Runtime.getRuntimeInstance(this.context)
+		PascaniRuntime.getRuntimeInstance(this.context)
 				.registerEventListener(this.probe);
 	}
 

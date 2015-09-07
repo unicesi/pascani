@@ -19,6 +19,7 @@
 package pascani.lang.infrastructure;
 
 import pascani.lang.Event;
+import pascani.lang.PascaniRuntime;
 import pascani.lang.Probe;
 import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer;
 
@@ -62,14 +63,14 @@ public class ExternalProbe<T extends Event<?>> extends CustomProbe<T> {
 	 *            this probe.
 	 * @throws Exception
 	 *             If something bad happens. Check exceptions in
-	 *             {@link CustomProbe#CustomProbe(String, String, pascani.lang.Runtime.Context)}
+	 *             {@link CustomProbe#CustomProbe(String, String, PascaniRuntime.Context)}
 	 */
 	public ExternalProbe(final String uri, final String routingKey)
 			throws Exception {
-		super(uri, routingKey, pascani.lang.Runtime.Context.PROBE);
+		super(uri, routingKey, PascaniRuntime.Context.PROBE);
 
 		this.consumer = new RabbitMQConsumer(super.endPoint, routingKey,
-				routingKey, pascani.lang.Runtime.Context.PROBE);
+				routingKey, PascaniRuntime.Context.PROBE);
 		this.consumer.start();
 	}
 

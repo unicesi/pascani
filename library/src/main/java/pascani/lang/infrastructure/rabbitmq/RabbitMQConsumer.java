@@ -24,6 +24,7 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.lang3.SerializationUtils;
 
 import pascani.lang.Event;
+import pascani.lang.PascaniRuntime;
 import pascani.lang.infrastructure.MessageConsumer;
 import pascani.lang.util.EventProducer;
 
@@ -79,7 +80,7 @@ public class RabbitMQConsumer extends MessageConsumer implements Consumer {
 	 *             RabbitMQ server
 	 */
 	public RabbitMQConsumer(final EndPoint endPoint, final String queue,
-			final String tag, final pascani.lang.Runtime.Context context)
+			final String tag, final PascaniRuntime.Context context)
 			throws IOException, TimeoutException {
 
 		this.endPoint = endPoint;
@@ -111,7 +112,7 @@ public class RabbitMQConsumer extends MessageConsumer implements Consumer {
 	 */
 	public RabbitMQConsumer(final EndPoint endPoint, final String exchange,
 			final String routingKey, final String tag,
-			final pascani.lang.Runtime.Context context) throws IOException,
+			final PascaniRuntime.Context context) throws IOException,
 			TimeoutException {
 
 		this.endPoint = endPoint;

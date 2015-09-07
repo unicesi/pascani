@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import pascani.lang.Event;
+import pascani.lang.PascaniRuntime;
 import pascani.lang.events.ChangeEvent;
 import pascani.lang.infrastructure.rabbitmq.EndPoint;
 import pascani.lang.infrastructure.rabbitmq.RabbitMQProducer;
@@ -49,7 +50,7 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	/**
 	 * The context in which this namespace is used
 	 */
-	private final pascani.lang.Runtime.Context context;
+	private final PascaniRuntime.Context context;
 
 	/**
 	 * A map containing the variables defined in this namespace, with their
@@ -74,20 +75,20 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	 *            namespaces exchange
 	 * @throws Exception
 	 *             If something bad happens. Check out
-	 *             {@link RabbitMQRpcServer#RabbitMQRpcServer(EndPoint, String, pascani.lang.Runtime.Context)}
+	 *             {@link RabbitMQRpcServer#RabbitMQRpcServer(EndPoint, String, PascaniRuntime.Context)}
 	 *             for more information.
 	 */
 	public BasicNamespace(final String uri, final String routingKey)
 			throws Exception {
 
 		this.variables = new HashMap<String, Serializable>();
-		this.context = pascani.lang.Runtime.Context.NAMESPACE;
+		this.context = PascaniRuntime.Context.NAMESPACE;
 		this.endPoint = new EndPoint(uri);
 		this.producer = new RabbitMQProducer(endPoint, getAcceptedClasses(),
 				declareQueue(routingKey), routingKey);
 
 		this.server = new RabbitMQRpcServer(endPoint, routingKey,
-				pascani.lang.Runtime.Context.NAMESPACE);
+				PascaniRuntime.Context.NAMESPACE);
 
 		startRpcServer();
 	}
@@ -97,7 +98,7 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 		// then create a binding between the queue and the configured namespace
 		// exchange.
 		String queue = routingKey;
-		String exchange = pascani.lang.Runtime.getRuntimeInstance(this.context)
+		String exchange = PascaniRuntime.getRuntimeInstance(this.context)
 				.getEnvironment().get("namespace_exchange");
 
 		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
