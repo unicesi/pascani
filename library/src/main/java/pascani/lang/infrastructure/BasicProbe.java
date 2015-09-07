@@ -57,7 +57,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	/**
 	 * A map holding the events as they are raised, grouped by event type
 	 */
-	private final Map<Class<? extends Event<?>>, EventSet<T>> events;
+	private final Map<String, EventSet<T>> events;
 
 	/**
 	 * Creates an instance of {@link Probe} with an empty set of events, and
@@ -69,13 +69,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 */
 	public BasicProbe(final RpcServer server) {
 		this.server = server;
-
-		/*
-		 * A type restriction on the map is not necessary, as the only method
-		 * that adds new events it type safe (restricted to T). Also, it could
-		 * cause cast errors, see http://stackoverflow.com/a/13974262
-		 */
-		this.events = new HashMap<Class<? extends Event<?>>, EventSet<T>>();
+		this.events = new HashMap<String, EventSet<T>>();
 
 		// Start serving RPC requests
 		this.server.setHandler(this);
@@ -91,27 +85,25 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	@Subscribe
 	public boolean recordEvent(T event) {
 
-		@SuppressWarnings("unchecked")
-		Class<? extends Event<?>> clazz = (Class<? extends Event<?>>) event
-				.getClass();
+		String key = event.getClass().getCanonicalName();
 
 		synchronized(this.events) {
-			if (this.events.get(clazz) == null)
-				this.events.put(clazz, new EventSet<T>());
+			if (this.events.get(key) == null)
+				this.events.put(key, new EventSet<T>());
 
-			return this.events.get(clazz).add(event);
+			return this.events.get(key).add(event);
 		}
 	}
 
-	private List<Class<? extends Event<?>>> types(
-			List<Class<? extends Event<?>>> eventTypes) {
-		List<Class<? extends Event<?>>> types = eventTypes;
+	private List<String> types(List<Class<? extends Event<?>>> eventTypes) {
+		
+		List<String> types = new ArrayList<String>();
 
-		if (types == null || types.isEmpty()) {
-			types = new ArrayList<Class<? extends Event<?>>>();
-			for (Class<? extends Event<?>> t : this.events.keySet()) {
-				types.add(t);
-			}
+		if (eventTypes == null || eventTypes.isEmpty()) {
+			types.addAll(this.events.keySet());
+		} else {
+			for (Class<? extends Event<?>> t : eventTypes)
+				types.add(t.getCanonicalName());
 		}
 
 		return types;
@@ -127,7 +119,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 
 		boolean removed = false;
 
-		for (Class<? extends Event<?>> clazz : types(eventTypes)) {
+		for (String clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				removed = removed
 						|| this.events.get(clazz).clean(start, end).size() > 1;
@@ -147,7 +139,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 
 		int count = 0;
 
-		for (Class<? extends Event<?>> clazz : types(eventTypes)) {
+		for (String clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				count += this.events.get(clazz).filter(start, end).size();
 			}
@@ -166,7 +158,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 
 		int count = 0;
 
-		for (Class<? extends Event<?>> clazz : types(eventTypes)) {
+		for (String clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				count += this.events.get(clazz).clean(start, end).size();
 			}
@@ -185,7 +177,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 
 		List<T> fetched = new ArrayList<T>();
 
-		for (Class<? extends Event<?>> clazz : types(eventTypes)) {
+		for (String clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				fetched.addAll(this.events.get(clazz).filter(start, end));
 			}
@@ -203,7 +195,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 			List<Class<? extends Event<?>>> eventTypes) {
 		List<T> fetched = new ArrayList<T>();
 
-		for (Class<? extends Event<?>> clazz : types(eventTypes)) {
+		for (String clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				fetched.addAll(this.events.get(clazz).clean(start, end));
 			}
