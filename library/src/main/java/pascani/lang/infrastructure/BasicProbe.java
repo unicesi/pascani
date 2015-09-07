@@ -20,7 +20,6 @@ package pascani.lang.infrastructure;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +103,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 		List<Class<T>> types = eventTypes;
 
 		if (types == null || types.isEmpty()) {
-			types = Collections.emptyList();
+			types = new ArrayList<Class<T>>();
 			for (Class<?> t : this.events.keySet()) {
 				types.add((Class<T>) t);
 			}
