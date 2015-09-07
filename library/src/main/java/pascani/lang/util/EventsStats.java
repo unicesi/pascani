@@ -18,7 +18,7 @@
  */
 package pascani.lang.util;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -35,9 +35,9 @@ import com.google.common.collect.Lists;
  */
 public final class EventsStats {
 
-	private final List<? extends Event<? extends Number>> events;
+	private final Collection<? extends Event<? extends Number>> events;
 
-	public EventsStats(List<? extends Event<? extends Number>> events) {
+	public EventsStats(Collection<? extends Event<? extends Number>> events) {
 		this.events = events;
 	}
 
