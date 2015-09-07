@@ -81,7 +81,7 @@ public class NetworkLatencyEvent implements Event<Double> {
 	private final Object _return;
 
 	/**
-	 * The name of method
+	 * The name of the method
 	 */
 	private final String methodName;
 
