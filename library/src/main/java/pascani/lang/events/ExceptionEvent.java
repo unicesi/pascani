@@ -117,19 +117,19 @@ public class ExceptionEvent implements Event<Exception> {
 	public Exception value() {
 		return this.exception;
 	}
-	
+
 	public Class<?> clazz() {
 		return this.clazz;
 	}
-	
+
 	public String methodName() {
 		return this.methodName;
 	}
-	
+
 	public Class<?>[] parameters() {
 		return this.parameters;
 	}
-	
+
 	public Object[] arguments() {
 		return this.arguments;
 	}
@@ -154,11 +154,24 @@ public class ExceptionEvent implements Event<Exception> {
 
 		return sb.toString();
 	}
+	
+	/**
+	 * The result is {@code true} if and only if the argument is not
+	 * {@code null}, is a {@Link ExceptionEvent} object and has the same
+	 * identifier as {@code this} {@Link ExceptionEvent}.
+	 */
+	@Override public boolean equals(final Object obj) {
+		if ((null == obj) || (obj.getClass() != ExceptionEvent.class))
+			return false;
+
+		ExceptionEvent other = (ExceptionEvent) obj;
+		return this.id.equals(other.id);
+	}
 
 	/**
-	 * The result is {@code -1} if {@code this} event was raised before
-	 * {@code o}. If {@code this} was raised after {@code o}, the result is
-	 * {@code 1}. Otherwise, the result is {@code 0}.
+	 * The result is {@code -1} if {@code this} event was started before
+	 * {@code o}, otherwise is {@code 1}. {@code 0} is returned when the
+	 * argument is null or is not a {@link ExceptionEvent}.
 	 *
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
@@ -168,10 +181,8 @@ public class ExceptionEvent implements Event<Exception> {
 
 			if (this.timestamp < other.timestamp) {
 				return -1;
-			} else if (this.timestamp > other.timestamp) {
-				return 1;
 			} else {
-				return 0;
+				return 1;
 			}
 		}
 

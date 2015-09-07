@@ -167,8 +167,8 @@ public final class TimeLapseEvent implements Event<Double> {
 
 	/**
 	 * The result is {@code -1} if {@code this} event was started before
-	 * {@code o}. If {@code this} was started after {@code o}, the result is
-	 * {@code 1}. Otherwise, the result is {@code 0}.
+	 * {@code o}, otherwise is {@code 1}. {@code 0} is returned when the
+	 * argument is null or is not a {@link TimeLapseEvent}.
 	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
@@ -178,10 +178,8 @@ public final class TimeLapseEvent implements Event<Double> {
 
 			if (this.start < other.start) {
 				return -1;
-			} else if (this.start > other.start) {
-				return 1;
 			} else {
-				return 0;
+				return 1;
 			}
 		}
 

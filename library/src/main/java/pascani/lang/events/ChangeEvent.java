@@ -109,9 +109,9 @@ public class ChangeEvent implements Event<Serializable> {
 	}
 
 	/**
-	 * The result is {@code -1} if {@code this} event was raised before
-	 * {@code o}. If {@code this} was raised after {@code o}, the result is
-	 * {@code 1}. Otherwise, the result is {@code 0}.
+	 * The result is {@code -1} if {@code this} event was started before
+	 * {@code o}, otherwise is {@code 1}. {@code 0} is returned when the
+	 * argument is null or is not a {@link ChangeEvent}.
 	 *
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
@@ -121,10 +121,8 @@ public class ChangeEvent implements Event<Serializable> {
 
 			if (this.timestamp < other.timestamp) {
 				return -1;
-			} else if (this.timestamp > other.timestamp) {
-				return 1;
 			} else {
-				return 0;
+				return 1;
 			}
 		}
 
