@@ -42,7 +42,7 @@ public interface Probe<T extends Event<?>> {
 	 *            An optional filter to only affect events by their type
 	 * @return whether at least one element was removed or not
 	 */
-	public boolean cleanData(long start, long end, Class<T>... eventTypes);
+	public boolean cleanData(long start, long end, List<Class<T>> eventTypes);
 
 	/**
 	 * Counts the number of event objects raised from {@code start} until
@@ -57,7 +57,7 @@ public interface Probe<T extends Event<?>> {
 	 * 
 	 * @return the number of events raised within the given time window
 	 */
-	public int count(long start, long end, Class<T>... eventTypes);
+	public int count(long start, long end, List<Class<T>> eventTypes);
 
 	/**
 	 * Counts the number of event objects raised from {@code start} until
@@ -75,7 +75,7 @@ public interface Probe<T extends Event<?>> {
 	 * 
 	 * @return the number of events raised after {@code timestamp}
 	 */
-	public int countAndClean(long start, long end, Class<T>... eventTypes);
+	public int countAndClean(long start, long end, List<Class<T>> eventTypes);
 
 	/**
 	 * Fetches the event objects raised from {@code start} until {@code end}.
@@ -89,7 +89,7 @@ public interface Probe<T extends Event<?>> {
 	 * 
 	 * @return a {@link List} containing the event objects
 	 */
-	public List<T> fetch(long start, long end, Class<T>... eventTypes);
+	public List<T> fetch(long start, long end, List<Class<T>> eventTypes);
 
 	/**
 	 * Fetches the event objects raised from {@code start} until {@code end},
@@ -107,6 +107,6 @@ public interface Probe<T extends Event<?>> {
 	 * 
 	 * @return a {@link List} containing the event objects
 	 */
-	public List<T> fetchAndClean(long start, long end, Class<T>... eventTypes);
+	public List<T> fetchAndClean(long start, long end, List<Class<T>> eventTypes);
 
 }

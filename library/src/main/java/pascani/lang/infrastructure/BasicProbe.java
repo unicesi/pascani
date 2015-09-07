@@ -20,6 +20,7 @@ package pascani.lang.infrastructure;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,23 +100,26 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	}
 
 	@SuppressWarnings("unchecked")
-	private Class<T>[] types(Class<T>[] eventTypes) {
-		Class<T>[] types = eventTypes;
-		
-		if(types.length == 0) {
-			types = (Class<T>[]) this.events.keySet().toArray();
+	private List<Class<T>> types(List<Class<T>> eventTypes) {
+		List<Class<T>> types = eventTypes;
+
+		if (types == null || types.isEmpty()) {
+			types = Collections.emptyList();
+			for (Class<?> t : this.events.keySet()) {
+				types.add((Class<T>) t);
+			}
 		}
-		
+
 		return types;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#cleanData(long, long, java.lang.Class[])
+	 * @see pascani.lang.Probe#cleanData(long, long, java.util.List)
 	 */
 	public boolean cleanData(final long start, final long end,
-			final Class<T>... eventTypes) {
+			List<Class<T>> eventTypes) {
 
 		boolean removed = false;
 
@@ -132,10 +136,9 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#count(long, long, java.lang.Class[])
+	 * @see pascani.lang.Probe#count(long, long, java.util.List)
 	 */
-	public int count(final long start, final long end,
-			final Class<T>... eventTypes) {
+	public int count(final long start, final long end, List<Class<T>> eventTypes) {
 
 		int count = 0;
 
@@ -151,10 +154,10 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#countAndClean(long, long, java.lang.Class[])
+	 * @see pascani.lang.Probe#countAndClean(long, long, java.util.List)
 	 */
 	public int countAndClean(final long start, final long end,
-			final Class<T>... eventTypes) {
+			List<Class<T>> eventTypes) {
 
 		int count = 0;
 
@@ -170,10 +173,10 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#fetch(long, long, java.lang.Class[])
+	 * @see pascani.lang.Probe#fetch(long, long, java.util.List)
 	 */
 	public List<T> fetch(final long start, final long end,
-			final Class<T>... eventTypes) {
+			List<Class<T>> eventTypes) {
 
 		List<T> fetched = new ArrayList<T>();
 
@@ -189,10 +192,10 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#fetchAndClean(long, long, java.lang.Class[])
+	 * @see pascani.lang.Probe#fetchAndClean(long, long, java.util.List)
 	 */
 	public List<T> fetchAndClean(final long start, final long end,
-			final Class<T>... eventTypes) {
+			List<Class<T>> eventTypes) {
 		List<T> fetched = new ArrayList<T>();
 
 		for (Class<T> clazz : types(eventTypes)) {
@@ -215,7 +218,9 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 
 		long start = (Long) request.getParameter(0);
 		long end = (Long) request.getParameter(1);
-		Class<T>[] eventTypes = (Class<T>[]) request.getParameter(2);
+
+		@SuppressWarnings("unchecked")
+		List<Class<T>> eventTypes = (List<Class<T>>) request.getParameter(2);
 
 		if (request.operation().equals(RpcOperation.PROBE_CLEAN))
 			response = this.cleanData(start, end, eventTypes);
