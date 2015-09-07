@@ -84,34 +84,72 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 		return response;
 	}
 
-	public boolean cleanData(long timestamp) {
-		RpcRequest request = new RpcRequest(RpcOperation.PROBE_CLEAN, timestamp);
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.Probe#cleanData(long, long, java.lang.Class[])
+	 */
+	public boolean cleanData(final long start, final long end,
+			final Class<T>... eventTypes) {
+
+		RpcRequest request = new RpcRequest(RpcOperation.PROBE_CLEAN, start,
+				end, eventTypes);
 		byte[] response = makeActualCall(request, false);
 		return SerializationUtils.deserialize(response);
 	}
 
-	public int count(long timestamp) {
-		RpcRequest request = new RpcRequest(RpcOperation.PROBE_COUNT, timestamp);
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.Probe#count(long, long, java.lang.Class[])
+	 */
+	public int count(final long start, final long end,
+			final Class<T>... eventTypes) {
+
+		RpcRequest request = new RpcRequest(RpcOperation.PROBE_COUNT, start,
+				end, eventTypes);
 		byte[] response = makeActualCall(request, 0);
 		return SerializationUtils.deserialize(response);
 	}
 
-	public int countAndClean(long timestamp) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.Probe#countAndClean(long, long, java.lang.Class[])
+	 */
+	public int countAndClean(final long start, final long end,
+			final Class<T>... eventTypes) {
+
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_COUNT_AND_CLEAN,
-				timestamp);
+				start, end, eventTypes);
 		byte[] response = makeActualCall(request, 0);
 		return SerializationUtils.deserialize(response);
 	}
 
-	public List<T> fetch(long timestamp) {
-		RpcRequest request = new RpcRequest(RpcOperation.PROBE_FETCH, timestamp);
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.Probe#fetch(long, long, java.lang.Class[])
+	 */
+	public List<T> fetch(final long start, final long end,
+			final Class<T>... eventTypes) {
+
+		RpcRequest request = new RpcRequest(RpcOperation.PROBE_FETCH, start,
+				end, eventTypes);
 		byte[] response = makeActualCall(request, new ArrayList<T>());
 		return SerializationUtils.deserialize(response);
 	}
 
-	public List<T> fetchAndClean(long timestamp) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.Probe#fetchAndClean(long, long, java.lang.Class[])
+	 */
+	public List<T> fetchAndClean(final long start, final long end,
+			final Class<T>... eventTypes) {
+
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_FETCH_AND_CLEAN,
-				timestamp);
+				start, end, eventTypes);
 		byte[] response = makeActualCall(request, new ArrayList<T>());
 		return SerializationUtils.deserialize(response);
 	}

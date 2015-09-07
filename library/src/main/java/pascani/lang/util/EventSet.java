@@ -47,23 +47,20 @@ public final class EventSet<T extends Event<?>> extends LoggingSortedSet<T> {
 
 	/**
 	 * Filters this {@link EventSet} according to a time window, by checking if
-	 * the events were measured (including the final timestamp) within the range
-	 * [{@code timestamp}, now]; by means of
-	 * {@link Event#isInTimeWindow(long, long)}.
+	 * the events were raised within the range [{@code start}, {@code end}]; by
+	 * means of {@link Event#isInTimeWindow(long, long)}.
 	 * 
-	 * <p>
-	 * <b>Note</b>: The "now" time is in nanoseconds.
-	 * </p>
-	 * 
-	 * @param timestamp
+	 * @param start
 	 *            The initial timestamp of the filtering criteria, in
 	 *            nanoseconds
-	 * @return an {@link EventSet} filtered according to the specified timestamp
+	 * @param end
+	 *            The final timestamp of the filtering criteria, in nanoseconds
+	 * @return an {@link EventSet} filtered according to the given time window
 	 */
-	public EventSet<T> filter(final long timestamp) {
+	public EventSet<T> filter(final long start, final long end) {
 		Collection<T> filtered = Collections2.filter(this, new Predicate<T>() {
 			public boolean apply(T event) {
-				return event.isInTimeWindow(timestamp, System.nanoTime());
+				return event.isInTimeWindow(start, end);
 			}
 		});
 
@@ -74,15 +71,15 @@ public final class EventSet<T extends Event<?>> extends LoggingSortedSet<T> {
 	}
 
 	/**
-	 * Removes the {@link Event} objects raised from {@code timestamp} until
-	 * now.
+	 * Removes the {@link Event} objects raised from {@code start} until
+	 * {@code end}.
 	 * 
-	 * @param timestamp
+	 * @param start
 	 *            The initial timestamp of the filtering criteria
 	 * @return the removed {@link Event} objects
 	 */
-	public synchronized EventSet<T> clean(final long timestamp) {
-		Collection<T> toRemove = filter(timestamp);
+	public synchronized EventSet<T> clean(final long start, final long end) {
+		Collection<T> toRemove = filter(start, end);
 		this.removeAll(toRemove);
 
 		return (EventSet<T>) toRemove;

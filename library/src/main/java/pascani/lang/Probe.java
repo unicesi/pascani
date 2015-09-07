@@ -24,65 +24,89 @@ import java.util.List;
  * Standard probe interface
  * 
  * @param <T>
- *            The type of events it is intended to handle
+ *            The type of events this probe is intended to handle
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
 public interface Probe<T extends Event<?>> {
 
 	/**
-	 * Removes all of the event objects raised from {@code timestamp} until now.
+	 * Removes all of the event objects raised from {@code start} until
+	 * {@code end}.
 	 * 
-	 * @param timestamp
+	 * @param start
 	 *            The initial date of search in epoch format
-	 * @return {@code true} if the measured data was removed; {@code false}
-	 *         otherwise
+	 * @param end
+	 *            The final date of search in epoch format
+	 * @param eventTypes
+	 *            An optional filter to only affect events by their type
+	 * @return whether at least one element was removed or not
 	 */
-	public boolean cleanData(long timestamp);
+	public boolean cleanData(long start, long end, Class<T>... eventTypes);
 
 	/**
-	 * Counts the number of event objects raised from {@code timestamp} until
-	 * now.
+	 * Counts the number of event objects raised from {@code start} until
+	 * {@code end}.
 	 * 
-	 * @param timestamp
+	 * @param start
 	 *            The initial date of search in epoch format
+	 * @param end
+	 *            The final date of search in epoch format
+	 * @param eventTypes
+	 *            An optional filter to only affect events by their type
+	 * 
+	 * @return the number of events raised within the given time window
+	 */
+	public int count(long start, long end, Class<T>... eventTypes);
+
+	/**
+	 * Counts the number of event objects raised from {@code start} until
+	 * {@code end}, while at the same time removes them.
+	 * 
+	 * @see Probe#count(long, long, Class...)
+	 * @see Probe#cleanData(long, long, Class...)
+	 * 
+	 * @param start
+	 *            The initial date of search in epoch format
+	 * @param end
+	 *            The final date of search in epoch format
+	 * @param eventTypes
+	 *            An optional filter to only affect events by their type
+	 * 
 	 * @return the number of events raised after {@code timestamp}
 	 */
-	public int count(long timestamp);
+	public int countAndClean(long start, long end, Class<T>... eventTypes);
 
 	/**
-	 * Counts the number of event objects raised from {@code timestamp} until
-	 * now, while at the same time removes them.
+	 * Fetches the event objects raised from {@code start} until {@code end}.
 	 * 
-	 * @see Probe#count(String, long)
-	 * @see Probe#cleanData(String, long)
-	 * 
-	 * @param timestamp
+	 * @param start
 	 *            The initial date of search in epoch format
-	 * @return the number of events raised after {@code timestamp}
-	 */
-	public int countAndClean(long timestamp);
-
-	/**
-	 * Fetches the event objects raised from {@code timestamp} until now.
+	 * @param end
+	 *            The final date of search in epoch format
+	 * @param eventTypes
+	 *            An optional filter to only affect events by their type
 	 * 
-	 * @param timestamp
-	 *            The initial date of search in epoch format
 	 * @return a {@link List} containing the event objects
 	 */
-	public List<T> fetch(long timestamp);
+	public List<T> fetch(long start, long end, Class<T>... eventTypes);
 
 	/**
-	 * Fetches the event objects raised from {@code timestamp} until now, while
-	 * at the same time removes them.
+	 * Fetches the event objects raised from {@code start} until {@code end},
+	 * while at the same time removes them.
 	 * 
-	 * @see Probe#fetch(String, long)
-	 * @see Probe#cleanData(String, long)
+	 * @see Probe#fetch(long, long, Class...)
+	 * @see Probe#cleanData(long, long, Class...)
 	 * 
-	 * @param timestamp
+	 * @param start
 	 *            The initial date of search in epoch format
+	 * @param end
+	 *            The final date of search in epoch format
+	 * @param eventTypes
+	 *            An optional filter to only affect events by their type
+	 * 
 	 * @return a {@link List} containing the event objects
 	 */
-	public List<T> fetchAndClean(long timestamp);
+	public List<T> fetchAndClean(long start, long end, Class<T>... eventTypes);
 
 }

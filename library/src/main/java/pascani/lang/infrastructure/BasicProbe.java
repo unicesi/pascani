@@ -19,13 +19,15 @@
 package pascani.lang.infrastructure;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import pascani.lang.Event;
 import pascani.lang.Probe;
 import pascani.lang.util.EventSet;
 
-import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 
 /**
@@ -53,9 +55,9 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	private final RpcServer server;
 
 	/**
-	 * A set holding the events as they are raised
+	 * A map holding the events as they are raised, grouped by event type
 	 */
-	private final EventSet<T> events;
+	private final Map<Class<?>, EventSet<T>> events;
 
 	/**
 	 * Creates an instance of {@link Probe} with an empty set of events, and
@@ -67,7 +69,13 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 */
 	public BasicProbe(final RpcServer server) {
 		this.server = server;
-		this.events = new EventSet<T>();
+
+		/*
+		 * A type restriction on the map is not necessary, as the only method
+		 * that adds new events it type safe (restricted to T). Also, it could
+		 * cause cast errors, see http://stackoverflow.com/a/13974262
+		 */
+		this.events = new HashMap<Class<?>, EventSet<T>>();
 
 		// Start serving RPC requests
 		this.server.setHandler(this);
@@ -80,53 +88,109 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 * @param event
 	 *            The event to record
 	 */
-	@Subscribe public void recordEvent(T event) {
-		this.events.add(event);
+	@Subscribe
+	public void recordEvent(T event) {
+		Class<?> clazz = event.getClass();
+
+		if (this.events.get(clazz) == null)
+			this.events.put(clazz, new EventSet<T>());
+
+		this.events.get(clazz).add(event);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#cleanData(long)
+	 * @see pascani.lang.Probe#cleanData(long, long, java.lang.Class[])
 	 */
-	public boolean cleanData(long timestamp) {
-		return this.events.clean(timestamp).size() > 1;
+	public boolean cleanData(final long start, final long end,
+			final Class<T>... eventTypes) {
+
+		boolean removed = false;
+
+		for (Class<T> clazz : eventTypes) {
+			if (this.events.containsKey(clazz)) {
+				removed = removed
+						|| this.events.get(clazz).clean(start, end).size() > 1;
+			}
+		}
+
+		return removed;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#count(long)
+	 * @see pascani.lang.Probe#count(long, long, java.lang.Class[])
 	 */
-	public int count(long timestamp) {
-		return this.events.filter(timestamp).size();
+	public int count(final long start, final long end,
+			final Class<T>... eventTypes) {
+
+		int count = 0;
+
+		for (Class<T> clazz : eventTypes) {
+			if (this.events.containsKey(clazz)) {
+				count += this.events.get(clazz).filter(start, end).size();
+			}
+		}
+
+		return count;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#countAndClean(long)
+	 * @see pascani.lang.Probe#countAndClean(long, long, java.lang.Class[])
 	 */
-	public int countAndClean(long timestamp) {
-		return this.events.clean(timestamp).size();
+	public int countAndClean(final long start, final long end,
+			final Class<T>... eventTypes) {
+
+		int count = 0;
+
+		for (Class<T> clazz : eventTypes) {
+			if (this.events.containsKey(clazz)) {
+				count += this.events.get(clazz).clean(start, end).size();
+			}
+		}
+
+		return count;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#fetch(long)
+	 * @see pascani.lang.Probe#fetch(long, long, java.lang.Class[])
 	 */
-	public List<T> fetch(long timestamp) {
-		return Lists.newArrayList(this.events.filter(timestamp));
+	public List<T> fetch(final long start, final long end,
+			final Class<T>... eventTypes) {
+
+		List<T> fetched = new ArrayList<T>();
+
+		for (Class<T> clazz : eventTypes) {
+			if (this.events.containsKey(clazz)) {
+				fetched.addAll(this.events.get(clazz).filter(start, end));
+			}
+		}
+
+		return fetched;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#fetchAndClean(long)
+	 * @see pascani.lang.Probe#fetchAndClean(long, long, java.lang.Class[])
 	 */
-	public List<T> fetchAndClean(long timestamp) {
-		return Lists.newArrayList(this.events.clean(timestamp));
+	public List<T> fetchAndClean(final long start, final long end,
+			final Class<T>... eventTypes) {
+		List<T> fetched = new ArrayList<T>();
+
+		for (Class<T> clazz : eventTypes) {
+			if (this.events.containsKey(clazz)) {
+				fetched.addAll(this.events.get(clazz).clean(start, end));
+			}
+		}
+
+		return fetched;
 	}
 
 	/*
@@ -137,18 +201,22 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 */
 	public Serializable handle(RpcRequest request) {
 		Serializable response = null;
-		long timestamp = (Long) request.getParameter(0);
+
+		long start = (Long) request.getParameter(0);
+		long end = (Long) request.getParameter(1);
+		Class<T>[] eventTypes = (Class<T>[]) request.getParameter(2);
 
 		if (request.operation().equals(RpcOperation.PROBE_CLEAN))
-			response = this.cleanData(timestamp);
+			response = this.cleanData(start, end, eventTypes);
 		else if (request.operation().equals(RpcOperation.PROBE_COUNT))
-			response = this.count(timestamp);
+			response = this.count(start, end, eventTypes);
 		else if (request.operation().equals(RpcOperation.PROBE_COUNT_AND_CLEAN))
-			response = this.countAndClean(timestamp);
+			response = this.countAndClean(start, end, eventTypes);
 		else if (request.operation().equals(RpcOperation.PROBE_FETCH))
-			response = (Serializable) this.fetch(timestamp);
+			response = (Serializable) this.fetch(start, end, eventTypes);
 		else if (request.operation().equals(RpcOperation.PROBE_FETCH_AND_CLEAN))
-			response = (Serializable) this.fetchAndClean(timestamp);
+			response = (Serializable) this
+					.fetchAndClean(start, end, eventTypes);
 
 		return response;
 	}

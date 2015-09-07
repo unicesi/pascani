@@ -124,46 +124,51 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#cleanData(long)
+	 * @see pascani.lang.Probe#cleanData(long, long, java.lang.Class[])
 	 */
-	public boolean cleanData(long timestamp) {
-		return this.probe.cleanData(timestamp);
+	public boolean cleanData(final long start, final long end,
+			final Class<T>... eventTypes) {
+		return this.probe.cleanData(start, end, eventTypes);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#count(long)
+	 * @see pascani.lang.Probe#count(long, long, java.lang.Class[])
 	 */
-	public int count(long timestamp) {
-		return this.probe.count(timestamp);
+	public int count(final long start, final long end,
+			final Class<T>... eventTypes) {
+		return this.probe.count(start, end, eventTypes);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#countAndClean(long)
+	 * @see pascani.lang.Probe#countAndClean(long, long, java.lang.Class[])
 	 */
-	public int countAndClean(long timestamp) {
-		return this.probe.countAndClean(timestamp);
+	public int countAndClean(final long start, final long end,
+			final Class<T>... eventTypes) {
+		return this.probe.countAndClean(start, end, eventTypes);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#fetch(long)
+	 * @see pascani.lang.Probe#fetch(long, long, java.lang.Class[])
 	 */
-	public List<T> fetch(long timestamp) {
-		return this.probe.fetch(timestamp);
+	public List<T> fetch(final long start, final long end,
+			final Class<T>... eventTypes) {
+		return this.probe.fetch(start, end, eventTypes);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.Probe#fetchAndClean(long)
+	 * @see pascani.lang.Probe#fetchAndClean(long, long, java.lang.Class[])
 	 */
-	public List<T> fetchAndClean(long timestamp) {
-		return this.probe.fetchAndClean(timestamp);
+	public List<T> fetchAndClean(final long start, final long end,
+			final Class<T>... eventTypes) {
+		return this.probe.fetchAndClean(start, end, eventTypes);
 	}
 
 }
