@@ -131,8 +131,8 @@ public class InvokeEvent implements Event<Long> {
 	}
 
 	/**
-	 * Checks whether this {@link InvokeEvent} instance was finished measuring
-	 * within a given time window, i.e., {@code this.end} is contained in [
+	 * Checks whether this {@link InvokeEvent} instance was raised within a
+	 * given time window, i.e., {@code this.timestamp} is contained in [
 	 * {@code start} , {@code end}].
 	 * 
 	 * @param start
