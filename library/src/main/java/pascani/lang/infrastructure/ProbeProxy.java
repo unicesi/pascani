@@ -85,7 +85,7 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	}
 
 	public boolean cleanData(final long start, final long end) {
-		return cleanData(start, end, null);
+		return cleanData(start, end, new ArrayList<Class<? extends Event<?>>>());
 	}
 
 	/*
@@ -103,7 +103,7 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	}
 
 	public int count(final long start, final long end) {
-		return count(start, end, null);
+		return count(start, end, new ArrayList<Class<? extends Event<?>>>());
 	}
 
 	/*
@@ -121,7 +121,7 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	}
 
 	public int countAndClean(final long start, final long end) {
-		return countAndClean(start, end, null);
+		return countAndClean(start, end, new ArrayList<Class<? extends Event<?>>>());
 	}
 
 	/*
@@ -140,7 +140,7 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	}
 
 	public List<T> fetch(final long start, final long end) {
-		return fetch(start, end, null);
+		return fetch(start, end, new ArrayList<Class<? extends Event<?>>>());
 	}
 
 	/*
@@ -158,7 +158,7 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	}
 
 	public List<T> fetchAndClean(final long start, final long end) {
-		return fetchAndClean(start, end, null);
+		return fetchAndClean(start, end, new ArrayList<Class<? extends Event<?>>>());
 	}
 
 	/*
