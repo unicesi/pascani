@@ -95,10 +95,12 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 		Class<? extends Event<?>> clazz = (Class<? extends Event<?>>) event
 				.getClass();
 
-		if (this.events.get(clazz) == null)
-			this.events.put(clazz, new EventSet<T>());
+		synchronized(this.events) {
+			if (this.events.get(clazz) == null)
+				this.events.put(clazz, new EventSet<T>());
 
-		return this.events.get(clazz).add(event);
+			return this.events.get(clazz).add(event);
+		}
 	}
 
 	private List<Class<? extends Event<?>>> types(
