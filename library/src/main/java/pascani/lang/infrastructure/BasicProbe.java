@@ -57,7 +57,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	/**
 	 * A map holding the events as they are raised, grouped by event type
 	 */
-	private final Map<Class<?>, EventSet<T>> events;
+	private final Map<Class<? extends Event<?>>, EventSet<T>> events;
 
 	/**
 	 * Creates an instance of {@link Probe} with an empty set of events, and
@@ -75,7 +75,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 		 * that adds new events it type safe (restricted to T). Also, it could
 		 * cause cast errors, see http://stackoverflow.com/a/13974262
 		 */
-		this.events = new HashMap<Class<?>, EventSet<T>>();
+		this.events = new HashMap<Class<? extends Event<?>>, EventSet<T>>();
 
 		// Start serving RPC requests
 		this.server.setHandler(this);
@@ -90,7 +90,10 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 */
 	@Subscribe
 	public void recordEvent(T event) {
-		Class<?> clazz = event.getClass();
+
+		@SuppressWarnings("unchecked")
+		Class<? extends Event<?>> clazz = (Class<? extends Event<?>>) event
+				.getClass();
 
 		if (this.events.get(clazz) == null)
 			this.events.put(clazz, new EventSet<T>());
@@ -98,14 +101,14 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 		this.events.get(clazz).add(event);
 	}
 
-	@SuppressWarnings("unchecked")
-	private List<Class<T>> types(List<Class<T>> eventTypes) {
-		List<Class<T>> types = eventTypes;
+	private List<Class<? extends Event<?>>> types(
+			List<Class<? extends Event<?>>> eventTypes) {
+		List<Class<? extends Event<?>>> types = eventTypes;
 
 		if (types == null || types.isEmpty()) {
-			types = new ArrayList<Class<T>>();
-			for (Class<?> t : this.events.keySet()) {
-				types.add((Class<T>) t);
+			types = new ArrayList<Class<? extends Event<?>>>();
+			for (Class<? extends Event<?>> t : this.events.keySet()) {
+				types.add(t);
 			}
 		}
 
@@ -118,11 +121,11 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 * @see pascani.lang.Probe#cleanData(long, long, java.util.List)
 	 */
 	public boolean cleanData(final long start, final long end,
-			List<Class<T>> eventTypes) {
+			List<Class<? extends Event<?>>> eventTypes) {
 
 		boolean removed = false;
 
-		for (Class<T> clazz : types(eventTypes)) {
+		for (Class<? extends Event<?>> clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				removed = removed
 						|| this.events.get(clazz).clean(start, end).size() > 1;
@@ -137,11 +140,12 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 * 
 	 * @see pascani.lang.Probe#count(long, long, java.util.List)
 	 */
-	public int count(final long start, final long end, List<Class<T>> eventTypes) {
+	public int count(final long start, final long end,
+			List<Class<? extends Event<?>>> eventTypes) {
 
 		int count = 0;
 
-		for (Class<T> clazz : types(eventTypes)) {
+		for (Class<? extends Event<?>> clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				count += this.events.get(clazz).filter(start, end).size();
 			}
@@ -156,11 +160,11 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 * @see pascani.lang.Probe#countAndClean(long, long, java.util.List)
 	 */
 	public int countAndClean(final long start, final long end,
-			List<Class<T>> eventTypes) {
+			List<Class<? extends Event<?>>> eventTypes) {
 
 		int count = 0;
 
-		for (Class<T> clazz : types(eventTypes)) {
+		for (Class<? extends Event<?>> clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				count += this.events.get(clazz).clean(start, end).size();
 			}
@@ -175,11 +179,11 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 * @see pascani.lang.Probe#fetch(long, long, java.util.List)
 	 */
 	public List<T> fetch(final long start, final long end,
-			List<Class<T>> eventTypes) {
+			List<Class<? extends Event<?>>> eventTypes) {
 
 		List<T> fetched = new ArrayList<T>();
 
-		for (Class<T> clazz : types(eventTypes)) {
+		for (Class<? extends Event<?>> clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				fetched.addAll(this.events.get(clazz).filter(start, end));
 			}
@@ -194,10 +198,10 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 * @see pascani.lang.Probe#fetchAndClean(long, long, java.util.List)
 	 */
 	public List<T> fetchAndClean(final long start, final long end,
-			List<Class<T>> eventTypes) {
+			List<Class<? extends Event<?>>> eventTypes) {
 		List<T> fetched = new ArrayList<T>();
 
-		for (Class<T> clazz : types(eventTypes)) {
+		for (Class<? extends Event<?>> clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				fetched.addAll(this.events.get(clazz).clean(start, end));
 			}
@@ -219,7 +223,8 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 		long end = (Long) request.getParameter(1);
 
 		@SuppressWarnings("unchecked")
-		List<Class<T>> eventTypes = (List<Class<T>>) request.getParameter(2);
+		List<Class<? extends Event<?>>> eventTypes = (List<Class<? extends Event<?>>>) request
+				.getParameter(2);
 
 		if (request.operation().equals(RpcOperation.PROBE_CLEAN))
 			response = this.cleanData(start, end, eventTypes);

@@ -120,7 +120,7 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	public void recordEvent(T event) {
 		this.probe.recordEvent(event);
 	}
-	
+
 	public boolean cleanData(final long start, final long end) {
 		return cleanData(start, end, null);
 	}
@@ -131,10 +131,10 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 * @see pascani.lang.Probe#cleanData(long, long, java.util.List)
 	 */
 	public boolean cleanData(final long start, final long end,
-			final List<Class<T>> eventTypes) {
+			final List<Class<? extends Event<?>>> eventTypes) {
 		return this.probe.cleanData(start, end, eventTypes);
 	}
-	
+
 	public int count(final long start, final long end) {
 		return count(start, end, null);
 	}
@@ -145,10 +145,10 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 * @see pascani.lang.Probe#count(long, long, java.util.List)
 	 */
 	public int count(final long start, final long end,
-			final List<Class<T>> eventTypes) {
+			final List<Class<? extends Event<?>>> eventTypes) {
 		return this.probe.count(start, end, eventTypes);
 	}
-	
+
 	public int countAndClean(final long start, final long end) {
 		return countAndClean(start, end, null);
 	}
@@ -159,10 +159,10 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 * @see pascani.lang.Probe#countAndClean(long, long, java.util.List)
 	 */
 	public int countAndClean(final long start, final long end,
-			final List<Class<T>> eventTypes) {
+			final List<Class<? extends Event<?>>> eventTypes) {
 		return this.probe.countAndClean(start, end, eventTypes);
 	}
-	
+
 	public List<T> fetch(final long start, final long end) {
 		return fetch(start, end, null);
 	}
@@ -173,10 +173,10 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 * @see pascani.lang.Probe#fetch(long, long, java.util.List)
 	 */
 	public List<T> fetch(final long start, final long end,
-			final List<Class<T>> eventTypes) {
+			final List<Class<? extends Event<?>>> eventTypes) {
 		return this.probe.fetch(start, end, eventTypes);
 	}
-	
+
 	public List<T> fetchAndClean(final long start, final long end) {
 		return fetchAndClean(start, end, null);
 	}
@@ -187,7 +187,7 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 * @see pascani.lang.Probe#fetchAndClean(long, long, java.util.List)
 	 */
 	public List<T> fetchAndClean(final long start, final long end,
-			final List<Class<T>> eventTypes) {
+			final List<Class<? extends Event<?>>> eventTypes) {
 		return this.probe.fetchAndClean(start, end, eventTypes);
 	}
 

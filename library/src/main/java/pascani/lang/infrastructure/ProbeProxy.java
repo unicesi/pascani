@@ -83,7 +83,7 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 		}
 		return response;
 	}
-	
+
 	public boolean cleanData(final long start, final long end) {
 		return cleanData(start, end, null);
 	}
@@ -94,14 +94,14 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	 * @see pascani.lang.Probe#cleanData(long, long, java.util.List)
 	 */
 	public boolean cleanData(final long start, final long end,
-			final List<Class<T>> eventTypes) {
+			final List<Class<? extends Event<?>>> eventTypes) {
 
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_CLEAN, start,
-				end, new ArrayList<Class<T>>(eventTypes));
+				end, new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, false);
 		return SerializationUtils.deserialize(response);
 	}
-	
+
 	public int count(final long start, final long end) {
 		return count(start, end, null);
 	}
@@ -112,14 +112,14 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	 * @see pascani.lang.Probe#count(long, long, java.lang.Class[])
 	 */
 	public int count(final long start, final long end,
-			final List<Class<T>> eventTypes) {
+			final List<Class<? extends Event<?>>> eventTypes) {
 
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_COUNT, start,
-				end, new ArrayList<Class<T>>(eventTypes));
+				end, new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, 0);
 		return SerializationUtils.deserialize(response);
 	}
-	
+
 	public int countAndClean(final long start, final long end) {
 		return countAndClean(start, end, null);
 	}
@@ -130,14 +130,15 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	 * @see pascani.lang.Probe#countAndClean(long, long, java.util.List)
 	 */
 	public int countAndClean(final long start, final long end,
-			final List<Class<T>> eventTypes) {
+			final List<Class<? extends Event<?>>> eventTypes) {
 
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_COUNT_AND_CLEAN,
-				start, end, new ArrayList<Class<T>>(eventTypes));
+				start, end,
+				new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, 0);
 		return SerializationUtils.deserialize(response);
 	}
-	
+
 	public List<T> fetch(final long start, final long end) {
 		return fetch(start, end, null);
 	}
@@ -148,14 +149,14 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	 * @see pascani.lang.Probe#fetch(long, long, java.util.List)
 	 */
 	public List<T> fetch(final long start, final long end,
-			final List<Class<T>> eventTypes) {
+			final List<Class<? extends Event<?>>> eventTypes) {
 
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_FETCH, start,
-				end, new ArrayList<Class<T>>(eventTypes));
+				end, new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, new ArrayList<T>());
 		return SerializationUtils.deserialize(response);
 	}
-	
+
 	public List<T> fetchAndClean(final long start, final long end) {
 		return fetchAndClean(start, end, null);
 	}
@@ -166,10 +167,10 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	 * @see pascani.lang.Probe#fetchAndClean(long, long, java.util.List)
 	 */
 	public List<T> fetchAndClean(final long start, final long end,
-			final List<Class<T>> eventTypes) {
+			final List<Class<? extends Event<?>>> eventTypes) {
 
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_FETCH_AND_CLEAN,
-				start, end, new ArrayList<Class<T>>(eventTypes));
+				start, end, new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, new ArrayList<T>());
 		return SerializationUtils.deserialize(response);
 	}
