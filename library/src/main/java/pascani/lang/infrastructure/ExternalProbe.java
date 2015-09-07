@@ -29,8 +29,8 @@ import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer;
  * exchange with the routing key set to this probe's unique name.
  * 
  * <p>
- * In the same way, {@link Monitor} instances and other components can
- * request data from the RPC queue, by using the routing key.
+ * In the same way, {@link Monitor} instances and other components can request
+ * data from the RPC queue, by using the routing key.
  * </p>
  * 
  * @param <T>
@@ -61,13 +61,15 @@ public class ExternalProbe<T extends Event<?>> extends CustomProbe<T> {
 	 *            A unique name among all the {@link Probe} instances. This name
 	 *            is necessary for external components to send RPC requests to
 	 *            this probe.
+	 * @param context
+	 *            The context in which this probe is used
 	 * @throws Exception
 	 *             If something bad happens. Check exceptions in
 	 *             {@link CustomProbe#CustomProbe(String, String, PascaniRuntime.Context)}
 	 */
-	public ExternalProbe(final String uri, final String routingKey)
-			throws Exception {
-		super(uri, routingKey, PascaniRuntime.Context.PROBE);
+	public ExternalProbe(final String uri, final String routingKey,
+			PascaniRuntime.Context context) throws Exception {
+		super(uri, routingKey, context);
 
 		this.consumer = new RabbitMQConsumer(super.endPoint, routingKey,
 				routingKey, PascaniRuntime.Context.PROBE);
