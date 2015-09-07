@@ -98,6 +98,17 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 		this.events.get(clazz).add(event);
 	}
 
+	@SuppressWarnings("unchecked")
+	private Class<T>[] types(Class<T>[] eventTypes) {
+		Class<T>[] types = eventTypes;
+		
+		if(types.length == 0) {
+			types = (Class<T>[]) this.events.keySet().toArray();
+		}
+		
+		return types;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -108,7 +119,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 
 		boolean removed = false;
 
-		for (Class<T> clazz : eventTypes) {
+		for (Class<T> clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				removed = removed
 						|| this.events.get(clazz).clean(start, end).size() > 1;
@@ -128,7 +139,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 
 		int count = 0;
 
-		for (Class<T> clazz : eventTypes) {
+		for (Class<T> clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				count += this.events.get(clazz).filter(start, end).size();
 			}
@@ -147,7 +158,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 
 		int count = 0;
 
-		for (Class<T> clazz : eventTypes) {
+		for (Class<T> clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				count += this.events.get(clazz).clean(start, end).size();
 			}
@@ -166,7 +177,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 
 		List<T> fetched = new ArrayList<T>();
 
-		for (Class<T> clazz : eventTypes) {
+		for (Class<T> clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				fetched.addAll(this.events.get(clazz).filter(start, end));
 			}
@@ -184,7 +195,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 			final Class<T>... eventTypes) {
 		List<T> fetched = new ArrayList<T>();
 
-		for (Class<T> clazz : eventTypes) {
+		for (Class<T> clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				fetched.addAll(this.events.get(clazz).clean(start, end));
 			}
