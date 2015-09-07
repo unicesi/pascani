@@ -118,8 +118,8 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 * @param event
 	 *            The event to record
 	 */
-	public void recordEvent(T event) {
-		this.probe.recordEvent(event);
+	public boolean recordEvent(T event) {
+		return this.probe.recordEvent(event);
 	}
 
 	public boolean cleanData(final long start, final long end) {

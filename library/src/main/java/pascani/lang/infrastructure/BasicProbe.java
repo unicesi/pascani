@@ -89,7 +89,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 *            The event to record
 	 */
 	@Subscribe
-	public void recordEvent(T event) {
+	public boolean recordEvent(T event) {
 
 		@SuppressWarnings("unchecked")
 		Class<? extends Event<?>> clazz = (Class<? extends Event<?>>) event
@@ -98,7 +98,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 		if (this.events.get(clazz) == null)
 			this.events.put(clazz, new EventSet<T>());
 
-		this.events.get(clazz).add(event);
+		return this.events.get(clazz).add(event);
 	}
 
 	private List<Class<? extends Event<?>>> types(
