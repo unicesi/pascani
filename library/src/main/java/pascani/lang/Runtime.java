@@ -45,8 +45,8 @@ public class Runtime {
 
 	/**
 	 * Specifies whether this runtime resides in the context of a
-	 * {@link Monitor}, a {@link Probe}, a {@link BasicNamespace} or a {@link Probe}
-	 * in the context of the measurement library.
+	 * {@link Monitor}, a {@link Probe}, a {@link BasicNamespace} or a
+	 * {@link Probe} in the context of the measurement library.
 	 * 
 	 * @author Miguel Jiménez - Initial contribution and API
 	 */
@@ -149,8 +149,10 @@ public class Runtime {
 		try {
 			input = getClass().getClassLoader().getResourceAsStream(
 					"pascani.properties");
-			config.load(input);
-			ok = true;
+			if (input != null) {
+				config.load(input);
+				ok = true;
+			}
 		} catch (FileNotFoundException e) {
 			logger.warn("No configuration file was found. Execution is started with default values");
 		} catch (IOException e) {
