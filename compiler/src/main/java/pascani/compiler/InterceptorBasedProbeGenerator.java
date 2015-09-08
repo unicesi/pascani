@@ -81,8 +81,7 @@ public abstract class InterceptorBasedProbeGenerator {
 		// Set general properties
 		javaClass.setPackage(packageName);
 		javaClass.setName(className);
-		javaClass.setSuperType(CustomProbe.class.getSimpleName() + "<"
-				+ ExceptionEvent.class.getSimpleName() + ">");
+		javaClass.setSuperType(CustomProbe.class);
 
 		String constructorBody = InterceptorBasedProbeTemplates
 				.getProbeConstructor(uri, routingKey);

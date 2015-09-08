@@ -400,8 +400,7 @@ public class LatencyProbeGenerator {
 		// Set general properties
 		javaClass.setName(className);
 		javaClass.setPackage(modified.getPackage());
-		javaClass.setSuperType(ExternalProbe.class.getSimpleName() + "<"
-				+ NetworkLatencyEvent.class.getSimpleName() + ">");
+		javaClass.setSuperType(ExternalProbe.class);
 
 		// Add imports
 		javaClass.addImport(ExternalProbe.class);
