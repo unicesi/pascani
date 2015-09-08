@@ -31,13 +31,13 @@ import org.apache.logging.log4j.Logger;
 import pascani.lang.infrastructure.MessageProducer;
 import pascani.lang.infrastructure.Monitor;
 import pascani.lang.infrastructure.BasicNamespace;
-import pascani.lang.util.EventProducer;
+import pascani.lang.util.LocalEventProducer;
 
 import com.google.common.eventbus.EventBus;
 
 /**
  * This class serves as event bus for all measurement components generating
- * events, such as {@link EventProducer}.
+ * events, such as {@link LocalEventProducer}.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */

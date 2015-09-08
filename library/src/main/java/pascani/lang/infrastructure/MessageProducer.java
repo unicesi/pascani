@@ -24,7 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pascani.lang.Event;
-import pascani.lang.util.EventProducer;
+import pascani.lang.util.LocalEventProducer;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -70,10 +70,10 @@ public abstract class MessageProducer {
 	}
 
 	/**
-	 * Listens for {@link Event}s produced by {@link EventProducer} objects.
+	 * Listens for {@link Event}s produced by {@link LocalEventProducer} objects.
 	 * 
 	 * @param event
-	 *            The {@link EventProducer}-produced {@link Event} object
+	 *            The {@link LocalEventProducer}-produced {@link Event} object
 	 */
 	@Subscribe public final void produce(Event<?> event) {
 		if (isAcceptedEvent(event)) {
@@ -95,7 +95,7 @@ public abstract class MessageProducer {
 	 * </p>
 	 * 
 	 * @param event
-	 *            The {@link EventProducer}-produced {@link Event} object
+	 *            The {@link LocalEventProducer}-produced {@link Event} object
 	 */
 	protected abstract void publish(Event<?> event) throws Exception;
 

@@ -3,7 +3,7 @@ package pascani.compiler.templates
 import pascani.compiler.util.NameProposal
 import com.google.common.collect.Lists
 import pascani.lang.events.ExceptionEvent
-import pascani.lang.util.EventProducer
+import pascani.lang.util.LocalEventProducer
 
 class ExceptionProbeTemplates {
 
@@ -12,7 +12,7 @@ class ExceptionProbeTemplates {
 	 */
 	def static String getProducerInitialization(String producerVar) {
 		'''
-			this.«producerVar» = new «EventProducer.simpleName»<«ExceptionEvent.simpleName»>(PascaniRuntime.Context.PROBE);
+			this.«producerVar» = new «LocalEventProducer.simpleName»<«ExceptionEvent.simpleName»>(PascaniRuntime.Context.PROBE);
 		'''
 	}
 

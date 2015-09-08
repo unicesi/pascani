@@ -33,7 +33,7 @@ import pascani.compiler.templates.ExceptionProbeTemplates;
 import pascani.compiler.util.NameProposal;
 import pascani.lang.PascaniRuntime;
 import pascani.lang.events.ExceptionEvent;
-import pascani.lang.util.EventProducer;
+import pascani.lang.util.LocalEventProducer;
 
 /**
  * This class generates the necessary source code to automatically caught
@@ -65,7 +65,7 @@ public class ExceptionProbeScaGenerator extends InterceptorBasedProbeGenerator {
 
 		// Add imports
 		javaClass.addImport(PascaniRuntime.class);
-		javaClass.addImport(EventProducer.class);
+		javaClass.addImport(LocalEventProducer.class);
 		javaClass.addImport(ExceptionEvent.class);
 		javaClass.addImport(UUID.class);
 
@@ -80,7 +80,7 @@ public class ExceptionProbeScaGenerator extends InterceptorBasedProbeGenerator {
 		String producerVar = "producer";
 
 		FieldSource<?> field = javaClass.addField();
-		field.setType(EventProducer.class.getSimpleName() + "<"
+		field.setType(LocalEventProducer.class.getSimpleName() + "<"
 				+ ExceptionEvent.class.getSimpleName() + ">");
 		field.setName(producerVar).setPrivate().setFinal(true);
 

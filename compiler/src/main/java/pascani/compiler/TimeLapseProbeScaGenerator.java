@@ -15,7 +15,7 @@ import pascani.compiler.templates.TimeLapseProbeTemplates;
 import pascani.compiler.util.NameProposal;
 import pascani.lang.PascaniRuntime;
 import pascani.lang.events.TimeLapseEvent;
-import pascani.lang.util.EventProducer;
+import pascani.lang.util.LocalEventProducer;
 
 /**
  * This class generates the necessary source code to automatically measure
@@ -47,7 +47,7 @@ public class TimeLapseProbeScaGenerator extends InterceptorBasedProbeGenerator {
 
 		// Add imports
 		javaClass.addImport(PascaniRuntime.class);
-		javaClass.addImport(EventProducer.class);
+		javaClass.addImport(LocalEventProducer.class);
 		javaClass.addImport(TimeLapseEvent.class);
 		javaClass.addImport(UUID.class);
 
@@ -62,7 +62,7 @@ public class TimeLapseProbeScaGenerator extends InterceptorBasedProbeGenerator {
 		String producerVar = "producer";
 
 		FieldSource<?> field = javaClass.addField();
-		field.setType(EventProducer.class.getSimpleName() + "<"
+		field.setType(LocalEventProducer.class.getSimpleName() + "<"
 				+ TimeLapseEvent.class.getSimpleName() + ">");
 		field.setName(producerVar).setPrivate().setFinal(true);
 

@@ -1,9 +1,9 @@
 package pascani.compiler.templates
 
 import pascani.compiler.util.NameProposal
-import pascani.lang.util.EventProducer
 import com.google.common.collect.Lists
 import pascani.lang.events.TimeLapseEvent
+import pascani.lang.util.LocalEventProducer
 
 class TimeLapseProbeTemplates {
 
@@ -12,7 +12,7 @@ class TimeLapseProbeTemplates {
 	 */
 	def static String getProducerInitialization(String producerVar) {
 		'''
-			this.«producerVar» = new «EventProducer.simpleName»<«TimeLapseEvent.simpleName»>(PascaniRuntime.Context.PROBE);
+			this.«producerVar» = new «LocalEventProducer.simpleName»<«TimeLapseEvent.simpleName»>(PascaniRuntime.Context.PROBE);
 		'''
 	}
 

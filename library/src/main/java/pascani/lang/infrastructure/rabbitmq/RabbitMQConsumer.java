@@ -26,7 +26,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import pascani.lang.Event;
 import pascani.lang.PascaniRuntime;
 import pascani.lang.infrastructure.MessageConsumer;
-import pascani.lang.util.EventProducer;
+import pascani.lang.util.LocalEventProducer;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
@@ -60,7 +60,7 @@ public class RabbitMQConsumer extends MessageConsumer implements Consumer {
 	/**
 	 * An event producer for delegating the event handling
 	 */
-	private final EventProducer<Event<?>> eventProducer;
+	private final LocalEventProducer<Event<?>> eventProducer;
 
 	/**
 	 * Creates a RabbitMQ message consumer
@@ -86,7 +86,7 @@ public class RabbitMQConsumer extends MessageConsumer implements Consumer {
 		this.endPoint = endPoint;
 		this.queueName = queue;
 		this.consumerTag = tag;
-		this.eventProducer = new EventProducer<Event<?>>(context);
+		this.eventProducer = new LocalEventProducer<Event<?>>(context);
 	}
 
 	/**
@@ -122,7 +122,7 @@ public class RabbitMQConsumer extends MessageConsumer implements Consumer {
 		channel.queueBind(this.queueName, exchange, routingKey);
 
 		this.consumerTag = tag;
-		this.eventProducer = new EventProducer<Event<?>>(context);
+		this.eventProducer = new LocalEventProducer<Event<?>>(context);
 	}
 
 	@Override protected void startConsuming() {
