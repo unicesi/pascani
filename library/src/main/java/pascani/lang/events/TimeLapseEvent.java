@@ -29,7 +29,7 @@ import com.google.common.collect.Range;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public final class TimeLapseEvent implements Event<Double> {
+public class TimeLapseEvent implements Event<Double> {
 
 	/**
 	 * Serial version UID
