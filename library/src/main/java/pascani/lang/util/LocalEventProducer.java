@@ -30,7 +30,7 @@ import pascani.lang.PascaniRuntime;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class EventProducer<T extends Event<?>> {
+public class LocalEventProducer<T extends Event<?>> {
 
 	/**
 	 * The default runtime
@@ -41,7 +41,7 @@ public class EventProducer<T extends Event<?>> {
 	 * @param context
 	 *            The context in which the runtime resides
 	 */
-	public EventProducer(PascaniRuntime.Context context) {
+	public LocalEventProducer(PascaniRuntime.Context context) {
 		this.runtime = PascaniRuntime.getRuntimeInstance(context);
 	}
 
