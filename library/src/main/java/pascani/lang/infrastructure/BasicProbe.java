@@ -59,6 +59,8 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 */
 	private final Map<String, EventSet<T>> events;
 
+	protected Class<? extends Event<?>> acceptedType;
+
 	/**
 	 * Creates an instance of {@link Probe} with an empty set of events, and
 	 * with a unique identifier within the RPC queue (contained in the
@@ -76,27 +78,37 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 		this.server.start();
 	}
 
+	public void acceptOnly(Class<? extends Event<?>> acceptedType) {
+		this.acceptedType = acceptedType;
+	}
+
 	/**
 	 * Listens for events and records them into an {@link EventSet}
 	 * 
 	 * @param event
 	 *            The event to record
 	 */
-	@Subscribe
-	public boolean recordEvent(T event) {
+	@Subscribe public boolean recordEvent(T event) {
+		boolean r = false;
+		boolean accept = this.acceptedType == null;
+		accept = accept || this.acceptedType.isInstance(event);
 
-		String key = event.getClass().getCanonicalName();
+		if (accept) {
+			String key = event.getClass().getCanonicalName();
 
-		synchronized(this.events) {
-			if (this.events.get(key) == null)
-				this.events.put(key, new EventSet<T>());
+			synchronized (this.events) {
+				if (this.events.get(key) == null)
+					this.events.put(key, new EventSet<T>());
 
-			return this.events.get(key).add(event);
+				r = this.events.get(key).add(event);
+			}
 		}
+
+		return r;
 	}
 
 	private List<String> types(List<Class<? extends Event<?>>> eventTypes) {
-		
+
 		List<String> types = new ArrayList<String>();
 
 		if (eventTypes == null || eventTypes.isEmpty()) {

@@ -112,6 +112,10 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 		PascaniRuntime.getRuntimeInstance(this.context)
 				.registerEventListener(this.probe);
 	}
+	
+	public void acceptOnly(Class<? extends Event<?>> acceptedType) {
+		this.probe.acceptOnly(acceptedType);
+	}
 
 	/**
 	 * Records an event
