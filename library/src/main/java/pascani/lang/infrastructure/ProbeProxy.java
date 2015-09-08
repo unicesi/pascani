@@ -38,7 +38,7 @@ import pascani.lang.Probe;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class ProbeProxy<T extends Event<?>> implements Probe<T> {
+public class ProbeProxy implements Probe<Event<?>> {
 
 	/**
 	 * The logger
@@ -139,7 +139,7 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 		return SerializationUtils.deserialize(response);
 	}
 
-	public List<T> fetch(final long start, final long end) {
+	public List<Event<?>> fetch(final long start, final long end) {
 		return fetch(start, end, new ArrayList<Class<? extends Event<?>>>());
 	}
 
@@ -148,16 +148,16 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	 * 
 	 * @see pascani.lang.Probe#fetch(long, long, java.util.List)
 	 */
-	public List<T> fetch(final long start, final long end,
+	public List<Event<?>> fetch(final long start, final long end,
 			final List<Class<? extends Event<?>>> eventTypes) {
 
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_FETCH, start,
 				end, new ArrayList<Class<? extends Event<?>>>(eventTypes));
-		byte[] response = makeActualCall(request, new ArrayList<T>());
+		byte[] response = makeActualCall(request, new ArrayList<Event<?>>());
 		return SerializationUtils.deserialize(response);
 	}
 
-	public List<T> fetchAndClean(final long start, final long end) {
+	public List<Event<?>> fetchAndClean(final long start, final long end) {
 		return fetchAndClean(start, end, new ArrayList<Class<? extends Event<?>>>());
 	}
 
@@ -166,12 +166,12 @@ public class ProbeProxy<T extends Event<?>> implements Probe<T> {
 	 * 
 	 * @see pascani.lang.Probe#fetchAndClean(long, long, java.util.List)
 	 */
-	public List<T> fetchAndClean(final long start, final long end,
+	public List<Event<?>> fetchAndClean(final long start, final long end,
 			final List<Class<? extends Event<?>>> eventTypes) {
 
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_FETCH_AND_CLEAN,
 				start, end, new ArrayList<Class<? extends Event<?>>>(eventTypes));
-		byte[] response = makeActualCall(request, new ArrayList<T>());
+		byte[] response = makeActualCall(request, new ArrayList<Event<?>>());
 		return SerializationUtils.deserialize(response);
 	}
 

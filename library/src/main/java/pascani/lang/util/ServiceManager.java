@@ -61,10 +61,10 @@ public class ServiceManager {
 	 * @param T
 	 * @return
 	 */
-	public static <T extends Event<?>> ProbeProxy<T> bindProbe(
+	public static <T extends Event<?>> ProbeProxy bindProbe(
 			final String routingKey, final Class<? extends Event<?>> T) {
 		
-		ProbeProxy<T> proxy = null;
+		ProbeProxy proxy = null;
 		
 		// TODO: replace with the actual values. These values must be read from a properties file
 		String exchange = "probes_exchange";
@@ -73,7 +73,7 @@ public class ServiceManager {
 		try {
 			EndPoint endPoint = new EndPoint(uri);
 			RpcClient client = new RabbitMQRpcClient(endPoint, exchange, routingKey);
-			proxy = new ProbeProxy<T>(client);
+			proxy = new ProbeProxy(client);
 		} catch (Exception e) {
 
 		}
