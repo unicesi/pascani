@@ -75,13 +75,17 @@ public class PascaniRuntime {
 	 * A map containing configuration variables (e.g., default queue and
 	 * exchange names)
 	 */
-	private final Map<String, String> environment;
+	private static final Map<String, String> environment = new HashMap<String, String>();
 
 	/**
 	 * The logger
 	 */
-	private final Logger logger = LogManager.getLogger(getClass());
+	private final static Logger logger = LogManager.getLogger(PascaniRuntime.class);
 
+	static {
+		readProperties();
+	}
+	
 	/**
 	 * @param context
 	 *            The context in which this runtime resides
@@ -89,9 +93,6 @@ public class PascaniRuntime {
 	private PascaniRuntime(Context context) {
 		this.context = context;
 		this.eventBus = new EventBus(this.context.toString());
-		this.environment = new HashMap<String, String>();
-
-		readProperties();
 	}
 
 	/**
@@ -134,21 +135,20 @@ public class PascaniRuntime {
 		this.eventBus.register(listener);
 	}
 
-	public Map<String, String> getEnvironment() {
-		return this.environment;
+	public static Map<String, String> getEnvironment() {
+		return environment;
 	}
 
 	/**
 	 * Reads configuration properties
 	 */
-	private void readProperties() {
+	private static void readProperties() {
 		Properties config = new Properties();
 		InputStream input = null;
 		boolean ok = false;
 
 		try {
-			input = getClass().getClassLoader().getResourceAsStream(
-					"pascani.properties");
+			input = PascaniRuntime.class.getClassLoader().getResourceAsStream("pascani.properties");
 			if (input != null) {
 				config.load(input);
 				ok = true;

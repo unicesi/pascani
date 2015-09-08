@@ -87,9 +87,7 @@ public class RabbitMQRpcServer extends RpcServer {
 			final PascaniRuntime.Context context) throws IOException,
 			TimeoutException {
 
-		super(PascaniRuntime.getRuntimeInstance(context).getEnvironment()
-				.get("rpc_queue_prefix")
-				+ routingKey);
+		super(PascaniRuntime.getEnvironment().get("rpc_queue_prefix") + routingKey);
 
 		this.endPoint = endPoint;
 
@@ -100,11 +98,9 @@ public class RabbitMQRpcServer extends RpcServer {
 	private String declareQueue(final PascaniRuntime.Context context,
 			String routingKey) throws IOException {
 
-		PascaniRuntime runtime = PascaniRuntime
-				.getRuntimeInstance(context);
-		String prefix = runtime.getEnvironment().get("rpc_queue_prefix");
+		String prefix = PascaniRuntime.getEnvironment().get("rpc_queue_prefix");
 		String queue = prefix + routingKey;
-		String exchange = runtime.getEnvironment().get("rpc_exchange");
+		String exchange = PascaniRuntime.getEnvironment().get("rpc_exchange");
 
 		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
 		this.endPoint.channel().queueBind(queue, exchange, routingKey);

@@ -90,8 +90,8 @@ public class CustomProbe implements Probe<Event<?>> {
 		// Create the corresponding queue, and then create a binding between the
 		// queue and the probes exchange
 		String queue = routingKey;
-		String exchange = PascaniRuntime.getRuntimeInstance(this.context)
-				.getEnvironment().get("probes_exchange");
+		String exchange = PascaniRuntime.getEnvironment()
+				.get("probes_exchange");
 
 		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
 		this.endPoint.channel().queueBind(queue, exchange, routingKey);
