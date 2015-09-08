@@ -20,7 +20,6 @@ package pascani.lang.util;
 
 import java.util.Map;
 
-import pascani.lang.Event;
 import pascani.lang.infrastructure.ProbeProxy;
 import pascani.lang.infrastructure.RpcClient;
 import pascani.lang.infrastructure.rabbitmq.EndPoint;
@@ -61,8 +60,7 @@ public class ServiceManager {
 	 * @param T
 	 * @return
 	 */
-	public static <T extends Event<?>> ProbeProxy bindProbe(
-			final String routingKey, final Class<? extends Event<?>> T) {
+	public static ProbeProxy bindProbe(final String routingKey) {
 		
 		ProbeProxy proxy = null;
 		
