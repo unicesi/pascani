@@ -18,7 +18,6 @@
  */
 package pascani.lang.infrastructure;
 
-import pascani.lang.Event;
 import pascani.lang.PascaniRuntime;
 import pascani.lang.Probe;
 import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer;
@@ -38,7 +37,7 @@ import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class ExternalProbe<T extends Event<?>> extends CustomProbe<T> {
+public class ExternalProbe extends CustomProbe {
 
 	/**
 	 * The message consumer listening for external events (i.e., events
@@ -72,7 +71,7 @@ public class ExternalProbe<T extends Event<?>> extends CustomProbe<T> {
 		super(uri, routingKey, context);
 
 		this.consumer = new RabbitMQConsumer(super.endPoint, routingKey,
-				routingKey, PascaniRuntime.Context.PROBE);
+				routingKey, context);
 		this.consumer.start();
 	}
 

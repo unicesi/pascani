@@ -36,12 +36,9 @@ import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcServer;
  * recording of events and the processing of RPC requests.
  * </p>
  * 
- * @param <T>
- *            The type of events this probe handles
- * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class CustomProbe<T extends Event<?>> implements Probe<T> {
+public class CustomProbe implements Probe<Event<?>> {
 
 	/**
 	 * A RabbitMQ end point (a connection to the server)
@@ -56,7 +53,7 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	/**
 	 * The {@link Probe} instance to record events and process RPC requests
 	 */
-	protected final BasicProbe<T> probe;
+	protected final BasicProbe probe;
 
 	/**
 	 * The context in which this probe is used
@@ -100,7 +97,7 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 		this.endPoint.channel().queueBind(queue, exchange, routingKey);
 
 		this.server = new RabbitMQRpcServer(endPoint, routingKey, this.context);
-		this.probe = new BasicProbe<T>(server);
+		this.probe = new BasicProbe(server);
 
 		registerProbeAsListener();
 	}
@@ -109,12 +106,18 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 * Registers the probe as an event listener
 	 */
 	private void registerProbeAsListener() {
-		PascaniRuntime.getRuntimeInstance(this.context)
-				.registerEventListener(this.probe);
+		PascaniRuntime.getRuntimeInstance(this.context).registerEventListener(
+				this.probe);
 	}
-	
-	public void acceptOnly(Class<? extends Event<?>> acceptedType) {
-		this.probe.acceptOnly(acceptedType);
+
+	/**
+	 * Establishes a set of event classes to be recorded by this probe
+	 * 
+	 * @param acceptedTypes
+	 *            The array of classes implementing {@link Event}
+	 */
+	public void acceptOnly(final Class<? extends Event<?>>... acceptedTypes) {
+		this.probe.acceptOnly(acceptedTypes);
 	}
 
 	/**
@@ -123,7 +126,7 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 * @param event
 	 *            The event to record
 	 */
-	public boolean recordEvent(T event) {
+	public boolean recordEvent(final Event<?> event) {
 		return this.probe.recordEvent(event);
 	}
 
@@ -156,7 +159,8 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	}
 
 	public int countAndClean(final long start, final long end) {
-		return countAndClean(start, end, new ArrayList<Class<? extends Event<?>>>());
+		return countAndClean(start, end,
+				new ArrayList<Class<? extends Event<?>>>());
 	}
 
 	/*
@@ -169,7 +173,7 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 		return this.probe.countAndClean(start, end, eventTypes);
 	}
 
-	public List<T> fetch(final long start, final long end) {
+	public List<Event<?>> fetch(final long start, final long end) {
 		return fetch(start, end, new ArrayList<Class<? extends Event<?>>>());
 	}
 
@@ -178,13 +182,14 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 * 
 	 * @see pascani.lang.Probe#fetch(long, long, java.util.List)
 	 */
-	public List<T> fetch(final long start, final long end,
+	public List<Event<?>> fetch(final long start, final long end,
 			final List<Class<? extends Event<?>>> eventTypes) {
 		return this.probe.fetch(start, end, eventTypes);
 	}
 
-	public List<T> fetchAndClean(final long start, final long end) {
-		return fetchAndClean(start, end, new ArrayList<Class<? extends Event<?>>>());
+	public List<Event<?>> fetchAndClean(final long start, final long end) {
+		return fetchAndClean(start, end,
+				new ArrayList<Class<? extends Event<?>>>());
 	}
 
 	/*
@@ -192,7 +197,7 @@ public class CustomProbe<T extends Event<?>> implements Probe<T> {
 	 * 
 	 * @see pascani.lang.Probe#fetchAndClean(long, long, java.util.List)
 	 */
-	public List<T> fetchAndClean(final long start, final long end,
+	public List<Event<?>> fetchAndClean(final long start, final long end,
 			final List<Class<? extends Event<?>>> eventTypes) {
 		return this.probe.fetchAndClean(start, end, eventTypes);
 	}

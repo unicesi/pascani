@@ -40,12 +40,9 @@ import com.google.common.eventbus.Subscribe;
  * RPC server instead.
  * </p>
  * 
- * @param <T>
- *            The type of events this probe handles
- * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class BasicProbe<T extends Event<?>> implements Probe<T>,
+public class BasicProbe implements Probe<Event<?>>,
 		RpcRequestHandler {
 
 	/**
@@ -57,9 +54,9 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	/**
 	 * A map holding the events as they are raised, grouped by event type
 	 */
-	private final Map<String, EventSet<T>> events;
+	private final Map<String, EventSet<Event<?>>> events;
 
-	protected Class<? extends Event<?>> acceptedType;
+	protected Class<? extends Event<?>>[] acceptedTypes;
 
 	/**
 	 * Creates an instance of {@link Probe} with an empty set of events, and
@@ -71,34 +68,43 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 */
 	public BasicProbe(final RpcServer server) {
 		this.server = server;
-		this.events = new HashMap<String, EventSet<T>>();
+		this.events = new HashMap<String, EventSet<Event<?>>>();
 
 		// Start serving RPC requests
 		this.server.setHandler(this);
 		this.server.start();
 	}
 
-	public void acceptOnly(Class<? extends Event<?>> acceptedType) {
-		this.acceptedType = acceptedType;
+	/**
+	 * Establishes a set of event classes to be recorded by this probe
+	 * 
+	 * @param acceptedTypes
+	 *            The array of classes implementing {@link Event}
+	 */
+	public void acceptOnly(final Class<? extends Event<?>>... acceptedTypes) {
+		this.acceptedTypes = acceptedTypes;
 	}
 
 	/**
-	 * Listens for events and records them into an {@link EventSet}
+	 * Listens for events and records them into an {@link EventSet}. When the
+	 * {@link #acceptOnly(Class...)} method has been invoked, a check will be
+	 * performed each time an event is received; if the event is instance of one
+	 * of the accepted classes, it will be recorded and {@code true} is
+	 * returned; otherwise, false is returned.
 	 * 
 	 * @param event
 	 *            The event to record
 	 */
-	@Subscribe public boolean recordEvent(T event) {
+	@Subscribe public boolean recordEvent(final Event<?> event) {
 		boolean r = false;
-		boolean accept = this.acceptedType == null;
-		accept = accept || this.acceptedType.isInstance(event);
+		boolean accept = isAcceptedEvent(event);
 
 		if (accept) {
 			String key = event.getClass().getCanonicalName();
 
 			synchronized (this.events) {
 				if (this.events.get(key) == null)
-					this.events.put(key, new EventSet<T>());
+					this.events.put(key, new EventSet<Event<?>>());
 
 				r = this.events.get(key).add(event);
 			}
@@ -107,7 +113,20 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 		return r;
 	}
 
-	private List<String> types(List<Class<? extends Event<?>>> eventTypes) {
+	protected boolean isAcceptedEvent(final Event<?> event) {
+		boolean accepted = this.acceptedTypes == null;
+
+		if (!accepted) {
+			for (int i = 0; i < this.acceptedTypes.length && !accepted; i++) {
+				accepted = this.acceptedTypes[i].isInstance(event);
+			}
+		}
+
+		return accepted;
+	}
+
+	protected List<String> types(
+			final List<Class<? extends Event<?>>> eventTypes) {
 
 		List<String> types = new ArrayList<String>();
 
@@ -127,7 +146,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 * @see pascani.lang.Probe#cleanData(long, long, java.util.List)
 	 */
 	public boolean cleanData(final long start, final long end,
-			List<Class<? extends Event<?>>> eventTypes) {
+			final List<Class<? extends Event<?>>> eventTypes) {
 
 		boolean removed = false;
 
@@ -147,7 +166,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 * @see pascani.lang.Probe#count(long, long, java.util.List)
 	 */
 	public int count(final long start, final long end,
-			List<Class<? extends Event<?>>> eventTypes) {
+			final List<Class<? extends Event<?>>> eventTypes) {
 
 		int count = 0;
 
@@ -166,7 +185,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 * @see pascani.lang.Probe#countAndClean(long, long, java.util.List)
 	 */
 	public int countAndClean(final long start, final long end,
-			List<Class<? extends Event<?>>> eventTypes) {
+			final List<Class<? extends Event<?>>> eventTypes) {
 
 		int count = 0;
 
@@ -184,10 +203,10 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 * 
 	 * @see pascani.lang.Probe#fetch(long, long, java.util.List)
 	 */
-	public List<T> fetch(final long start, final long end,
-			List<Class<? extends Event<?>>> eventTypes) {
+	public List<Event<?>> fetch(final long start, final long end,
+			final List<Class<? extends Event<?>>> eventTypes) {
 
-		List<T> fetched = new ArrayList<T>();
+		List<Event<?>> fetched = new ArrayList<Event<?>>();
 
 		for (String clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
@@ -203,9 +222,9 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 * 
 	 * @see pascani.lang.Probe#fetchAndClean(long, long, java.util.List)
 	 */
-	public List<T> fetchAndClean(final long start, final long end,
-			List<Class<? extends Event<?>>> eventTypes) {
-		List<T> fetched = new ArrayList<T>();
+	public List<Event<?>> fetchAndClean(final long start, final long end,
+			final List<Class<? extends Event<?>>> eventTypes) {
+		List<Event<?>> fetched = new ArrayList<Event<?>>();
 
 		for (String clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
@@ -222,7 +241,7 @@ public class BasicProbe<T extends Event<?>> implements Probe<T>,
 	 * @see pascani.lang.infrastructure.RpcRequestHandler#handle(pascani.lang.
 	 * infrastructure.RpcRequest)
 	 */
-	public Serializable handle(RpcRequest request) {
+	public Serializable handle(final RpcRequest request) {
 		Serializable response = null;
 
 		long start = (Long) request.getParameter(0);
