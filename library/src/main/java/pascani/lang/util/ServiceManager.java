@@ -18,19 +18,30 @@
  */
 package pascani.lang.util;
 
+import java.lang.reflect.Proxy;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import pascani.lang.PascaniRuntime;
 import pascani.lang.infrastructure.ProbeProxy;
 import pascani.lang.infrastructure.RpcClient;
 import pascani.lang.infrastructure.rabbitmq.EndPoint;
 import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcClient;
 
 /**
- * TODO: documentation
+ * This implementation provides utility methods to bind external services
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class ServiceManager {
+
+	/**
+	 * The logger
+	 */
+	private final static Logger logger = LogManager
+			.getLogger(ServiceManager.class);
 
 	/**
 	 * Registers the necessary properties to bind a SCA service
@@ -41,7 +52,8 @@ public class ServiceManager {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 */
-	public static <T> T bindService(Map<String, Object> properties, Class<T> clazz) {
+	public static <T> T bindService(Map<String, Object> properties,
+			Class<T> clazz) {
 
 		// TODO: how to register these properties? (this method is not actually
 		// called at runtime) -> Create production rules in the Pascani grammar
@@ -55,25 +67,26 @@ public class ServiceManager {
 	}
 
 	/**
+	 * Binds a {@link ProbeProxy} to a remote {@link Proxy} instance
 	 * 
 	 * @param routingKey
-	 * @param T
-	 * @return
+	 *            The probe routing key
+	 * @return a probe proxy pointing to the specified routing key
 	 */
 	public static ProbeProxy bindProbe(final String routingKey) {
-		
 		ProbeProxy proxy = null;
-		
-		// TODO: replace with the actual values. These values must be read from a properties file
-		String exchange = "probes_exchange";
-		String uri = "Rabbitmq connection URI";
+
+		String uri = PascaniRuntime.getEnvironment().get("uri");
+		String exchange = PascaniRuntime.getEnvironment()
+				.get("rpc_exchange");
 
 		try {
 			EndPoint endPoint = new EndPoint(uri);
-			RpcClient client = new RabbitMQRpcClient(endPoint, exchange, routingKey);
+			RpcClient client = new RabbitMQRpcClient(endPoint, exchange,
+					routingKey);
 			proxy = new ProbeProxy(client);
 		} catch (Exception e) {
-
+			logger.error("Error binding probe " + routingKey, e);
 		}
 
 		return proxy;
