@@ -18,16 +18,12 @@
  */
 package pascani.lang.infrastructure;
 
-import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pascani.lang.Event;
 import pascani.lang.util.LocalEventProducer;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.eventbus.Subscribe;
 
 /**
@@ -49,7 +45,7 @@ public abstract class MessageProducer {
 	/**
 	 * The list of event classes configured to be produced
 	 */
-	protected final List<Class<? extends Event<?>>> configuredEventClasses;
+	private Class<? extends Event<?>>[] acceptedTypes;
 
 	/**
 	 * The logger
@@ -61,16 +57,14 @@ public abstract class MessageProducer {
 	 * <b>Note</b>: For the optional parameter {@code routingKey} DO NOT USE
 	 * null, use empty string instead.
 	 * </p>
-	 * 
-	 * @param classes
-	 *            The list of event types of interest
 	 */
-	protected MessageProducer(final List<Class<? extends Event<?>>> classes) {
-		this.configuredEventClasses = classes;
+	protected MessageProducer() {
+
 	}
 
 	/**
-	 * Listens for {@link Event}s produced by {@link LocalEventProducer} objects.
+	 * Listens for {@link Event}s produced by {@link LocalEventProducer}
+	 * objects.
 	 * 
 	 * @param event
 	 *            The {@link LocalEventProducer}-produced {@link Event} object
@@ -98,24 +92,36 @@ public abstract class MessageProducer {
 	 *            The {@link LocalEventProducer}-produced {@link Event} object
 	 */
 	protected abstract void publish(Event<?> event) throws Exception;
+	
+	/**
+	 * Establishes a set of event classes to be produced
+	 * 
+	 * @param acceptedTypes
+	 *            The array of classes implementing {@link Event}
+	 */
+	public void acceptOnly(final Class<? extends Event<?>>... acceptedTypes) {
+		this.acceptedTypes = acceptedTypes;
+	}
 
 	/**
 	 * Decides whether an {@link Event} instance must be or not posted to the
-	 * infrastructure.
+	 * infrastructure
 	 * 
 	 * @param event
 	 *            The event under judgment
-	 * @return {@code true} if the event is a direct instance of any of the
-	 *         configured classes, and {@code false} otherwise
+	 * @return whether the event is a direct instance of any of the configured
+	 *         classes or not
 	 */
-	protected final boolean isAcceptedEvent(final Event<?> event) {
-		Predicate<Class<?>> isInstance = new Predicate<Class<?>>() {
-			public boolean apply(Class<?> clazz) {
-				return event.getClass().isAssignableFrom(clazz);
+	protected boolean isAcceptedEvent(final Event<?> event) {
+		boolean accepted = this.acceptedTypes == null;
+
+		if (!accepted) {
+			for (int i = 0; i < this.acceptedTypes.length && !accepted; i++) {
+				accepted = this.acceptedTypes[i].isInstance(event);
 			}
-		};
-		return Collections2.filter(this.configuredEventClasses, isInstance)
-				.size() > 0;
+		}
+
+		return accepted;
 	}
 
 }

@@ -19,7 +19,6 @@
 package pascani.lang.infrastructure.rabbitmq;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.apache.commons.lang3.SerializationUtils;
 
@@ -59,17 +58,13 @@ public final class RabbitMQProducer extends MessageProducer {
 	 * 
 	 * @param endPoint
 	 *            The configured RabbitMQ end point
-	 * @param classes
-	 *            The list of event types of interest
 	 * @param exchange
 	 *            The exchange to which messages are sent
 	 * @param routingKey
 	 *            An optional queue name for directly sending the messages
 	 */
-	public RabbitMQProducer(final EndPoint endPoint,
-			final List<Class<? extends Event<?>>> classes,
-			final String exchange, final String routingKey) {
-		super(classes);
+	public RabbitMQProducer(final EndPoint endPoint, final String exchange,
+			final String routingKey) {
 		this.endPoint = endPoint;
 		this.exchange = exchange == null ? "" : exchange;
 		this.routingKey = routingKey == null ? "" : routingKey;
@@ -82,8 +77,6 @@ public final class RabbitMQProducer extends MessageProducer {
 	 * 
 	 * @param endPoint
 	 *            The configured RabbitMQ end point
-	 * @param classes
-	 *            The list of event types of interest
 	 * @param exchange
 	 *            The exchange to which messages are sent
 	 * @param routingKey
@@ -93,12 +86,11 @@ public final class RabbitMQProducer extends MessageProducer {
 	 * @throws IOException
 	 *             If an error with the exchange declaration is encountered
 	 */
-	public RabbitMQProducer(final EndPoint endPoint,
-			final List<Class<? extends Event<?>>> classes,
-			final String exchange, final String routingKey,
-			final boolean durableExchange) throws IOException {
+	public RabbitMQProducer(final EndPoint endPoint, final String exchange,
+			final String routingKey, final boolean durableExchange)
+			throws IOException {
 
-		this(endPoint, classes, exchange, routingKey);
+		this(endPoint, exchange, routingKey);
 		this.endPoint.channel().exchangeDeclare(this.exchange, "direct",
 				durableExchange);
 	}

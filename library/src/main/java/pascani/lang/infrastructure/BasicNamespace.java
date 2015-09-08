@@ -2,13 +2,10 @@ package pascani.lang.infrastructure;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import pascani.lang.Event;
 import pascani.lang.PascaniRuntime;
 import pascani.lang.events.ChangeEvent;
 import pascani.lang.infrastructure.rabbitmq.EndPoint;
@@ -50,13 +47,13 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	/**
 	 * The context in which this namespace is used
 	 */
-	private final PascaniRuntime.Context context;
+	protected final PascaniRuntime.Context context;
 
 	/**
 	 * A map containing the variables defined in this namespace, with their
 	 * corresponding current values
 	 */
-	private final Map<String, Serializable> variables;
+	protected final Map<String, Serializable> variables;
 
 	/**
 	 * Creates a basic namespace connected to the RabbitMQ server, identified by
@@ -78,14 +75,16 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	 *             {@link RabbitMQRpcServer#RabbitMQRpcServer(EndPoint, String, PascaniRuntime.Context)}
 	 *             for more information.
 	 */
+	@SuppressWarnings("unchecked")
 	public BasicNamespace(final String uri, final String routingKey)
 			throws Exception {
 
 		this.variables = new HashMap<String, Serializable>();
 		this.context = PascaniRuntime.Context.NAMESPACE;
 		this.endPoint = new EndPoint(uri);
-		this.producer = new RabbitMQProducer(endPoint, getAcceptedClasses(),
+		this.producer = new RabbitMQProducer(endPoint,
 				declareQueue(routingKey), routingKey);
+		this.producer.acceptOnly(ChangeEvent.class);
 
 		this.server = new RabbitMQRpcServer(endPoint, routingKey,
 				PascaniRuntime.Context.NAMESPACE);
@@ -98,20 +97,13 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 		// then create a binding between the queue and the configured namespace
 		// exchange.
 		String queue = routingKey;
-		String exchange = PascaniRuntime.getRuntimeInstance(this.context)
-				.getEnvironment().get("namespace_exchange");
+		String exchange = PascaniRuntime.getEnvironment().get(
+				"namespace_exchange");
 
 		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
 		this.endPoint.channel().queueBind(queue, exchange, routingKey);
 
 		return exchange;
-	}
-
-	private List<Class<? extends Event<?>>> getAcceptedClasses() {
-		List<Class<? extends Event<?>>> classes = new ArrayList<Class<? extends Event<?>>>();
-		classes.add(ChangeEvent.class);
-
-		return classes;
 	}
 
 	private void startRpcServer() {
@@ -185,9 +177,9 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	 * java.io.Serializable)
 	 */
 	public Serializable setVariable(String variable, Serializable value) {
-		if(!this.variables.containsKey(variable))
+		if (!this.variables.containsKey(variable))
 			return null;
-		
+
 		synchronized (this.variables) {
 			Serializable previousValue = this.variables.get(variable);
 			ChangeEvent event = new ChangeEvent(UUID.randomUUID(),

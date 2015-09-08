@@ -18,13 +18,12 @@
  */
 package pascani.compiler.templates
 
-import pascani.lang.events.NetworkLatencyEvent
 import com.google.common.base.Joiner
-import java.util.List
 import java.util.Collection
-import pascani.lang.infrastructure.rabbitmq.RabbitMQProducer
-import pascani.lang.Event
+import java.util.List
 import pascani.compiler.util.NameProposal
+import pascani.lang.events.NetworkLatencyEvent
+import pascani.lang.infrastructure.rabbitmq.RabbitMQProducer
 
 class NetworkLatencyTemplates {
 
@@ -109,12 +108,9 @@ class NetworkLatencyTemplates {
 			try {
 				EndPoint endPoint = new EndPoint("«uri»");
 				
-				List<Class<? extends «Event.simpleName»<?>>> classes = 
-					new ArrayList<Class<? extends «Event.simpleName»<?>>>();
-				classes.add(«NetworkLatencyEvent.simpleName».class);
-				
 				this.«producerVar» = new «RabbitMQProducer.simpleName»(endPoint, classes, 
 					"«exchange»", "«routingKey»", «durableExchange»);
+				this.«producerVar».acceptOnly(«NetworkLatencyEvent.simpleName»).class;
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
