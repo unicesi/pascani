@@ -12,8 +12,8 @@ import com.google.common.collect.Lists;
 
 /**
  * This class filters a collection of {@link Event} instances by keeping only
- * instances of an specific class implementing {@link Event}. This is done by
- * performing a non safe cast in a safe way, that is:
+ * instances of an specific class. This is done by performing a non safe cast in
+ * a safe way, that is:
  * 
  * <ol>
  * <li>The collection is filtered keeping the elements of interest (instances of
@@ -28,22 +28,18 @@ public class EventFilter {
 
 	private final Collection<Event<?>> events;
 
-	private final Class<? extends Event<?>> subType;
-
-	public EventFilter(Collection<Event<?>> events,
-			Class<? extends Event<?>> subType) {
+	public EventFilter(Collection<Event<?>> events) {
 		this.events = events;
-		this.subType = subType;
 	}
 
-	public EventFilter(Class<? extends Event<?>> subType, Event<?>... events) {
-		this(Lists.newArrayList(events), subType);
+	public EventFilter(Event<?>... events) {
+		this(Lists.newArrayList(events));
 	}
 
 	/**
 	 * @return a list containing only instances of the specified class
 	 */
-	public <T> List<T> filter() {
+	public <T extends Event<?>> List<T> filter(final Class<T> subType) {
 		Collection<Event<?>> filtered = Collections2.filter(this.events,
 				new Predicate<Event<?>>() {
 					public boolean apply(Event<?> event) {
