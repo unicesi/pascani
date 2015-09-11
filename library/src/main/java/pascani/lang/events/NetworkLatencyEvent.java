@@ -31,23 +31,12 @@ import com.google.common.collect.Range;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class NetworkLatencyEvent implements Event<Double> {
+public class NetworkLatencyEvent extends Event<Double> {
 
 	/**
 	 * Serial version UID
 	 */
 	private static final long serialVersionUID = 8016321382976600130L;
-
-	/**
-	 * The universally unique identifier of this event
-	 */
-	private final UUID id;
-
-	/**
-	 * The universally unique identifier of the transaction of which this event
-	 * is part
-	 */
-	private final UUID transactionId;
 
 	/**
 	 * The actual initial time in epoch format
@@ -121,8 +110,7 @@ public class NetworkLatencyEvent implements Event<Double> {
 			final long end, final Class<?> caller, final Class<?> callee,
 			final Object _return, final String methodName,
 			final Class<?>[] parameters, Object... arguments) {
-		this.id = UUID.randomUUID();
-		this.transactionId = transactionId;
+		super(transactionId);
 		this.start = start;
 		this.end = end;
 		this.latency = this.end - this.start;
@@ -182,15 +170,7 @@ public class NetworkLatencyEvent implements Event<Double> {
 				event.arguments);
 	}
 
-	public UUID identifier() {
-		return this.id;
-	}
-
-	public UUID transactionId() {
-		return this.transactionId;
-	}
-
-	public Double value() {
+	@Override public Double value() {
 		return this.latency;
 	}
 
@@ -230,42 +210,27 @@ public class NetworkLatencyEvent implements Event<Double> {
 	 * @return Whether the range [{@code start}, {@code end}] contains the final
 	 *         timestamp this object
 	 */
-	public boolean isInTimeWindow(long start, long end) {
+	@Override public boolean isInTimeWindow(long start, long end) {
 		return Range.closed(start, end).contains(this.end);
 	}
 
 	/**
 	 * Returns the string representation of this event for logging purposes.
 	 */
-	@Override
-	public String toString() {
+	@Override public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getClass().getCanonicalName() + "\t");
 		sb.append(this.transactionId + "\t");
-		sb.append(this.id + "\t");
+		sb.append(this.identifier + "\t");
 		sb.append(this.caller.getCanonicalName() + "\t");
 		sb.append(this.callee.getCanonicalName() + "\t");
 		sb.append(this.methodName + "\t");
 		sb.append(Arrays.toString(parameters) + "\t");
 		sb.append(this.start + "\t");
 		sb.append(this.end + "\t");
-		sb.append(value());
+		sb.append(this.value());
 
 		return sb.toString();
-	}
-
-	/**
-	 * The result is {@code true} if and only if the argument is not
-	 * {@code null}, is a {@Link NetworkLatencyEvent} object and has the
-	 * same identifier as {@code this} {@Link NetworkLatencyEvent}.
-	 */
-	@Override
-	public boolean equals(final Object obj) {
-		if ((null == obj) || (obj.getClass() != NetworkLatencyEvent.class))
-			return false;
-
-		NetworkLatencyEvent other = (NetworkLatencyEvent) obj;
-		return this.id.equals(other.id);
 	}
 
 	/**

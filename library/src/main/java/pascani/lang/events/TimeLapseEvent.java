@@ -29,23 +29,12 @@ import com.google.common.collect.Range;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class TimeLapseEvent implements Event<Double> {
+public class TimeLapseEvent extends Event<Double> {
 
 	/**
 	 * Serial version UID
 	 */
 	private static final long serialVersionUID = 6620284496813795698L;
-
-	/**
-	 * The universally unique identifier of this event
-	 */
-	private final UUID id;
-
-	/**
-	 * The universally unique identifier of the transaction of which this event
-	 * is part
-	 */
-	private final UUID transactionId;
 
 	/**
 	 * The actual initial time in epoch format
@@ -74,8 +63,7 @@ public class TimeLapseEvent implements Event<Double> {
 	 */
 	public TimeLapseEvent(final UUID transactionId, final long start,
 			final long end) {
-		this.id = UUID.randomUUID();
-		this.transactionId = transactionId;
+		super(transactionId);
 		this.start = start;
 		this.end = end;
 		this.value = this.end - this.start;
@@ -121,19 +109,11 @@ public class TimeLapseEvent implements Event<Double> {
 	 * @return {@code true} if the range [{@code start}, {@code end}] contains
 	 *         the final timestamp {@code this} object
 	 */
-	public boolean isInTimeWindow(final long start, final long end) {
+	@Override public boolean isInTimeWindow(final long start, final long end) {
 		return Range.closed(start, end).contains(this.end);
 	}
 
-	public UUID identifier() {
-		return this.id;
-	}
-
-	public UUID transactionId() {
-		return this.transactionId;
-	}
-
-	public Double value() {
+	@Override public Double value() {
 		return this.value;
 	}
 
@@ -144,25 +124,12 @@ public class TimeLapseEvent implements Event<Double> {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getClass().getCanonicalName() + "\t");
 		sb.append(this.transactionId + "\t");
-		sb.append(this.id + "\t");
+		sb.append(this.identifier + "\t");
 		sb.append(this.start + "\t");
 		sb.append(this.end + "\t");
-		sb.append(value());
+		sb.append(this.value());
 
 		return sb.toString();
-	}
-
-	/**
-	 * The result is {@code true} if and only if the argument is not
-	 * {@code null}, is a {@Link TimeLapseEvent} object and has the same
-	 * identifier as {@code this} {@Link TimeLapseEvent}.
-	 */
-	@Override public boolean equals(final Object obj) {
-		if ((null == obj) || (obj.getClass() != TimeLapseEvent.class))
-			return false;
-
-		TimeLapseEvent other = (TimeLapseEvent) obj;
-		return this.id.equals(other.id);
 	}
 
 	/**

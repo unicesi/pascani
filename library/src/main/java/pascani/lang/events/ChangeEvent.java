@@ -3,32 +3,14 @@ package pascani.lang.events;
 import java.io.Serializable;
 import java.util.UUID;
 
-import com.google.common.collect.Range;
-
 import pascani.lang.Event;
 
-public class ChangeEvent implements Event<Serializable> {
+public class ChangeEvent extends Event<Serializable> {
 
 	/**
 	 * Serial version UID
 	 */
 	private static final long serialVersionUID = -4543044781516991891L;
-
-	/**
-	 * The universally unique identifier of this event
-	 */
-	private final UUID id;
-
-	/**
-	 * The universally unique identifier of the transaction of which this event
-	 * is part
-	 */
-	private final UUID transactionId;
-
-	/**
-	 * The timestamp when the exception is caught, in nanoseconds
-	 */
-	private final long timestamp;
 
 	/**
 	 * The value of the variable before the change
@@ -59,39 +41,24 @@ public class ChangeEvent implements Event<Serializable> {
 	public ChangeEvent(final UUID transactionId,
 			final Serializable previousValue, final Serializable newValue,
 			final String variable) {
-
-		this.timestamp = System.nanoTime();
-		this.id = UUID.randomUUID();
-		this.transactionId = transactionId;
+		super(transactionId);
 		this.previousValue = previousValue;
 		this.newValue = newValue;
 		this.variable = variable;
 	}
 
-	public UUID identifier() {
-		return this.id;
-	}
-
-	public UUID transactionId() {
-		return this.transactionId;
-	}
-	
-	public String variable(){
+	public String variable() {
 		return this.variable;
 	}
-	
-	public Serializable previousValue(){
+
+	public Serializable previousValue() {
 		return this.previousValue;
 	}
 
-	public Serializable value() {
+	@Override public Serializable value() {
 		return this.newValue;
 	}
 
-	public boolean isInTimeWindow(final long start, final long end) {
-		return Range.closed(start, end).contains(this.timestamp);
-	}
-	
 	/**
 	 * Returns the string representation of this event for logging purposes.
 	 */
@@ -99,7 +66,7 @@ public class ChangeEvent implements Event<Serializable> {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getClass().getCanonicalName() + "\t");
 		sb.append(this.transactionId + "\t");
-		sb.append(this.id + "\t");
+		sb.append(this.identifier + "\t");
 		sb.append(this.variable + "\t");
 		sb.append(this.previousValue + "\t");
 		sb.append(this.newValue + "\t");

@@ -22,36 +22,18 @@ import java.util.UUID;
 
 import pascani.lang.Event;
 
-import com.google.common.collect.Range;
-
 /**
  * Implementation of {@link Event} for periodic events based on chronological
  * expressions
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class IntervalEvent implements Event<String> {
+public class IntervalEvent extends Event<String> {
 
 	/**
 	 * Serial version UID
 	 */
 	private static final long serialVersionUID = -9029356694184256904L;
-
-	/**
-	 * The universally unique identifier of this event
-	 */
-	private final UUID id;
-
-	/**
-	 * The universally unique identifier of the transaction of which this event
-	 * is part
-	 */
-	private final UUID transactionId;
-
-	/**
-	 * The timestamp when this event was raised, in nanoseconds
-	 */
-	private final long timestamp;
 
 	/**
 	 * The scheduler expression
@@ -67,26 +49,12 @@ public class IntervalEvent implements Event<String> {
 	 *            The scheduler expression
 	 */
 	public IntervalEvent(final UUID transactionId, final String expression) {
-		this.timestamp = System.nanoTime();
-		this.id = UUID.randomUUID();
-		this.transactionId = transactionId;
+		super(transactionId);
 		this.expression = expression;
 	}
 
-	public UUID identifier() {
-		return this.id;
-	}
-
-	public UUID transactionId() {
-		return this.transactionId;
-	}
-
-	public String value() {
+	@Override public String value() {
 		return this.expression;
-	}
-
-	public boolean isInTimeWindow(final long start, final long end) {
-		return Range.closed(start, end).contains(this.timestamp);
 	}
 
 	/**
@@ -96,24 +64,11 @@ public class IntervalEvent implements Event<String> {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getClass().getCanonicalName() + "\t");
 		sb.append(this.transactionId + "\t");
-		sb.append(this.id + "\t");
+		sb.append(this.identifier + "\t");
 		sb.append(this.timestamp + "\t");
 		sb.append(value().toString());
 
 		return sb.toString();
-	}
-
-	/**
-	 * The result is {@code true} if and only if the argument is not
-	 * {@code null}, is a {@Link IntervalEvent} object and has the same
-	 * identifier as {@code this} {@Link IntervalEvent}.
-	 */
-	@Override public boolean equals(final Object obj) {
-		if ((null == obj) || (obj.getClass() != IntervalEvent.class))
-			return false;
-
-		IntervalEvent other = (IntervalEvent) obj;
-		return this.id.equals(other.id);
 	}
 
 	/**

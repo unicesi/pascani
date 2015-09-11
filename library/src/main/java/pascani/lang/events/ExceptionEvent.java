@@ -22,35 +22,17 @@ import java.util.UUID;
 
 import pascani.lang.Event;
 
-import com.google.common.collect.Range;
-
 /**
  * Implementation of {@link Event} for exceptions registry
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class ExceptionEvent implements Event<Exception> {
+public class ExceptionEvent extends Event<Exception> {
 
 	/**
 	 * Serial version UID
 	 */
 	private static final long serialVersionUID = -9029356694184256904L;
-
-	/**
-	 * The universally unique identifier of this event
-	 */
-	private final UUID id;
-
-	/**
-	 * The universally unique identifier of the transaction of which this event
-	 * is part
-	 */
-	private final UUID transactionId;
-
-	/**
-	 * The timestamp when the exception is caught, in nanoseconds
-	 */
-	private final long timestamp;
 
 	/**
 	 * The thrown exception
@@ -96,9 +78,7 @@ public class ExceptionEvent implements Event<Exception> {
 	public ExceptionEvent(final UUID transactionId, final Exception exception,
 			final Class<?> clazz, final String methodName,
 			final Class<?>[] parameters, final Object... arguments) {
-		this.timestamp = System.nanoTime();
-		this.id = UUID.randomUUID();
-		this.transactionId = transactionId;
+		super(transactionId);
 		this.exception = exception;
 		this.clazz = clazz;
 		this.methodName = methodName;
@@ -106,15 +86,7 @@ public class ExceptionEvent implements Event<Exception> {
 		this.arguments = arguments;
 	}
 
-	public UUID identifier() {
-		return this.id;
-	}
-
-	public UUID transactionId() {
-		return this.transactionId;
-	}
-
-	public Exception value() {
+	@Override public Exception value() {
 		return this.exception;
 	}
 
@@ -134,10 +106,6 @@ public class ExceptionEvent implements Event<Exception> {
 		return this.arguments;
 	}
 
-	public boolean isInTimeWindow(final long start, final long end) {
-		return Range.closed(start, end).contains(this.timestamp);
-	}
-
 	/**
 	 * Returns the string representation of this event for logging purposes.
 	 */
@@ -145,7 +113,7 @@ public class ExceptionEvent implements Event<Exception> {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getClass().getCanonicalName() + "\t");
 		sb.append(this.transactionId + "\t");
-		sb.append(this.id + "\t");
+		sb.append(this.identifier + "\t");
 		sb.append(this.clazz + "\t");
 		sb.append(this.methodName + "\t");
 		sb.append(this.parameters + "\t");
@@ -153,19 +121,6 @@ public class ExceptionEvent implements Event<Exception> {
 		sb.append(value().toString());
 
 		return sb.toString();
-	}
-	
-	/**
-	 * The result is {@code true} if and only if the argument is not
-	 * {@code null}, is a {@Link ExceptionEvent} object and has the same
-	 * identifier as {@code this} {@Link ExceptionEvent}.
-	 */
-	@Override public boolean equals(final Object obj) {
-		if ((null == obj) || (obj.getClass() != ExceptionEvent.class))
-			return false;
-
-		ExceptionEvent other = (ExceptionEvent) obj;
-		return this.id.equals(other.id);
 	}
 
 	/**

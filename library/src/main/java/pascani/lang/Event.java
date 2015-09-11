@@ -21,37 +21,89 @@ package pascani.lang;
 import java.io.Serializable;
 import java.util.UUID;
 
+import com.google.common.collect.Range;
+
 /**
- * Standard interface for simple events
+ * Standard abstract implementation for simple events
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public interface Event<T> extends Comparable<Event<T>>, Serializable {
+public abstract class Event<T> implements Comparable<Event<T>>, Serializable {
+
+	/**
+	 * Serial version UID
+	 */
+	private static final long serialVersionUID = 4932084076805806298L;
+
+	/**
+	 * The universally unique identifier of this event
+	 */
+	protected final UUID identifier;
+
+	/**
+	 * The universally unique identifier of the transaction of which this event
+	 * is part
+	 */
+	protected final UUID transactionId;
+
+	/**
+	 * The timestamp when this event is raised, in nanoseconds
+	 */
+	protected final long timestamp;
+
+	public Event(final UUID transactionId) {
+		this.timestamp = System.nanoTime();
+		this.identifier = UUID.randomUUID();
+		this.transactionId = transactionId;
+	}
 
 	/**
 	 * @return the universal unique identifier of this event
 	 */
-	public UUID identifier();
+	public UUID identifier() {
+		return this.identifier;
+	}
 
 	/**
 	 * @return The universally unique identifier of the transaction of which
 	 *         this event is part
 	 */
-	public UUID transactionId();
+	public UUID transactionId() {
+		return this.transactionId;
+	}
 
 	/**
 	 * @return the value of this event
 	 */
-	public T value();
+	public abstract T value();
 
 	/**
+	 * Checks whether this {@link Event} was raised within a given time window,
+	 * i.e., {@code this.timestamp} is contained in [ {@code start} ,
+	 * {@code end}].
+	 * 
 	 * @param start
 	 *            The initial timestamp of the time window
 	 * @param end
 	 *            The final timestamp of the time window
-	 * @return whether this event was created within the specified time
-	 *         window
+	 * @return Whether the range [{@code start}, {@code end}] contains the final
+	 *         timestamp this object
 	 */
-	public boolean isInTimeWindow(long start, long end);
+	public boolean isInTimeWindow(long start, long end) {
+		return Range.closed(start, end).contains(this.timestamp);
+	}
+
+	/**
+	 * The result is {@code true} if and only if the argument is not
+	 * {@code null}, is an {@Link Event} object with the same identifier
+	 * as {@code this} instance.
+	 */
+	@Override public boolean equals(final Object obj) {
+		if ((null == obj) || (obj.getClass() != this.getClass()))
+			return false;
+
+		Event<?> other = (Event<?>) obj;
+		return this.identifier.equals(other.identifier);
+	}
 
 }
