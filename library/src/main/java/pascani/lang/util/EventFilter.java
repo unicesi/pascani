@@ -35,6 +35,13 @@ public class EventFilter {
 	public EventFilter(Event<?>... events) {
 		this(Lists.newArrayList(events));
 	}
+	
+	/**
+	 * @return a collection containing the unfiltered events
+	 */
+	public Collection<Event<?>> unfilteredEvents() {
+		return this.events;
+	}
 
 	/**
 	 * @return a list containing only instances of the specified class
