@@ -106,4 +106,22 @@ public abstract class Event<T> implements Comparable<Event<T>>, Serializable {
 		return this.identifier.equals(other.identifier);
 	}
 
+	/**
+	 * The result is {@code -1} if {@code this} event was started before
+	 * {@code o}, otherwise is {@code 1}. {@code 0} is returned when the object
+	 * is null, or when the objects are not instances of the same class.
+	 *
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
+	public int compareTo(final Event<T> o) {
+
+		if (o != null && this.getClass() == o.getClass()) {
+			if (this.timestamp < o.timestamp)
+				return -1;
+			else
+				return 1;
+		}
+
+		return 0;
+	}
 }

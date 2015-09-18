@@ -71,25 +71,4 @@ public class IntervalEvent extends Event<String> {
 		return sb.toString();
 	}
 
-	/**
-	 * The result is {@code -1} if {@code this} event was started before
-	 * {@code o}, otherwise is {@code 1}. {@code 0} is returned when the
-	 * argument is null or is not a {@link IntervalEvent}.
-	 *
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	public int compareTo(final Event<String> o) {
-		if (o != null && o instanceof IntervalEvent) {
-			IntervalEvent other = (IntervalEvent) o;
-
-			if (this.timestamp < other.timestamp) {
-				return -1;
-			} else {
-				return 1;
-			}
-		}
-
-		return 0;
-	}
-
 }

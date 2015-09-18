@@ -123,25 +123,4 @@ public class ExceptionEvent extends Event<Exception> {
 		return sb.toString();
 	}
 
-	/**
-	 * The result is {@code -1} if {@code this} event was started before
-	 * {@code o}, otherwise is {@code 1}. {@code 0} is returned when the
-	 * argument is null or is not a {@link ExceptionEvent}.
-	 *
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	public int compareTo(final Event<Exception> o) {
-		if (o != null && o instanceof ExceptionEvent) {
-			ExceptionEvent other = (ExceptionEvent) o;
-
-			if (this.timestamp < other.timestamp) {
-				return -1;
-			} else {
-				return 1;
-			}
-		}
-
-		return 0;
-	}
-
 }
