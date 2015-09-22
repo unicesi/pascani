@@ -112,11 +112,6 @@ public class LatencyProbeGenerator {
 	private final String routingKey;
 
 	/**
-	 * Whether the exchange is durable or not
-	 */
-	private final boolean durableExchange;
-
-	/**
 	 * Creates a network latency probe generator.
 	 * 
 	 * @param interfacePath
@@ -132,13 +127,11 @@ public class LatencyProbeGenerator {
 	 *            Whether the exchange is durable or not
 	 */
 	public LatencyProbeGenerator(final String interfacePath, final String uri,
-			final String exchange, final String routingKey,
-			final boolean durableExchange) {
+			final String exchange, final String routingKey) {
 		this.interfacePath = interfacePath;
 		this.uri = uri;
 		this.exchange = exchange;
 		this.routingKey = routingKey;
-		this.durableExchange = durableExchange;
 	}
 
 	/**
@@ -234,7 +227,7 @@ public class LatencyProbeGenerator {
 		// A constructor to initialize the producer
 		String constructorBody = NetworkLatencyTemplates
 				.getProducerInitialization(PRODUCER_FIELD_NAME, this.uri,
-						this.exchange, this.routingKey, this.durableExchange);
+						this.exchange, this.routingKey);
 
 		javaClass.addMethod().setName(javaClass.getName())
 				.setBody(constructorBody).setConstructor(true);
@@ -346,7 +339,7 @@ public class LatencyProbeGenerator {
 		// A constructor to initialize the producer
 		String constructorBody = NetworkLatencyTemplates
 				.getProducerInitialization(PRODUCER_FIELD_NAME, this.uri,
-						this.exchange, this.routingKey, this.durableExchange);
+						this.exchange, this.routingKey);
 
 		javaClass.addMethod().setName(javaClass.getName())
 				.setBody(constructorBody).setConstructor(true);

@@ -102,14 +102,12 @@ class NetworkLatencyTemplates {
 	/**
 	 * Produces a code block for initializing the message producer inside each adapter
 	 */
-	def static String getProducerInitialization(String producerVar, String uri, String exchange, String routingKey,
-		boolean durableExchange) {
+	def static String getProducerInitialization(String producerVar, String uri, String exchange, String routingKey) {
 		'''
 			try {
 				EndPoint endPoint = new EndPoint("«uri»");
 				
-				this.«producerVar» = new «RabbitMQProducer.simpleName»(endPoint, classes, 
-					"«exchange»", "«routingKey»", «durableExchange»);
+				this.«producerVar» = new «RabbitMQProducer.simpleName»(endPoint, classes, "«exchange»", "«routingKey»");
 				this.«producerVar».acceptOnly(«NetworkLatencyEvent.simpleName»).class;
 			} catch (Exception e) {
 				throw new RuntimeException(e);
