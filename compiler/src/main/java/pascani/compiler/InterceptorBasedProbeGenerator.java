@@ -1,6 +1,7 @@
 package pascani.compiler;
 
 import java.io.File;
+import java.util.List;
 
 import org.jboss.forge.roaster.Roaster;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
@@ -8,6 +9,7 @@ import org.jboss.forge.roaster.model.source.MethodSource;
 
 import pascani.compiler.templates.InterceptorBasedProbeTemplates;
 import pascani.compiler.util.NameProposal;
+import pascani.lang.Event;
 import pascani.lang.PascaniRuntime;
 import pascani.lang.Probe;
 import pascani.lang.events.ExceptionEvent;
@@ -48,9 +50,13 @@ public abstract class InterceptorBasedProbeGenerator {
 	 * 
 	 * @param packageName
 	 *            The package of the generated java class
+	 * @param events
+	 *            A list of event types to be caught by the interceptor. Not all
+	 *            types of events are supported
 	 * @return an object encapsulating the java source code
 	 */
-	public abstract JavaClassSource interceptor(String packageName);
+	public abstract JavaClassSource interceptor(String packageName,
+			List<Class<? extends Event<?>>> events);
 
 	/**
 	 * Generates a class extending {@link CustomProbe} with the corresponding
@@ -68,7 +74,7 @@ public abstract class InterceptorBasedProbeGenerator {
 			final String routingKey) {
 
 		File directory = new File(this.path);
-		String className = new NameProposal(this.probeName + ".java", directory)
+		String className = new NameProposal(this.probeName + "Probe.java", directory)
 				.getNewName();
 
 		JavaClassSource javaClass = Roaster.create(JavaClassSource.class);
@@ -76,7 +82,6 @@ public abstract class InterceptorBasedProbeGenerator {
 		// Add imports
 		javaClass.addImport(PascaniRuntime.class);
 		javaClass.addImport(CustomProbe.class);
-		javaClass.addImport(ExceptionEvent.class);
 
 		// Set general properties
 		javaClass.setPackage(packageName);

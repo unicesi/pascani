@@ -1,6 +1,7 @@
 package pascani.compiler;
 
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 
 import org.jboss.forge.roaster.Roaster;
@@ -11,24 +12,29 @@ import org.osoa.sca.annotations.Scope;
 import org.ow2.frascati.tinfi.api.IntentHandler;
 import org.ow2.frascati.tinfi.api.IntentJoinPoint;
 
-import pascani.compiler.templates.TimeLapseProbeTemplates;
+import pascani.compiler.templates.ProbeTemplates;
 import pascani.compiler.util.NameProposal;
+import pascani.lang.Event;
 import pascani.lang.PascaniRuntime;
+import pascani.lang.events.ExceptionEvent;
+import pascani.lang.events.InvokeEvent;
+import pascani.lang.events.ReturnEvent;
 import pascani.lang.events.TimeLapseEvent;
 import pascani.lang.util.LocalEventProducer;
 
 /**
- * This class generates the necessary source code to automatically measure
- * execution time in service executions. As the generated code is compliant with
- * the SCA specification, and the FraSCAti middleware, the mechanism for
- * intercepting the service execution is an Intent composite.
+ * This class generates the necessary source code to automatically raise
+ * instances of {@link ExceptionEvent}, {@link TimeLapseEvent},
+ * {@link InvokeEvent} and {@link ReturnEvent}. As the generated code is
+ * compliant with the SCA specification, and the FraSCAti middleware, the
+ * mechanism for intercepting the service execution is an Intent composite.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class TimeLapseProbeScaGenerator extends InterceptorBasedProbeGenerator {
+public class ScaProbeGenerator extends InterceptorBasedProbeGenerator {
 
-	public TimeLapseProbeScaGenerator(String directoryPath) {
-		super(directoryPath, "TimeLapseProbe");
+	public ScaProbeGenerator(String directoryPath, final String probeName) {
+		super(directoryPath, probeName);
 	}
 
 	/*
@@ -36,20 +42,25 @@ public class TimeLapseProbeScaGenerator extends InterceptorBasedProbeGenerator {
 	 * 
 	 * @see
 	 * pascani.compiler.InterceptorBasedProbeGenerator#interceptor(java.lang
-	 * .String)
+	 * .String, java.util.List)
 	 */
-	@Override public JavaClassSource interceptor(final String packageName) {
+	@Override public JavaClassSource interceptor(final String packageName,
+			final List<Class<? extends Event<?>>> events) {
+
 		File directory = new File(path);
-		String className = new NameProposal("TimeLapseInterceptor.java",
-				directory).getNewName();
+		String className = new NameProposal(
+				this.probeName + "Interceptor.java", directory).getNewName();
 
 		JavaClassSource javaClass = Roaster.create(JavaClassSource.class);
 
 		// Add imports
 		javaClass.addImport(PascaniRuntime.class);
 		javaClass.addImport(LocalEventProducer.class);
-		javaClass.addImport(TimeLapseEvent.class);
+		javaClass.addImport(Event.class);
 		javaClass.addImport(UUID.class);
+
+		for (Class<? extends Event<?>> clazz : events)
+			javaClass.addImport(clazz);
 
 		// Set general properties
 		javaClass.setPackage(packageName);
@@ -63,17 +74,17 @@ public class TimeLapseProbeScaGenerator extends InterceptorBasedProbeGenerator {
 
 		FieldSource<?> field = javaClass.addField();
 		field.setType(LocalEventProducer.class.getSimpleName() + "<"
-				+ TimeLapseEvent.class.getSimpleName() + ">");
+				+ Event.class.getSimpleName() + "<?>" + ">");
 		field.setName(producerVar).setPrivate().setFinal(true);
 
-		String constructor = TimeLapseProbeTemplates
+		String constructor = ProbeTemplates
 				.getProducerInitialization(producerVar);
 		javaClass.addMethod().setConstructor(true).setBody(constructor);
 
 		// Override the invoke method
 		String paramName = "ijp";
-		String invokeBody = TimeLapseProbeTemplates.getInterceptorMethodBody(
-				producerVar, paramName);
+		String invokeBody = ProbeTemplates.getInterceptorMethodBody(
+				producerVar, paramName, events);
 
 		MethodSource<?> invoke = javaClass.addMethod();
 
