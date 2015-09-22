@@ -28,7 +28,7 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import pascani.lang.infrastructure.MessageProducer;
+import pascani.lang.infrastructure.AbstractProducer;
 import pascani.lang.infrastructure.Monitor;
 import pascani.lang.infrastructure.BasicNamespace;
 import pascani.lang.util.LocalEventProducer;
@@ -124,7 +124,7 @@ public class PascaniRuntime {
 	 * new events.
 	 * 
 	 * <p>
-	 * Event listeners may be {@link Probe} or {@link MessageProducer}
+	 * Event listeners may be {@link Probe} or {@link AbstractProducer}
 	 * instances.
 	 * </p>
 	 * 

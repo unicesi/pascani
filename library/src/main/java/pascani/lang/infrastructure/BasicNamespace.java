@@ -42,7 +42,7 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	/**
 	 * The producer sending (variable) change events
 	 */
-	private final MessageProducer producer;
+	private final AbstractProducer producer;
 
 	/**
 	 * The context in which this namespace is used

@@ -23,18 +23,18 @@ import java.io.IOException;
 import org.apache.commons.lang3.SerializationUtils;
 
 import pascani.lang.Event;
-import pascani.lang.infrastructure.MessageProducer;
+import pascani.lang.infrastructure.AbstractProducer;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 
 /**
- * Implementation of {@link MessageProducer} to work with the RabbitMQ queuing
+ * Implementation of {@link AbstractProducer} to work with the RabbitMQ queuing
  * system.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public final class RabbitMQProducer extends MessageProducer {
+public final class RabbitMQProducer extends AbstractProducer {
 
 	/**
 	 * An end point connected to a RabbitMQ queue

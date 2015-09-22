@@ -25,7 +25,7 @@ import org.apache.commons.lang3.SerializationUtils;
 
 import pascani.lang.Event;
 import pascani.lang.PascaniRuntime;
-import pascani.lang.infrastructure.MessageConsumer;
+import pascani.lang.infrastructure.AbstractConsumer;
 import pascani.lang.util.LocalEventProducer;
 
 import com.rabbitmq.client.AMQP.BasicProperties;
@@ -35,12 +35,12 @@ import com.rabbitmq.client.Envelope;
 import com.rabbitmq.client.ShutdownSignalException;
 
 /**
- * Implementation of {@link MessageConsumer} to work with the RabbitMQ queuing
+ * Implementation of {@link AbstractConsumer} to work with the RabbitMQ queuing
  * system.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class RabbitMQConsumer extends MessageConsumer implements Consumer {
+public class RabbitMQConsumer extends AbstractConsumer implements Consumer {
 
 	/**
 	 * An end point connected to a RabbitMQ queue

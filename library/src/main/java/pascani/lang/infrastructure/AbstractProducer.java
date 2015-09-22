@@ -32,15 +32,14 @@ import com.google.common.eventbus.Subscribe;
  * <p>
  * Subclasses must implement the actual code to post the event, by implementing
  * the communication with a message queuing system. The implementation of method
- * {@link MessageProducer#publish(Event)} should not be {@code public}, given
- * that the entry point for events should be always
- * {@link MessageProducer#produce(Event)}; this allows to filter messages not
- * supposed to be produced.
+ * {@link #publish(Event)} should not be {@code public}, given that the entry
+ * point for events should be always {@link #produce(Event)}; this allows to
+ * filter messages not supposed to be produced.
  * </p>
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class MessageProducer {
+public abstract class AbstractProducer {
 
 	/**
 	 * The list of event classes configured to be produced
@@ -58,7 +57,7 @@ public abstract class MessageProducer {
 	 * null, use empty string instead.
 	 * </p>
 	 */
-	protected MessageProducer() {
+	protected AbstractProducer() {
 
 	}
 
@@ -92,7 +91,7 @@ public abstract class MessageProducer {
 	 *            The {@link LocalEventProducer}-produced {@link Event} object
 	 */
 	protected abstract void publish(Event<?> event) throws Exception;
-	
+
 	/**
 	 * Establishes a set of event classes to be produced
 	 * 

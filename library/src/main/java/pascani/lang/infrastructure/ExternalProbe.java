@@ -43,7 +43,7 @@ public class ExternalProbe extends CustomProbe {
 	 * The message consumer listening for external events (i.e., events
 	 * generated elsewhere and concentrated here)
 	 */
-	protected final MessageConsumer consumer;
+	protected final AbstractConsumer consumer;
 
 	/**
 	 * Creates an instance connected to a RabbitMQ server, making the recorded

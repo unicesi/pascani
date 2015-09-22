@@ -39,7 +39,7 @@ import pascani.compiler.util.NameProposal;
 import pascani.lang.Event;
 import pascani.lang.events.NetworkLatencyEvent;
 import pascani.lang.infrastructure.ExternalProbe;
-import pascani.lang.infrastructure.MessageProducer;
+import pascani.lang.infrastructure.AbstractProducer;
 import pascani.lang.infrastructure.rabbitmq.EndPoint;
 import pascani.lang.infrastructure.rabbitmq.RabbitMQProducer;
 
@@ -50,7 +50,7 @@ import com.google.common.collect.Lists;
 
 /**
  * TODO: Check if producing events blocks the execution. If so, make
- * {@link MessageProducer} a {@link Thread}
+ * {@link AbstractProducer} a {@link Thread}
  * 
  * TODO: Generate the SCA composites
  * 
@@ -216,7 +216,7 @@ public class LatencyProbeGenerator {
 		javaClass.addImport(List.class);
 		javaClass.addImport(ArrayList.class);
 		javaClass.addImport(Event.class);
-		javaClass.addImport(MessageProducer.class);
+		javaClass.addImport(AbstractProducer.class);
 		javaClass.addImport(RabbitMQProducer.class);
 
 		for (Import _import : _interface.getImports()) {
@@ -229,7 +229,7 @@ public class LatencyProbeGenerator {
 
 		// Add a producer
 		javaClass.addField().setName(PRODUCER_FIELD_NAME)
-				.setType(MessageProducer.class).setPrivate().setFinal(true);
+				.setType(AbstractProducer.class).setPrivate().setFinal(true);
 
 		// A constructor to initialize the producer
 		String constructorBody = NetworkLatencyTemplates
@@ -328,7 +328,7 @@ public class LatencyProbeGenerator {
 		javaClass.addImport(List.class);
 		javaClass.addImport(ArrayList.class);
 		javaClass.addImport(Event.class);
-		javaClass.addImport(MessageProducer.class);
+		javaClass.addImport(AbstractProducer.class);
 		javaClass.addImport(RabbitMQProducer.class);
 
 		for (Import _import : modified.getImports()) {
@@ -341,7 +341,7 @@ public class LatencyProbeGenerator {
 
 		// Add a producer
 		javaClass.addField().setName(PRODUCER_FIELD_NAME)
-				.setType(MessageProducer.class).setPrivate().setFinal(true);
+				.setType(AbstractProducer.class).setPrivate().setFinal(true);
 
 		// A constructor to initialize the producer
 		String constructorBody = NetworkLatencyTemplates

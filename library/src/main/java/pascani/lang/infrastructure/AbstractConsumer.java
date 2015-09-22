@@ -27,10 +27,10 @@ import pascani.lang.Event;
 
 /**
  * Abstract implementation of a message queue consumer, containing only methods
- * for starting consuming messages from a queue (
- * {@link MessageConsumer#startConsuming()}) and delegating the handling of the
- * already consumed message (instance of {@link Event}) to an interested
- * listener ({@link MessageConsumer#delegateEventHandling(Event)}).
+ * for starting consuming messages from a queue ({@link #startConsuming()}) and
+ * delegating the handling of the already consumed message (instance of
+ * {@link Event}) to an interested listener (
+ * {@link #delegateEventHandling(Event)}).
  * 
  * <p>
  * The delegating can be done by using an {@link EventBus}.
@@ -38,7 +38,7 @@ import pascani.lang.Event;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class MessageConsumer extends Thread {
+public abstract class AbstractConsumer extends Thread {
 
 	/**
 	 * The logger
