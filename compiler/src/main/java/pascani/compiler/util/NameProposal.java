@@ -20,6 +20,7 @@ package pascani.compiler.util;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -40,7 +41,7 @@ public class NameProposal {
 	/**
 	 * Sibling names (e.g., file names within the same parent)
 	 */
-	private final Collection<String> siblingsNames;
+	private final ArrayList<String> siblingsNames;
 
 	/**
 	 * An initial name. If there is no collision with sibling elements, the name
@@ -69,11 +70,11 @@ public class NameProposal {
 				});
 
 		this.intendedName = FilenameUtils.removeExtension(intendedName);
-		this.siblingsNames = siblingsNames;
+		this.siblingsNames = new ArrayList<String>(siblingsNames);
 	}
 
 	public NameProposal(Collection<String> siblingsNames) {
-		this.siblingsNames = siblingsNames;
+		this.siblingsNames = new ArrayList<String>(siblingsNames);
 	}
 
 	/**
