@@ -33,8 +33,10 @@ import pascani.lang.util.LocalEventProducer;
  */
 public class ScaProbeGenerator extends InterceptorBasedProbeGenerator {
 
-	public ScaProbeGenerator(String directoryPath, final String probeName) {
-		super(directoryPath, probeName);
+	public ScaProbeGenerator(String directoryPath, final String probeName,
+			final String connectionURI) {
+		
+		super(directoryPath, probeName, connectionURI);
 	}
 
 	/*

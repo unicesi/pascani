@@ -9,6 +9,10 @@ import java.util.List
 import pascani.lang.events.ExceptionEvent
 import pascani.lang.events.InvokeEvent
 import pascani.lang.events.ReturnEvent
+import pascani.lang.infrastructure.AbstractProducer
+import pascani.lang.infrastructure.rabbitmq.RabbitMQProducer
+import pascani.lang.infrastructure.rabbitmq.EndPoint
+import pascani.lang.PascaniRuntime
 
 class ProbeTemplates {
 
@@ -18,6 +22,31 @@ class ProbeTemplates {
 	def static String getProducerInitialization(String producerVar) {
 		'''
 			this.«producerVar» = new «LocalEventProducer.simpleName»<«Event.simpleName»<?>>(PascaniRuntime.Context.PROBE);
+		'''
+	}
+
+	def static String getInitializationContrib(String probeClass, String connectionURI, String probesExchange,
+		String probeRoutingKey, boolean addProducer, List<Class<? extends Event<?>>> events) {
+		'''
+			try {
+				«probeClass» probe = new «probeClass»();
+				«IF addProducer»
+					«EndPoint.simpleName» endPoint = new «EndPoint.simpleName»("«connectionURI»");
+					«AbstractProducer.simpleName» producer = 
+						new «RabbitMQProducer.simpleName»(endPoint, "«probesExchange»", "«probeRoutingKey»");
+					
+					producer.acceptOnly(
+						«FOR clazz : events SEPARATOR ", "»
+							«clazz.canonicalName».class
+						«ENDFOR»
+					);
+					«PascaniRuntime.canonicalName»
+						.getRuntimeInstance(«PascaniRuntime.canonicalName».Context.PROBE)
+						.registerEventListener(producer);
+				«ENDIF»
+			} catch(Exception e) {
+				throw new RuntimeException(e);
+			}
 		'''
 	}
 
