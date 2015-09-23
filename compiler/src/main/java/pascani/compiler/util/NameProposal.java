@@ -30,23 +30,23 @@ import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 
 /**
- * Utility class to choose (files, variables) names avoiding collisions with
- * sibling elements.
+ * Utility class to name variables and files avoiding collisions with sibling
+ * elements.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class NameProposal {
 
 	/**
-	 * An initial name. If there is no collision with sibling elements, the name
-	 * remains equal
-	 */
-	private final String intendedName;
-
-	/**
 	 * Sibling names (e.g., file names within the same parent)
 	 */
 	private final Collection<String> siblingsNames;
+
+	/**
+	 * An initial name. If there is no collision with sibling elements, the name
+	 * remains equal
+	 */
+	private String intendedName;
 
 	public NameProposal(final String intendedName, final File parentDirectory) {
 		final String extension = FilenameUtils.getExtension(intendedName);
@@ -72,8 +72,7 @@ public class NameProposal {
 		this.siblingsNames = siblingsNames;
 	}
 
-	public NameProposal(String intendedName, Collection<String> siblingsNames) {
-		this.intendedName = intendedName;
+	public NameProposal(Collection<String> siblingsNames) {
 		this.siblingsNames = siblingsNames;
 	}
 
@@ -83,14 +82,27 @@ public class NameProposal {
 	 *         collision
 	 */
 	public String getNewName() {
-		String definitiveName = this.intendedName;
+		return getNewName(this.intendedName);
+	}
+
+	/**
+	 * @param intendedName
+	 *            An initial name. If there is no collision with sibling
+	 *            elements, the name remains equal
+	 * @return a name that does not collide with sibling elements. If there was
+	 *         a collision, an index is added as suffix until there is no
+	 *         collision
+	 */
+	public String getNewName(String intendedName) {
+		String definitiveName = intendedName;
 		int index = 0;
 
 		while (this.siblingsNames.contains(definitiveName)) {
-			definitiveName = this.intendedName + index;
+			definitiveName = intendedName + index;
 			index++;
 		}
 
+		this.siblingsNames.add(definitiveName);
 		return definitiveName;
 	}
 

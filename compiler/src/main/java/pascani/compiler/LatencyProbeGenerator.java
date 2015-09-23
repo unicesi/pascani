@@ -160,8 +160,8 @@ public class LatencyProbeGenerator {
 			Collection<String> names = Collections2.transform(parameters,
 					this.getName);
 
-			String parameterName = new NameProposal(EVENT_PARAMETER_NAME, names)
-					.getNewName();
+			String parameterName = new NameProposal(names)
+					.getNewName(EVENT_PARAMETER_NAME);
 			String parameter = NetworkLatencyEvent.class.getSimpleName() + " "
 					+ parameterName;
 
@@ -255,17 +255,16 @@ public class LatencyProbeGenerator {
 			List<?> parameters = classMethod.getParameters();
 			Collection<String> names = Collections2.transform(parameters,
 					this.getName);
+			NameProposal varNames = new NameProposal(names);
 
 			// Method's body
-			String eventParam = new NameProposal(EVENT_PARAMETER_NAME, names)
-					.getNewName();
+			String eventParam = varNames.getNewName(EVENT_PARAMETER_NAME);
 			List<String> eventParams = new ArrayList<String>();
 
-			String startParam = new NameProposal("start", names).getNewName();
-			String exceptionParam = new NameProposal("e", names).getNewName();
+			String startParam = varNames.getNewName("start");
+			String exceptionParam = varNames.getNewName("e");
 
-			String paramTypesArray = new NameProposal("paramTypes", names)
-					.getNewName();
+			String paramTypesArray = varNames.getNewName("paramTypes");
 			Collection<String> paramTypes = Collections2.transform(parameters,
 					getClass);
 
@@ -353,12 +352,12 @@ public class LatencyProbeGenerator {
 			List<?> parameters = classMethod.getParameters();
 			ArrayList<String> names = Lists.newArrayList(Collections2
 					.transform(parameters, this.getName));
+			NameProposal varNames = new NameProposal(names);
 
 			// Method's body
 			String eventParam = names.get(0);
-			String newEventParam = new NameProposal(eventParam, names)
-					.getNewName();
-			String endParam = new NameProposal("end", names).getNewName();
+			String newEventParam = varNames.getNewName(eventParam);
+			String endParam = varNames.getNewName("end");
 
 			// Remove the event parameter
 			names.remove(0);

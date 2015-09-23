@@ -36,7 +36,7 @@ class NetworkLatencyTemplates {
 		String methodName, String methodReturn, Collection<String> paramNames) {
 
 		var params = if(paramNames.size > 0) ", " + Joiner.on(", ").join(paramNames) else "";
-		val _return = if(!isVoid) new NameProposal("_return", paramNames).newName;
+		val _return = if(!isVoid) new NameProposal(paramNames).getNewName("_return");
 
 		'''
 			long «startVar» = System.nanoTime();
@@ -68,9 +68,11 @@ class NetworkLatencyTemplates {
 	 */
 	def static String finalAdapterMethod(String endVar, String eventVar, String newEventVar, boolean isVoid,
 		String referenceVar, String producerVar, String methodName, Collection<String> paramNames) {
-
-		val _return = if(!isVoid) new NameProposal("_return", paramNames).newName;
-		val _returnEvent = if(!isVoid) new NameProposal("_returnEvent", paramNames).newName;
+		
+		val varNames = new NameProposal(paramNames)
+		
+		val _return = if(!isVoid) varNames.getNewName("_return");
+		val _returnEvent = if(!isVoid) varNames.getNewName("_returnEvent");
 
 		'''
 			long «endVar» = System.nanoTime();

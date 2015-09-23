@@ -57,18 +57,19 @@ class ProbeTemplates {
 		List<Class<? extends Event<?>>> events) {
 
 		var names = Lists.newArrayList(producerVar, ijpVar);
+		val varNames = new NameProposal(names)
 
-		val transactionVar = new NameProposal("transactionId", names).newName;
-		val returnVar = new NameProposal("_return", names).newName;
+		val transactionVar = varNames.getNewName("transactionId");
+		val returnVar = varNames.getNewName("_return");
 
-		val invokeEVar = new NameProposal("invokeEvent", names).newName;
-		val exceptionEVar = new NameProposal("exceptionEvent", names).newName;
-		val timeLapseEVar = new NameProposal("timeLapseEvent", names).newName;
-		val returnEVar = new NameProposal("returnEvent", names).newName;
+		val invokeEVar = varNames.getNewName("invokeEvent");
+		val exceptionEVar = varNames.getNewName("exceptionEvent");
+		val timeLapseEVar = varNames.getNewName("timeLapseEvent");
+		val returnEVar = varNames.getNewName("returnEvent");
 
-		val causeVar = new NameProposal("cause", names).newName;
-		val startVar = new NameProposal("start", names).newName;
-		val endVar = new NameProposal("end", names).newName;
+		val causeVar = varNames.getNewName("cause");
+		val startVar = varNames.getNewName("start");
+		val endVar = varNames.getNewName("end");
 
 		'''
 			«IF !events.isEmpty»
