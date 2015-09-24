@@ -21,7 +21,7 @@ import org.quartz.Trigger;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class EventScheduler {
+public class JobScheduler {
 
 	private static Scheduler scheduler;
 
