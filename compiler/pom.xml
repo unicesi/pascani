@@ -20,7 +20,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.pascani.monitors</groupId>
+		<groupId>org.pascani.monitoring</groupId>
 		<artifactId>monitors</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
@@ -29,7 +29,7 @@
 	<description>Class library containing the classes and utilities implementing the translation model</description>
 	<dependencies>
 		<dependency>
-			<groupId>org.pascani.monitors</groupId>
+			<groupId>org.pascani.monitoring</groupId>
 			<artifactId>library</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
