@@ -58,6 +58,14 @@ public abstract class AbstractConsumer extends Thread {
 	 *            The event to be handled
 	 */
 	public abstract void delegateEventHandling(Event<?> event);
+	
+	/**
+	 * Shutdowns connections
+	 * 
+	 * @throws Exception
+	 *             If something bad happens!
+	 */
+	public abstract void shutdown() throws Exception;
 
 	@Override public final void run() {
 		startConsuming();

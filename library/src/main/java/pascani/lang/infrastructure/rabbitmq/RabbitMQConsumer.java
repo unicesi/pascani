@@ -176,4 +176,8 @@ public class RabbitMQConsumer extends AbstractConsumer implements Consumer {
 		logger.info("The connection for the RabbitMQ consumer " + consumerTag
 				+ " has been recovered successfully");
 	}
+
+	@Override public void shutdown() throws IOException, TimeoutException {
+		this.endPoint.close();
+	}
 }

@@ -69,6 +69,14 @@ public abstract class RpcClient {
 	 *             If something bad happened
 	 */
 	public abstract byte[] makeRequest(byte[] message) throws Exception;
+	
+	/**
+	 * Shutdowns connections
+	 * 
+	 * @throws Exception
+	 *             If something bad happens!
+	 */
+	public abstract void shutdown() throws Exception;
 
 	/**
 	 * @return the routing key of the RPC server

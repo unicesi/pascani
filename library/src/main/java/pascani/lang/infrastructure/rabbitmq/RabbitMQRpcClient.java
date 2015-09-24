@@ -75,5 +75,9 @@ public class RabbitMQRpcClient extends RpcClient {
 		// Automatically sets reply-to and correlationId
 		return this.client.primitiveCall(message);
 	}
+	
+	@Override public void shutdown() throws IOException, TimeoutException {
+		this.endPoint.close();
+	}
 
 }

@@ -98,6 +98,14 @@ public abstract class RpcServer extends Thread {
 	protected abstract void startProcessingRequests() throws Exception;
 
 	/**
+	 * Shutdowns connections
+	 * 
+	 * @throws Exception
+	 *             If something bad happens!
+	 */
+	public abstract void shutdown() throws Exception;
+
+	/**
 	 * Delegates the request processing to the handler.
 	 * 
 	 * @param request

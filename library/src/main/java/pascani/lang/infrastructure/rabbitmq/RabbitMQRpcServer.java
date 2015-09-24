@@ -118,5 +118,9 @@ public class RabbitMQRpcServer extends RpcServer {
 	@Override public void startProcessingRequests() throws IOException {
 		this.server.mainloop();
 	}
+	
+	@Override public void shutdown() throws IOException, TimeoutException {
+		this.endPoint.close();
+	}
 
 }

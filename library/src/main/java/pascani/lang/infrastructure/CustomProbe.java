@@ -202,4 +202,10 @@ public class CustomProbe implements Probe<Event<?>> {
 		return this.probe.fetchAndClean(start, end, eventTypes);
 	}
 
+	public void shutdown() throws Exception {
+		// The end point is shared among all connections to RabbitMQ, shutting
+		// it down does all the job
+		this.endPoint.close();
+	}
+
 }

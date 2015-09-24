@@ -265,5 +265,9 @@ public class BasicProbe implements Probe<Event<?>>,
 
 		return response;
 	}
+	
+	public void shutdown() throws Exception {
+		this.server.shutdown();
+	}
 
 }

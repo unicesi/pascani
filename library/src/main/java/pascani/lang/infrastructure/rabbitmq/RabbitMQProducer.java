@@ -19,6 +19,7 @@
 package pascani.lang.infrastructure.rabbitmq;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.SerializationUtils;
 
@@ -110,6 +111,10 @@ public final class RabbitMQProducer extends AbstractProducer {
 
 		Channel c = endPoint.channel();
 		c.basicPublish(this.exchange, this.routingKey, props, data);
+	}
+
+	public void shutdown() throws IOException, TimeoutException {
+		this.endPoint.close();
 	}
 
 }
