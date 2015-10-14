@@ -18,13 +18,15 @@
  */
 package pascani.lang.util;
 
-import java.lang.reflect.Proxy;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pascani.lang.PascaniRuntime;
+import pascani.lang.Probe;
+import pascani.lang.infrastructure.Namespace;
+import pascani.lang.infrastructure.NamespaceProxy;
 import pascani.lang.infrastructure.ProbeProxy;
 import pascani.lang.infrastructure.RpcClient;
 import pascani.lang.infrastructure.rabbitmq.EndPoint;
@@ -67,7 +69,7 @@ public class ServiceManager {
 	}
 
 	/**
-	 * Binds a {@link ProbeProxy} to a remote {@link Proxy} instance
+	 * Binds a {@link ProbeProxy} to a remote {@link Probe} instance
 	 * 
 	 * @param routingKey
 	 *            The probe routing key
@@ -89,6 +91,32 @@ public class ServiceManager {
 			logger.error("Error binding probe " + routingKey, e);
 		}
 
+		return proxy;
+	}
+	
+	/**
+	 * Binds a {@link NamespaceProxy} to a remote {@link Namespace} instance
+	 * 
+	 * @param routingKey
+	 *            The namespace routing key
+	 * @return a namespace proxy pointing to the specified routing key
+	 */
+	public static NamespaceProxy bindNamespace(final String routingKey) {
+		NamespaceProxy proxy = null;
+		
+		String uri = PascaniRuntime.getEnvironment().get("uri");
+		String exchange = PascaniRuntime.getEnvironment()
+				.get("rpc_exchange");
+		
+		try {
+			EndPoint endPoint = new EndPoint(uri);
+			RpcClient client = new RabbitMQRpcClient(endPoint, exchange,
+					routingKey);
+			proxy = new NamespaceProxy(client);
+		} catch (Exception e) {
+			logger.error("Error binding namespace " + routingKey, e);
+		}
+		
 		return proxy;
 	}
 
