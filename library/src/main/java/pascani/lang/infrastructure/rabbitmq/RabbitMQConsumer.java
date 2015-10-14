@@ -168,7 +168,7 @@ public class RabbitMQConsumer extends AbstractConsumer implements Consumer {
 
 	public void handleShutdownSignal(final String consumerTag,
 			ShutdownSignalException sig) {
-		logger.error("A channel or the connection of the RabbitMQ consumer "
+		logger.info("A channel or the connection of the RabbitMQ consumer "
 				+ consumerTag + " has been shut down");
 	}
 
