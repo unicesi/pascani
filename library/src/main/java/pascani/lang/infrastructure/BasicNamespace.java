@@ -208,5 +208,15 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 		}
 		return getVariable(variable);
 	}
+	
+	/**
+	 * Shutdowns connections
+	 * 
+	 * @throws Exception
+	 *             If something bad happens!
+	 */
+	public void shutdown() throws Exception {
+		this.server.shutdown();
+	}
 
 }
