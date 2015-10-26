@@ -62,5 +62,4 @@ public class LoggingSortedSet<E> extends ForwardingSortedSet<E> {
 	@Override public boolean addAll(Collection<? extends E> collection) {
 		return super.standardAddAll(collection);
 	}
-
 }

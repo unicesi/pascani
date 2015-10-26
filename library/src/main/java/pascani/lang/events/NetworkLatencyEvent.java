@@ -233,25 +233,19 @@ public class NetworkLatencyEvent extends Event<Double> {
 		return sb.toString();
 	}
 
-	/**
-	 * The result is {@code -1} if {@code this} event was started before
-	 * {@code o}, otherwise is {@code 1}. {@code 0} is returned when the
-	 * argument is null or is not a {@link NetworkLatencyEvent}.
-	 * 
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	/*
+	 * (non-Javadoc)
+	 * @see pascani.lang.Event#compareTo(pascani.lang.Event)
 	 */
-	public int compareTo(final Event<Double> o) {
-		if (o != null && o instanceof NetworkLatencyEvent) {
-			NetworkLatencyEvent other = (NetworkLatencyEvent) o;
-
-			if (this.start < other.start) {
-				return -1;
-			} else {
-				return 1;
-			}
+	@Override public int compareTo(final Event<Double> o) {
+		NetworkLatencyEvent other = (NetworkLatencyEvent) o;
+		if (this.start < other.start) {
+			return -1;
+		} else if(this.start > other.start) {
+			return 1;
+		} else {
+			return 0;
 		}
-
-		return 0;
 	}
 
 }

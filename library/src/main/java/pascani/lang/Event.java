@@ -93,35 +93,44 @@ public abstract class Event<T> implements Comparable<Event<T>>, Serializable {
 		return Range.closed(start, end).contains(this.timestamp);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((this.identifier == null) ? 0 : this.identifier.hashCode());
+		return result;
+	}
+	
 	/**
 	 * The result is {@code true} if and only if the argument is not
 	 * {@code null}, is an {@Link Event} object with the same identifier
 	 * as {@code this} instance.
 	 */
 	@Override public boolean equals(final Object obj) {
-		if ((null == obj) || (obj.getClass() != this.getClass()))
+		if (this == obj)
+			return true;
+		else if ((null == obj) || (obj.getClass() != this.getClass()))
 			return false;
 
 		Event<?> other = (Event<?>) obj;
 		return this.identifier.equals(other.identifier);
 	}
 
-	/**
-	 * The result is {@code -1} if {@code this} event was started before
-	 * {@code o}, otherwise is {@code 1}. {@code 0} is returned when the object
-	 * is null, or when the objects are not instances of the same class.
-	 *
+	/*
+	 * (non-Javadoc)
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	public int compareTo(final Event<T> o) {
-
-		if (o != null && this.getClass() == o.getClass()) {
-			if (this.timestamp < o.timestamp)
-				return -1;
-			else
-				return 1;
-		}
-
-		return 0;
+		if (this.timestamp < o.timestamp)
+			return -1;
+		else if (this.timestamp > o.timestamp)
+			return 1;
+		else
+			return 0;
 	}
+	
 }
