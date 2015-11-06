@@ -116,6 +116,14 @@ public class TimeLapseEvent extends Event<Double> {
 	@Override public Double value() {
 		return this.value;
 	}
+	
+	public long start() {
+		return this.start;
+	}
+	
+	public long end() {
+		return this.end;
+	}
 
 	/**
 	 * Returns the string representation of this event for logging purposes.

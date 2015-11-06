@@ -173,6 +173,14 @@ public class NetworkLatencyEvent extends Event<Double> {
 	@Override public Double value() {
 		return this.latency;
 	}
+	
+	public long start() {
+		return this.start;
+	}
+	
+	public long end() {
+		return this.end;
+	}
 
 	public Class<?> methodCaller() {
 		return this.caller;
