@@ -175,6 +175,12 @@ public class ProbeProxy implements Probe<Event<?>> {
 		return SerializationUtils.deserialize(response);
 	}
 	
+	/**
+	 * Shutdowns connections
+	 * 
+	 * @throws Exception
+	 *             If something bad happens!
+	 */
 	public void shutdown() throws Exception {
 		this.client.shutdown();
 	}
