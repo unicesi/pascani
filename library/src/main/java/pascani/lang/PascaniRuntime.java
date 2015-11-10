@@ -145,28 +145,28 @@ public class PascaniRuntime {
 	private static void readProperties() {
 		Properties config = new Properties();
 		InputStream input = null;
-		boolean ok = false;
 
 		try {
 			input = PascaniRuntime.class.getClassLoader().getResourceAsStream("pascani.properties");
-			if (input != null) {
+			if (input != null)
 				config.load(input);
-				ok = true;
-			}
 		} catch (FileNotFoundException e) {
 			logger.warn("No configuration file was found. Execution is started with default values");
 		} catch (IOException e) {
 			logger.error("Error loading configuration file. Execution is started with default values");
 		} finally {
 
-			if (!ok) {
-				// Set defaults
+			// Set defaults
+			if(!config.containsKey("uri"))
 				config.put("uri", "amqp://guest:guest@localhost:5672");
+			if(!config.containsKey("probes_exchange"))
 				config.put("probes_exchange", "probes_exchange");
+			if(!config.containsKey("namespace_exchange"))
 				config.put("namespace_exchange", "namespace_exchange");
+			if(!config.containsKey("rpc_exchange"))
 				config.put("rpc_exchange", "rpc_exchange");
+			if(!config.containsKey("rpc_queue_prefix"))
 				config.put("rpc_queue_prefix", "rpc_");
-			}
 
 			if (input != null) {
 				try {
