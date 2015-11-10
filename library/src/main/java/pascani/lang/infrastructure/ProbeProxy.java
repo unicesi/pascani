@@ -174,5 +174,9 @@ public class ProbeProxy implements Probe<Event<?>> {
 		byte[] response = makeActualCall(request, new ArrayList<Event<?>>());
 		return SerializationUtils.deserialize(response);
 	}
+	
+	public void shutdown() throws Exception {
+		this.client.shutdown();
+	}
 
 }
