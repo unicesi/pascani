@@ -35,7 +35,7 @@ import com.rabbitmq.client.Channel;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public final class RabbitMQProducer extends AbstractProducer {
+public class RabbitMQProducer extends AbstractProducer {
 
 	/**
 	 * An end point connected to a RabbitMQ server
