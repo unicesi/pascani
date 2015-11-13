@@ -43,7 +43,7 @@ import com.rabbitmq.client.ShutdownSignalException;
 public class RabbitMQConsumer extends AbstractConsumer implements Consumer {
 
 	/**
-	 * An end point connected to a RabbitMQ queue
+	 * An end point connected to a RabbitMQ server
 	 */
 	private final EndPoint endPoint;
 

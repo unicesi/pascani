@@ -38,7 +38,7 @@ import com.rabbitmq.client.Channel;
 public final class RabbitMQProducer extends AbstractProducer {
 
 	/**
-	 * An end point connected to a RabbitMQ queue
+	 * An end point connected to a RabbitMQ server
 	 */
 	private final EndPoint endPoint;
 

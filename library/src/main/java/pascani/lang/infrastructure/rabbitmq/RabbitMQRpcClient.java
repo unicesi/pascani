@@ -33,7 +33,7 @@ import com.rabbitmq.client.ShutdownSignalException;
 public class RabbitMQRpcClient extends RpcClient {
 
 	/**
-	 * An end point connected to a RabbitMQ queue
+	 * An end point connected to a RabbitMQ server
 	 */
 	private final EndPoint endPoint;
 

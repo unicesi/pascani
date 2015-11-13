@@ -60,7 +60,7 @@ public class RabbitMQRpcServer extends RpcServer {
 	}
 
 	/**
-	 * An end point connected to a RabbitMQ queue
+	 * An end point connected to a RabbitMQ server
 	 */
 	private final EndPoint endPoint;
 
