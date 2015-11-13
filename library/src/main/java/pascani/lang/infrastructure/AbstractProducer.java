@@ -52,16 +52,6 @@ public abstract class AbstractProducer {
 	protected final Logger logger = LogManager.getLogger(getClass());
 
 	/**
-	 * <p>
-	 * <b>Note</b>: For the optional parameter {@code routingKey} DO NOT USE
-	 * null, use empty string instead.
-	 * </p>
-	 */
-	protected AbstractProducer() {
-
-	}
-
-	/**
 	 * Listens for {@link Event}s produced by {@link LocalEventProducer}
 	 * objects.
 	 * 
@@ -92,6 +82,14 @@ public abstract class AbstractProducer {
 	 */
 	protected abstract void publish(Event<?> event) throws Exception;
 
+	/**
+	 * Shutdowns connections
+	 * 
+	 * @throws Exception
+	 *             If something bad happens!
+	 */
+	public abstract void shutdown() throws Exception;
+	
 	/**
 	 * Establishes a set of event classes to be produced
 	 * 

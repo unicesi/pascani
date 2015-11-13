@@ -128,7 +128,12 @@ public class RabbitMQProducer extends AbstractProducer {
 		c.basicPublish(this.exchange, this.routingKey, props, data);
 	}
 
-	public void shutdown() throws IOException, TimeoutException {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.infrastructure.AbstractProducer#shutdown()
+	 */
+	@Override public void shutdown() throws IOException, TimeoutException {
 		this.endPoint.close();
 	}
 
