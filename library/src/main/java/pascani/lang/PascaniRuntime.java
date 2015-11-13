@@ -163,6 +163,8 @@ public class PascaniRuntime {
 				config.put("probes_exchange", "probes_exchange");
 			if(!config.containsKey("namespace_exchange"))
 				config.put("namespace_exchange", "namespace_exchange");
+			if(!config.containsKey("monitor_exchange"))
+				config.put("monitor_exchange", "monitor_exchange");
 			if(!config.containsKey("rpc_exchange"))
 				config.put("rpc_exchange", "rpc_exchange");
 			if(!config.containsKey("rpc_queue_prefix"))
