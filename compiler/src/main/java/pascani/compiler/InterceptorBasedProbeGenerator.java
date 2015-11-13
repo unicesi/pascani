@@ -29,7 +29,7 @@ import pascani.compiler.templates.InterceptorBasedProbeTemplates;
 import pascani.compiler.templates.ProbeTemplates;
 import pascani.compiler.util.NameProposal;
 import pascani.lang.Event;
-import pascani.lang.PascaniRuntime;
+import pascani.lang.PascaniRuntime.Context;
 import pascani.lang.Probe;
 import pascani.lang.events.ExceptionEvent;
 import pascani.lang.infrastructure.CustomProbe;
@@ -56,25 +56,17 @@ public abstract class InterceptorBasedProbeGenerator {
 	protected final String probeName;
 
 	/**
-	 * The RabbitMQ connection URI
-	 */
-	protected final String connectionURI;
-
-	/**
 	 * @param directoryPath
 	 *            The directory in which the java files will be written
 	 * @param probeName
 	 *            The intended probe name; for instance "ExceptionProbe". It may
 	 *            change if an existing file under the same parent directory has
 	 *            the same name.
-	 * @param connectionURI
-	 *            The RabbitMQ connection URI
 	 */
 	public InterceptorBasedProbeGenerator(final String directoryPath,
-			final String probeName, final String connectionURI) {
+			final String probeName) {
 		this.path = directoryPath;
 		this.probeName = probeName;
-		this.connectionURI = connectionURI;
 	}
 
 	/**
@@ -109,7 +101,7 @@ public abstract class InterceptorBasedProbeGenerator {
 			List<Class<? extends Event<?>>> events) {
 
 		return ProbeTemplates.getInitializationContrib(getProbeClassName(),
-				connectionURI, exchange, routingKey, true, events);
+				exchange, routingKey, true, events);
 	}
 
 	/**
@@ -117,8 +109,8 @@ public abstract class InterceptorBasedProbeGenerator {
 	 */
 	public String probeInitialization() {
 
-		return ProbeTemplates.getInitializationContrib(getProbeClassName(),
-				connectionURI, "", "", false, null);
+		return ProbeTemplates.getInitializationContrib(getProbeClassName(), "",
+				"", false, null);
 	}
 
 	/**
@@ -141,8 +133,8 @@ public abstract class InterceptorBasedProbeGenerator {
 		JavaClassSource javaClass = Roaster.create(JavaClassSource.class);
 
 		// Add imports
-		javaClass.addImport(PascaniRuntime.class);
 		javaClass.addImport(CustomProbe.class);
+		javaClass.addImport(Context.class);
 
 		// Set general properties
 		javaClass.setPackage(packageName);
@@ -150,7 +142,7 @@ public abstract class InterceptorBasedProbeGenerator {
 		javaClass.setSuperType(CustomProbe.class);
 
 		String constructorBody = InterceptorBasedProbeTemplates
-				.getProbeConstructor(this.connectionURI, routingKey);
+				.getProbeConstructor(routingKey, Context.PROBE);
 
 		MethodSource<?> constructor = javaClass.addMethod();
 		constructor.setConstructor(true);

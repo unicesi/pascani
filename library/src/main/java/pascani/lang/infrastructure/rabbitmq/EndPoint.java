@@ -21,6 +21,8 @@ package pascani.lang.infrastructure.rabbitmq;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+import pascani.lang.PascaniRuntime;
+
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -42,13 +44,14 @@ public class EndPoint {
 	 * 
 	 * @param uri
 	 *            The RabbitMQ connection URI
+	 * 
 	 * @throws Exception
 	 *             If something bat happens. Check exceptions in
 	 *             {@link ConnectionFactory#setUri(String)},
 	 *             {@link ConnectionFactory#newConnection()}, and
 	 *             {@link Connection#createChannel()}
 	 */
-	public EndPoint(String uri) throws Exception {
+	public EndPoint(final String uri) throws Exception {
 
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setAutomaticRecoveryEnabled(true);
@@ -56,6 +59,20 @@ public class EndPoint {
 
 		this.connection = factory.newConnection();
 		this.channel = this.connection.createChannel();
+	}
+	
+	/**
+	 * Creates a RabbitMQ end point; that is, a connection to the RabbitMQ
+	 * server. This is commonly used by all RabbitMQ consumers and producers.
+	 * 
+	 * @throws Exception
+	 *             If something bat happens. Check exceptions in
+	 *             {@link ConnectionFactory#setUri(String)},
+	 *             {@link ConnectionFactory#newConnection()}, and
+	 *             {@link Connection#createChannel()}
+	 */
+	public EndPoint() throws Exception {
+		this(PascaniRuntime.getEnvironment().get("uri"));
 	}
 
 	public void close() throws IOException, TimeoutException {

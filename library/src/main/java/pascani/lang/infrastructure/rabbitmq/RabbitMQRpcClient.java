@@ -46,6 +46,21 @@ public class RabbitMQRpcClient extends RpcClient {
 	 * Creates an instance of a RabbitMQ RPC client, setting the RPC exchange
 	 * and a routing key.
 	 * 
+	 * @param exchange
+	 *            The exchange to which messages are sent
+	 * @param routingKey
+	 *            The queue name of the RPC server
+	 * @throws Exception
+	 */
+	public RabbitMQRpcClient(String exchange,
+			String routingKey) throws Exception {
+		this(new EndPoint(), exchange, routingKey);
+	}
+	
+	/**
+	 * Creates an instance of a RabbitMQ RPC client, setting the RPC exchange
+	 * and a routing key.
+	 * 
 	 * @param endPoint
 	 *            The configured RabbitMQ end point
 	 * @param exchange

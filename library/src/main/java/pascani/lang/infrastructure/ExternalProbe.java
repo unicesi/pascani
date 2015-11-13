@@ -54,8 +54,6 @@ public class ExternalProbe extends CustomProbe {
 	 * recorded events from this probe.
 	 * </p>
 	 * 
-	 * @param uri
-	 *            The RabbitMQ connection URI
 	 * @param routingKey
 	 *            A unique name among all the {@link Probe} instances. This name
 	 *            is necessary for external components to send RPC requests to
@@ -66,9 +64,9 @@ public class ExternalProbe extends CustomProbe {
 	 *             If something bad happens. Check exceptions in
 	 *             {@link CustomProbe#CustomProbe(String, String, PascaniRuntime.Context)}
 	 */
-	public ExternalProbe(final String uri, final String routingKey,
-			PascaniRuntime.Context context) throws Exception {
-		super(uri, routingKey, context);
+	public ExternalProbe(final String routingKey, PascaniRuntime.Context context)
+			throws Exception {
+		super(routingKey, context);
 
 		this.consumer = new RabbitMQConsumer(super.endPoint, routingKey,
 				routingKey, context);

@@ -22,6 +22,7 @@ import com.google.common.base.Joiner
 import java.util.Collection
 import java.util.List
 import pascani.compiler.util.NameProposal
+import pascani.lang.PascaniRuntime.Context
 import pascani.lang.events.NetworkLatencyEvent
 import pascani.lang.infrastructure.rabbitmq.RabbitMQProducer
 
@@ -104,13 +105,11 @@ class NetworkLatencyTemplates {
 	/**
 	 * Produces a code block for initializing the message producer inside each adapter
 	 */
-	def static String getProducerInitialization(String producerVar, String uri, String exchange, String routingKey) {
+	def static String getProducerInitialization(String producerVar, String exchange, String routingKey) {
 		'''
 			try {
-				EndPoint endPoint = new EndPoint("«uri»");
-				
-				this.«producerVar» = new «RabbitMQProducer.simpleName»(endPoint, classes, "«exchange»", "«routingKey»");
-				this.«producerVar».acceptOnly(«NetworkLatencyEvent.simpleName»).class;
+				this.«producerVar» = new «RabbitMQProducer.simpleName»("«exchange»", "«routingKey»");
+				this.«producerVar».acceptOnly(«NetworkLatencyEvent.simpleName».class);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -132,9 +131,9 @@ class NetworkLatencyTemplates {
 	/**
 	 * Producer a code block for initializing the network probe
 	 */
-	def static String getProbeInitialization(String uri, String exchange, String routingKey) {
+	def static String getProbeInitialization(String routingKey, Context context) {
 		'''
-			super("«uri»", "«routingKey»");
+			super("«routingKey»", «Context.simpleName».«context.name»);
 		'''
 	}
 

@@ -83,8 +83,6 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	 * (there is no local event propagation).
 	 * </p>
 	 * 
-	 * @param uri
-	 *            The RabbitMQ connection URI
 	 * @param routingKey
 	 *            The routing key identifying this namespace within the
 	 *            namespaces exchange
@@ -94,12 +92,12 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	 *             for more information.
 	 */
 	@SuppressWarnings("unchecked")
-	public BasicNamespace(final String uri, final String routingKey)
+	public BasicNamespace(final String routingKey)
 			throws Exception {
 
 		this.variables = new HashMap<String, Serializable>();
 		this.context = PascaniRuntime.Context.NAMESPACE;
-		this.endPoint = new EndPoint(uri);
+		this.endPoint = new EndPoint();
 		this.producer = new RabbitMQProducer(endPoint,
 				declareQueue(routingKey), routingKey);
 		this.producer.acceptOnly(ChangeEvent.class);

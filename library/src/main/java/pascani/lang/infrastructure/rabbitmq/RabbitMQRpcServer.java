@@ -73,6 +73,19 @@ public class RabbitMQRpcServer extends RpcServer {
 	 * Creates an instance of a RabbitMQ RPC server, setting the RPC request
 	 * queue.
 	 * 
+	 * @param routingKey
+	 *            The routing key
+	 * @throws Exception 
+	 */
+	public RabbitMQRpcServer(String routingKey,
+			final PascaniRuntime.Context context) throws Exception {
+		this(new EndPoint(), routingKey, context);
+	}
+	
+	/**
+	 * Creates an instance of a RabbitMQ RPC server, setting the RPC request
+	 * queue.
+	 * 
 	 * @param endPoint
 	 * @param routingKey
 	 *            The routing key

@@ -20,30 +20,12 @@ package pascani.lang.util;
 
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import pascani.lang.PascaniRuntime;
-import pascani.lang.Probe;
-import pascani.lang.infrastructure.Namespace;
-import pascani.lang.infrastructure.NamespaceProxy;
-import pascani.lang.infrastructure.ProbeProxy;
-import pascani.lang.infrastructure.RpcClient;
-import pascani.lang.infrastructure.rabbitmq.EndPoint;
-import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcClient;
-
 /**
  * This implementation provides utility methods to bind external services
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class ServiceManager {
-
-	/**
-	 * The logger
-	 */
-	private final static Logger logger = LogManager
-			.getLogger(ServiceManager.class);
 
 	/**
 	 * Registers the necessary properties to bind a SCA service
@@ -66,58 +48,6 @@ public class ServiceManager {
 		 * and content assist purposes.
 		 */
 		return null;
-	}
-
-	/**
-	 * Binds a {@link ProbeProxy} to a remote {@link Probe} instance
-	 * 
-	 * @param routingKey
-	 *            The probe routing key
-	 * @return a probe proxy pointing to the specified routing key
-	 */
-	public static ProbeProxy bindProbe(final String routingKey) {
-		ProbeProxy proxy = null;
-
-		String uri = PascaniRuntime.getEnvironment().get("uri");
-		String exchange = PascaniRuntime.getEnvironment()
-				.get("rpc_exchange");
-
-		try {
-			EndPoint endPoint = new EndPoint(uri);
-			RpcClient client = new RabbitMQRpcClient(endPoint, exchange,
-					routingKey);
-			proxy = new ProbeProxy(client);
-		} catch (Exception e) {
-			logger.error("Error binding probe " + routingKey, e);
-		}
-
-		return proxy;
-	}
-	
-	/**
-	 * Binds a {@link NamespaceProxy} to a remote {@link Namespace} instance
-	 * 
-	 * @param routingKey
-	 *            The namespace routing key
-	 * @return a namespace proxy pointing to the specified routing key
-	 */
-	public static NamespaceProxy bindNamespace(final String routingKey) {
-		NamespaceProxy proxy = null;
-		
-		String uri = PascaniRuntime.getEnvironment().get("uri");
-		String exchange = PascaniRuntime.getEnvironment()
-				.get("rpc_exchange");
-		
-		try {
-			EndPoint endPoint = new EndPoint(uri);
-			RpcClient client = new RabbitMQRpcClient(endPoint, exchange,
-					routingKey);
-			proxy = new NamespaceProxy(client);
-		} catch (Exception e) {
-			logger.error("Error binding namespace " + routingKey, e);
-		}
-		
-		return proxy;
 	}
 
 }

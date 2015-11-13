@@ -27,7 +27,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pascani.lang.Event;
+import pascani.lang.PascaniRuntime;
 import pascani.lang.Probe;
+import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcClient;
 
 /**
  * An implementation of {@link Probe} that makes communication transparent for
@@ -49,6 +51,19 @@ public class ProbeProxy implements Probe<Event<?>> {
 	 * An RPC client configured to make requests to a specific {@link Probe}
 	 */
 	private final RpcClient client;
+
+	/**
+	 * Creates a ProbeProxy instance from a routing key, and the default RPC
+	 * exchange.
+	 * 
+	 * @param routingKey
+	 *            The probe's routing key
+	 * @throws Exception
+	 */
+	public ProbeProxy(String routingKey) throws Exception {
+		this(new RabbitMQRpcClient(PascaniRuntime.getEnvironment().get(
+				"rpc_exchange"), routingKey));
+	}
 
 	/**
 	 * @param client
@@ -121,7 +136,8 @@ public class ProbeProxy implements Probe<Event<?>> {
 	}
 
 	public int countAndClean(final long start, final long end) {
-		return countAndClean(start, end, new ArrayList<Class<? extends Event<?>>>());
+		return countAndClean(start, end,
+				new ArrayList<Class<? extends Event<?>>>());
 	}
 
 	/*
@@ -158,7 +174,8 @@ public class ProbeProxy implements Probe<Event<?>> {
 	}
 
 	public List<Event<?>> fetchAndClean(final long start, final long end) {
-		return fetchAndClean(start, end, new ArrayList<Class<? extends Event<?>>>());
+		return fetchAndClean(start, end,
+				new ArrayList<Class<? extends Event<?>>>());
 	}
 
 	/*
@@ -170,7 +187,8 @@ public class ProbeProxy implements Probe<Event<?>> {
 			final List<Class<? extends Event<?>>> eventTypes) {
 
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_FETCH_AND_CLEAN,
-				start, end, new ArrayList<Class<? extends Event<?>>>(eventTypes));
+				start, end,
+				new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, new ArrayList<Event<?>>());
 		return SerializationUtils.deserialize(response);
 	}

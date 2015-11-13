@@ -24,6 +24,9 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import pascani.lang.PascaniRuntime;
+import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcClient;
+
 public class NamespaceProxy implements Namespace {
 
 	/**
@@ -35,6 +38,20 @@ public class NamespaceProxy implements Namespace {
 	 * An RPC client configured to make requests to a specific {@link Namespace}
 	 */
 	private final RpcClient client;
+
+	/**
+	 * Creates a NamespaceProxy instance from a routing key, and the default RPC
+	 * exchange
+	 * 
+	 * @param routingKey
+	 *            The namespace's routing key
+	 * 
+	 * @throws Exception
+	 */
+	public NamespaceProxy(String routingKey) throws Exception {
+		this(new RabbitMQRpcClient(PascaniRuntime.getEnvironment().get(
+				"rpc_exchange"), routingKey));
+	}
 
 	/**
 	 * @param client
@@ -96,7 +113,7 @@ public class NamespaceProxy implements Namespace {
 		byte[] response = makeActualCall(request, null);
 		return SerializationUtils.deserialize(response);
 	}
-	
+
 	/**
 	 * Shutdowns connections
 	 * 

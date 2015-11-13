@@ -54,6 +54,21 @@ public final class RabbitMQProducer extends AbstractProducer {
 	private String routingKey;
 
 	/**
+	 * Creates a RabbitMQ producer
+	 * 
+	 * @param exchange
+	 *            The exchange to which messages are sent
+	 * @param routingKey
+	 *            An optional queue name for directly sending the messages
+	 * @throws Exception
+	 *             If something bat happens. See {@link EndPoint}
+	 */
+	public RabbitMQProducer(final String exchange, final String routingKey)
+			throws Exception {
+		this(new EndPoint(), exchange, routingKey);
+	}
+
+	/**
 	 * Creates a RabbitMQ producer from an end point and a list of accepted
 	 * events' classes
 	 * 

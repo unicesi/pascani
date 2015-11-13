@@ -65,6 +65,23 @@ public class RabbitMQConsumer extends AbstractConsumer implements Consumer {
 	/**
 	 * Creates a RabbitMQ message consumer
 	 * 
+	 * @param queue
+	 *            The queue from which messages are consumed
+	 * @param tag
+	 *            The consumer tag for this consumer (a unique name)
+	 * @param context
+	 *            The context in which this consumer is used
+	 * @throws Exception 
+	 */
+	public RabbitMQConsumer(final String queue,
+			final String tag, final PascaniRuntime.Context context)
+			throws Exception {
+		this(new EndPoint(), queue, tag, context);
+	}
+	
+	/**
+	 * Creates a RabbitMQ message consumer
+	 * 
 	 * @param endPoint
 	 *            The RabbitMQ end point
 	 * @param queue

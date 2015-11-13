@@ -18,14 +18,16 @@
  */
 package pascani.compiler.templates
 
+import pascani.lang.PascaniRuntime.Context
+
 class InterceptorBasedProbeTemplates {
 
 	/**
 	 * Produces the necessary code to initialize the {@link CustomProbe}
 	 */
-	def static String getProbeConstructor(String uri, String routingKey) {
+	def static String getProbeConstructor(String routingKey, Context context) {
 		'''
-			super("«uri»", "«routingKey»", PascaniRuntime.Context.PROBE);
+			super("«routingKey»", «Context.simpleName».«context.name»);
 		'''
 	}
 

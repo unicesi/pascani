@@ -18,19 +18,18 @@
  */
 package pascani.compiler.templates
 
-import pascani.compiler.util.NameProposal
 import com.google.common.collect.Lists
-import pascani.lang.events.TimeLapseEvent
-import pascani.lang.util.LocalEventProducer
-import pascani.lang.Event
 import java.util.List
+import pascani.compiler.util.NameProposal
+import pascani.lang.Event
+import pascani.lang.PascaniRuntime
 import pascani.lang.events.ExceptionEvent
 import pascani.lang.events.InvokeEvent
 import pascani.lang.events.ReturnEvent
+import pascani.lang.events.TimeLapseEvent
 import pascani.lang.infrastructure.AbstractProducer
 import pascani.lang.infrastructure.rabbitmq.RabbitMQProducer
-import pascani.lang.infrastructure.rabbitmq.EndPoint
-import pascani.lang.PascaniRuntime
+import pascani.lang.util.LocalEventProducer
 
 class ProbeTemplates {
 
@@ -43,15 +42,14 @@ class ProbeTemplates {
 		'''
 	}
 
-	def static String getInitializationContrib(String probeClass, String connectionURI, String probesExchange,
-		String probeRoutingKey, boolean addProducer, List<Class<? extends Event<?>>> events) {
+	def static String getInitializationContrib(String probeClass, String probesExchange, String probeRoutingKey,
+		boolean addProducer, List<Class<? extends Event<?>>> events) {
 		'''
 			try {
 				«probeClass» probe = new «probeClass»();
 				«IF addProducer»
-					«EndPoint.simpleName» endPoint = new «EndPoint.simpleName»("«connectionURI»");
 					«AbstractProducer.simpleName» producer = 
-						new «RabbitMQProducer.simpleName»(endPoint, "«probesExchange»", "«probeRoutingKey»");
+						new «RabbitMQProducer.simpleName»("«probesExchange»", "«probeRoutingKey»");
 					
 					producer.acceptOnly(
 						«FOR clazz : events SEPARATOR ", "»

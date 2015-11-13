@@ -18,6 +18,7 @@
  */
 package pascani.lang.infrastructure;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,8 +70,6 @@ public class CustomProbe implements Probe<Event<?>> {
 	 * recorded events from this probe.
 	 * </p>
 	 * 
-	 * @param uri
-	 *            The RabbitMQ connection URI
 	 * @param routingKey
 	 *            A unique name among all the {@link Probe} instances. This name
 	 *            is necessary for external components to send RPC requests to
@@ -81,25 +80,30 @@ public class CustomProbe implements Probe<Event<?>> {
 	 *             If something bad happens. Check exceptions in
 	 *             {@link EndPoint#EndPoint(String)}
 	 */
-	public CustomProbe(final String uri, final String routingKey,
+	public CustomProbe(final String routingKey,
 			final PascaniRuntime.Context context) throws Exception {
-
+		
 		this.context = context;
-		this.endPoint = new EndPoint(uri);
+		this.endPoint = new EndPoint();
+		createQueue(routingKey);
+		
+		this.server = new RabbitMQRpcServer(endPoint, routingKey, this.context);
+		this.probe = new BasicProbe(server);
 
-		// Create the corresponding queue, and then create a binding between the
-		// queue and the probes exchange
+		registerProbeAsListener();
+	}
+
+	/**
+	 * Create the corresponding queue, and then create a binding between the
+	 * queue and the probes exchange
+	 */
+	private void createQueue(final String routingKey) throws IOException {
 		String queue = routingKey;
 		String exchange = PascaniRuntime.getEnvironment()
 				.get("probes_exchange");
 
 		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
 		this.endPoint.channel().queueBind(queue, exchange, routingKey);
-
-		this.server = new RabbitMQRpcServer(endPoint, routingKey, this.context);
-		this.probe = new BasicProbe(server);
-
-		registerProbeAsListener();
 	}
 
 	/**
@@ -202,6 +206,12 @@ public class CustomProbe implements Probe<Event<?>> {
 		return this.probe.fetchAndClean(start, end, eventTypes);
 	}
 
+	/**
+	 * Shutdowns connections
+	 * 
+	 * @throws Exception
+	 *             If something bad happens!
+	 */
 	public void shutdown() throws Exception {
 		// The end point is shared among all connections to RabbitMQ, shutting
 		// it down does all the job

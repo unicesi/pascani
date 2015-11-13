@@ -36,11 +36,11 @@ import org.jboss.forge.roaster.model.util.Types;
 
 import pascani.compiler.templates.NetworkLatencyTemplates;
 import pascani.compiler.util.NameProposal;
-import pascani.lang.Event;
+import pascani.lang.PascaniRuntime;
+import pascani.lang.PascaniRuntime.Context;
 import pascani.lang.events.NetworkLatencyEvent;
-import pascani.lang.infrastructure.ExternalProbe;
 import pascani.lang.infrastructure.AbstractProducer;
-import pascani.lang.infrastructure.rabbitmq.EndPoint;
+import pascani.lang.infrastructure.ExternalProbe;
 import pascani.lang.infrastructure.rabbitmq.RabbitMQProducer;
 
 import com.google.common.base.Function;
@@ -97,11 +97,6 @@ public class LatencyProbeGenerator {
 	};
 
 	/**
-	 * The message queuing server's connection URI
-	 */
-	private final String uri;
-
-	/**
 	 * The probes' exchange
 	 */
 	private final String exchange;
@@ -116,8 +111,6 @@ public class LatencyProbeGenerator {
 	 * 
 	 * @param interfacePath
 	 *            The file path of the original interface's source code
-	 * @param uri
-	 *            The queuing server's connection URI
 	 * @param exchange
 	 *            The probes' exchange
 	 * @param routingKey
@@ -126,10 +119,9 @@ public class LatencyProbeGenerator {
 	 * @param durableExchange
 	 *            Whether the exchange is durable or not
 	 */
-	public LatencyProbeGenerator(final String interfacePath, final String uri,
+	public LatencyProbeGenerator(final String interfacePath,
 			final String exchange, final String routingKey) {
 		this.interfacePath = interfacePath;
-		this.uri = uri;
 		this.exchange = exchange;
 		this.routingKey = routingKey;
 	}
@@ -205,10 +197,7 @@ public class LatencyProbeGenerator {
 		javaClass.addInterface(_interface.getCanonicalName());
 		javaClass.addImport(UUID.class);
 		javaClass.addImport(NetworkLatencyEvent.class);
-		javaClass.addImport(EndPoint.class);
 		javaClass.addImport(List.class);
-		javaClass.addImport(ArrayList.class);
-		javaClass.addImport(Event.class);
 		javaClass.addImport(AbstractProducer.class);
 		javaClass.addImport(RabbitMQProducer.class);
 
@@ -226,11 +215,14 @@ public class LatencyProbeGenerator {
 
 		// A constructor to initialize the producer
 		String constructorBody = NetworkLatencyTemplates
-				.getProducerInitialization(PRODUCER_FIELD_NAME, this.uri,
-						this.exchange, this.routingKey);
+				.getProducerInitialization(PRODUCER_FIELD_NAME, this.exchange,
+						this.routingKey);
 
-		javaClass.addMethod().setName(javaClass.getName())
-				.setBody(constructorBody).setConstructor(true);
+		MethodSource<JavaClassSource> constructor = javaClass.addMethod()
+				.setName(javaClass.getName()).setBody(constructorBody)
+				.setConstructor(true);
+		constructor.addAnnotation(SuppressWarnings.class).setStringValue(
+				"unchecked");
 
 		Function<Object, String> getClass = new Function<Object, String>() {
 			public String apply(Object parameter) {
@@ -316,10 +308,7 @@ public class LatencyProbeGenerator {
 		javaClass.setPackage(modified.getPackage());
 		javaClass.addInterface(modified.getCanonicalName());
 		javaClass.addImport(NetworkLatencyEvent.class);
-		javaClass.addImport(EndPoint.class);
 		javaClass.addImport(List.class);
-		javaClass.addImport(ArrayList.class);
-		javaClass.addImport(Event.class);
 		javaClass.addImport(AbstractProducer.class);
 		javaClass.addImport(RabbitMQProducer.class);
 
@@ -337,11 +326,14 @@ public class LatencyProbeGenerator {
 
 		// A constructor to initialize the producer
 		String constructorBody = NetworkLatencyTemplates
-				.getProducerInitialization(PRODUCER_FIELD_NAME, this.uri,
-						this.exchange, this.routingKey);
+				.getProducerInitialization(PRODUCER_FIELD_NAME, this.exchange,
+						this.routingKey);
 
-		javaClass.addMethod().setName(javaClass.getName())
-				.setBody(constructorBody).setConstructor(true);
+		MethodSource<JavaClassSource> constructor = javaClass.addMethod()
+				.setName(javaClass.getName()).setBody(constructorBody)
+				.setConstructor(true);
+		constructor.addAnnotation(SuppressWarnings.class).setStringValue(
+				"unchecked");
 
 		for (MethodSource<?> method : modified.getMethods()) {
 
@@ -396,10 +388,11 @@ public class LatencyProbeGenerator {
 
 		// Add imports
 		javaClass.addImport(ExternalProbe.class);
-		javaClass.addImport(NetworkLatencyEvent.class);
+		javaClass.addImport(PascaniRuntime.Context.class);
 
-		String body = NetworkLatencyTemplates.getProbeInitialization(this.uri,
-				this.exchange, this.routingKey);
+		Context context = Context.PROBE;
+		String body = NetworkLatencyTemplates.getProbeInitialization(
+				this.routingKey, context);
 		javaClass.addMethod().setConstructor(true).setBody(body)
 				.addThrows(Exception.class);
 
