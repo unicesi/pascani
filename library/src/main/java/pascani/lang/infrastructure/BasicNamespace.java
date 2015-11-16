@@ -114,7 +114,7 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 		// exchange.
 		String queue = routingKey;
 		String exchange = PascaniRuntime.getEnvironment().get(
-				"namespace_exchange");
+				"namespaces_exchange");
 
 		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
 		this.endPoint.channel().queueBind(queue, exchange, routingKey);
