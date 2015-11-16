@@ -39,7 +39,7 @@ import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcServer;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class CustomProbe implements Probe<Event<?>> {
+public class LocalProbe implements Probe<Event<?>> {
 
 	/**
 	 * A RabbitMQ end point (a connection to the server)
@@ -80,7 +80,7 @@ public class CustomProbe implements Probe<Event<?>> {
 	 *             If something bad happens. Check exceptions in
 	 *             {@link EndPoint#EndPoint(String)}
 	 */
-	public CustomProbe(final String routingKey,
+	public LocalProbe(final String routingKey,
 			final PascaniRuntime.Context context) throws Exception {
 		
 		this.context = context;

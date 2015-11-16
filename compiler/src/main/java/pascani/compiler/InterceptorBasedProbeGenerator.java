@@ -32,7 +32,7 @@ import pascani.lang.Event;
 import pascani.lang.PascaniRuntime.Context;
 import pascani.lang.Probe;
 import pascani.lang.events.ExceptionEvent;
-import pascani.lang.infrastructure.CustomProbe;
+import pascani.lang.infrastructure.LocalProbe;
 
 /**
  * 
@@ -114,7 +114,7 @@ public abstract class InterceptorBasedProbeGenerator {
 	}
 
 	/**
-	 * Generates a class extending {@link CustomProbe} with the corresponding
+	 * Generates a class extending {@link LocalProbe} with the corresponding
 	 * connection information.
 	 * 
 	 * @param packageName
@@ -133,13 +133,13 @@ public abstract class InterceptorBasedProbeGenerator {
 		JavaClassSource javaClass = Roaster.create(JavaClassSource.class);
 
 		// Add imports
-		javaClass.addImport(CustomProbe.class);
+		javaClass.addImport(LocalProbe.class);
 		javaClass.addImport(Context.class);
 
 		// Set general properties
 		javaClass.setPackage(packageName);
 		javaClass.setName(className);
-		javaClass.setSuperType(CustomProbe.class);
+		javaClass.setSuperType(LocalProbe.class);
 
 		String constructorBody = InterceptorBasedProbeTemplates
 				.getProbeConstructor(routingKey, Context.PROBE);

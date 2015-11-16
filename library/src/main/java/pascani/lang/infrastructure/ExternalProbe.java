@@ -37,7 +37,7 @@ import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class ExternalProbe extends CustomProbe {
+public class ExternalProbe extends LocalProbe {
 
 	/**
 	 * The message consumer listening for external events (i.e., events
@@ -62,7 +62,7 @@ public class ExternalProbe extends CustomProbe {
 	 *            The context in which this probe is used
 	 * @throws Exception
 	 *             If something bad happens. Check exceptions in
-	 *             {@link CustomProbe#CustomProbe(String, String, PascaniRuntime.Context)}
+	 *             {@link LocalProbe#CustomProbe(String, String, PascaniRuntime.Context)}
 	 */
 	public ExternalProbe(final String routingKey, PascaniRuntime.Context context)
 			throws Exception {
