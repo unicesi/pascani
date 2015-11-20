@@ -151,31 +151,17 @@ public class PascaniRuntime {
 			if (input != null)
 				config.load(input);
 		} catch (FileNotFoundException e) {
-			logger.warn("No configuration file was found. Execution is started with default values");
+			logger.warn("No configuration file was found");
 		} catch (IOException e) {
-			logger.error("Error loading configuration file. Execution is started with default values");
+			logger.error("Error loading configuration file");
 		} finally {
-
-			// Set defaults
-			if(!config.containsKey("uri"))
-				config.put("uri", "amqp://guest:guest@localhost:5672");
-			if(!config.containsKey("probes_exchange"))
-				config.put("probes_exchange", "probes_exchange");
-			if(!config.containsKey("namespaces_exchange"))
-				config.put("namespaces_exchange", "namespaces_exchange");
-			if(!config.containsKey("monitors_exchange"))
-				config.put("monitors_exchange", "monitors_exchange");
-			if(!config.containsKey("rpc_exchange"))
-				config.put("rpc_exchange", "rpc_exchange");
-			if(!config.containsKey("rpc_queue_prefix"))
-				config.put("rpc_queue_prefix", "rpc_");
-
+			setPropertiesFromSystem(config);
+			setDefaultProperties(config);
 			if (input != null) {
 				try {
 					input.close();
 				} catch (IOException e) {
-					logger.error("Error closing stream of configuration file",
-							e);
+					logger.error("Error closing stream of configuration file", e);
 				}
 			}
 		}
@@ -184,6 +170,38 @@ public class PascaniRuntime {
 			String name = (String) key;
 			environment.put(name, config.getProperty(name));
 		}
+	}
+	
+	private static void setPropertiesFromSystem(Properties execProps) {
+		Properties systemProps = System.getProperties();
+
+		if(systemProps.containsKey("pascani.uri"))
+			execProps.put("uri", systemProps.getProperty("pascani.uri"));
+		if(systemProps.containsKey("pascani.probes_exchange"))
+			execProps.put("probes_exchange", systemProps.getProperty("pascani.probes_exchange"));
+		if(systemProps.containsKey("pascani.namespaces_exchange"))
+			execProps.put("namespaces_exchange", systemProps.getProperty("pascani.namespaces_exchange"));
+		if(systemProps.containsKey("pascani.monitors_exchange"))
+			execProps.put("monitors_exchange", systemProps.getProperty("pascani.monitors_exchange"));
+		if(systemProps.containsKey("pascani.rpc_exchange"))
+			execProps.put("rpc_exchange", systemProps.getProperty("pascani.rpc_exchange"));
+		if(systemProps.containsKey("pascani.rpc_queue_prefix"))
+			execProps.put("rpc_queue_prefix", systemProps.getProperty("pascani.rpc_queue_prefix"));
+	}
+	
+	private static void setDefaultProperties(Properties execProps) {
+		if(!execProps.containsKey("uri"))
+			execProps.put("uri", "amqp://guest:guest@localhost:5672");
+		if(!execProps.containsKey("probes_exchange"))
+			execProps.put("probes_exchange", "probes_exchange");
+		if(!execProps.containsKey("namespaces_exchange"))
+			execProps.put("namespaces_exchange", "namespaces_exchange");
+		if(!execProps.containsKey("monitors_exchange"))
+			execProps.put("monitors_exchange", "monitors_exchange");
+		if(!execProps.containsKey("rpc_exchange"))
+			execProps.put("rpc_exchange", "rpc_exchange");
+		if(!execProps.containsKey("rpc_queue_prefix"))
+			execProps.put("rpc_queue_prefix", "rpc_");
 	}
 
 	/**
