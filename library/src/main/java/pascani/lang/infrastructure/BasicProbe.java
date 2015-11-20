@@ -42,8 +42,7 @@ import com.google.common.eventbus.Subscribe;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class BasicProbe implements Probe<Event<?>>,
-		RpcRequestHandler {
+public class BasicProbe implements Probe, RpcRequestHandler {
 
 	/**
 	 * An RPC server configured to serve external requests, for instance, from
@@ -265,7 +264,7 @@ public class BasicProbe implements Probe<Event<?>>,
 
 		return response;
 	}
-	
+
 	/**
 	 * Shutdowns connections
 	 * 

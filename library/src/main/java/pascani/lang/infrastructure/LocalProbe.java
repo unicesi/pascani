@@ -39,7 +39,7 @@ import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcServer;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class LocalProbe implements Probe<Event<?>> {
+public class LocalProbe implements Probe {
 
 	/**
 	 * A RabbitMQ end point (a connection to the server)

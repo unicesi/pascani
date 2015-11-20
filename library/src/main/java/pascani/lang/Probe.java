@@ -23,12 +23,9 @@ import java.util.List;
 /**
  * Standard probe interface
  * 
- * @param <T>
- *            The type of events this probe is intended to handle
- * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public interface Probe<T extends Event<?>> {
+public interface Probe {
 
 	/**
 	 * Removes all of the event objects raised from {@code start} until
@@ -92,7 +89,7 @@ public interface Probe<T extends Event<?>> {
 	 * 
 	 * @return a {@link List} containing the event objects
 	 */
-	public List<T> fetch(long start, long end,
+	public List<Event<?>> fetch(long start, long end,
 			List<Class<? extends Event<?>>> eventTypes);
 
 	/**
@@ -111,7 +108,7 @@ public interface Probe<T extends Event<?>> {
 	 * 
 	 * @return a {@link List} containing the event objects
 	 */
-	public List<T> fetchAndClean(long start, long end,
+	public List<Event<?>> fetchAndClean(long start, long end,
 			List<Class<? extends Event<?>>> eventTypes);
 
 }

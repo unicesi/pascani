@@ -40,7 +40,7 @@ import pascani.lang.infrastructure.rabbitmq.RabbitMQRpcClient;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class ProbeProxy implements Probe<Event<?>> {
+public class ProbeProxy implements Probe {
 
 	/**
 	 * The logger
