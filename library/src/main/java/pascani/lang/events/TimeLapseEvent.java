@@ -145,14 +145,19 @@ public class TimeLapseEvent extends Event<Double> {
 	 * @see pascani.lang.Event#compareTo(pascani.lang.Event)
 	 */
 	@Override public int compareTo(final Event<Double> o) {
+		int v = 0;
 		TimeLapseEvent other = (TimeLapseEvent) o;
-		if (this.start < other.start) {
-			return -1;
-		} else if(this.start > other.start) {
-			return 1;
-		} else {
-			return 0;
-		}
+		
+		v = compareInt(this.start, other.start);
+		if (v != 0) return v;
+
+		v = compareInt(this.end, other.end);
+		if (v != 0) return v;
+
+		v = this.identifier.compareTo(other.identifier);
+		if (v != 0) return v;
+		
+		return v;
 	}
 
 }

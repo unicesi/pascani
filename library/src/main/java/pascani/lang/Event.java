@@ -116,21 +116,35 @@ public abstract class Event<T> implements Comparable<Event<T>>, Serializable {
 		else if ((null == obj) || (obj.getClass() != this.getClass()))
 			return false;
 
-		Event<?> other = (Event<?>) obj;
-		return this.identifier.equals(other.identifier);
+		@SuppressWarnings("unchecked")
+		Event<T> other = (Event<T>) obj;
+		return this.compareTo(other) == 0;
 	}
-
+	
+	protected int compareInt(long i1, long i2) {
+		if (i1 < i2) {
+			return -1;
+		} else if (i1 > i2) {
+			return +1;
+		} else {
+			return 0;
+		}
+	}
+	
 	/*
 	 * (non-Javadoc)
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 * @see pascani.lang.Event#compareTo(pascani.lang.Event)
 	 */
 	public int compareTo(final Event<T> o) {
-		if (this.timestamp < o.timestamp)
-			return -1;
-		else if (this.timestamp > o.timestamp)
-			return 1;
-		else
-			return 0;
+		int v = 0;
+		
+		v = compareInt(this.timestamp, o.timestamp);
+		if (v != 0) return v;
+
+		v = this.identifier.compareTo(o.identifier);
+		if (v != 0) return v;
+		
+		return v;
 	}
 	
 }
