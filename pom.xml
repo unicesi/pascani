@@ -27,6 +27,7 @@
 	<modules>
 		<module>library</module>
 		<module>compiler</module>
+		<module>xtext</module>
 	</modules>
 	<licenses>
 		<license>

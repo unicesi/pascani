@@ -1,0 +1,286 @@
+/*
+ * Copyright © 2015 Universidad Icesi
+ * 
+ * This file is part of the Pascani DSL.
+ * 
+ * The Pascani DSL is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * 
+ * The Pascani DSL is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ * for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with The Pascani DSL. If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.pascani.jvmmodel
+
+import com.google.inject.Inject
+import java.io.Serializable
+import java.util.ArrayList
+import java.util.List
+import org.eclipse.xtext.common.types.JvmGenericType
+import org.eclipse.xtext.naming.IQualifiedNameProvider
+import org.eclipse.xtext.xbase.XVariableDeclaration
+import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
+import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
+import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import org.pascani.outputconfiguration.OutputConfigurationAdapter
+import org.pascani.outputconfiguration.PascaniOutputConfigurationProvider
+import org.pascani.pascani.Event
+import org.pascani.pascani.Handler
+import org.pascani.pascani.Monitor
+import org.pascani.pascani.Namespace
+import org.pascani.pascani.TypeDeclaration
+import org.quartz.CronExpression
+import org.quartz.Job
+import org.quartz.JobExecutionContext
+import org.quartz.JobExecutionException
+import pascani.lang.infrastructure.BasicNamespace
+import pascani.lang.infrastructure.NamespaceProxy
+import pascani.lang.util.JobScheduler
+
+/**
+ * <p>Infers a JVM model from the source model.</p> 
+ * 
+ * <p>The JVM model should contain all elements that would appear in the Java code 
+ * which is generated from the source model. Other models link against the JVM model rather than the source model.</p>     
+ */
+class PascaniJvmModelInferrer extends AbstractModelInferrer {
+
+	/**
+	 * convenience API to build and initialize JVM types and their members.
+	 */
+	@Inject extension JvmTypesBuilder
+
+	@Inject extension IQualifiedNameProvider
+
+	def dispatch void infer(Monitor monitor, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
+		val monitorImpl = monitor.toClass(monitor.fullyQualifiedName)
+
+		monitorImpl.eAdapters.add(new OutputConfigurationAdapter(
+			PascaniOutputConfigurationProvider::MONITORS_OUTPUT
+		))
+
+		acceptor.accept(monitorImpl) [ m |
+			val exps = monitor.body.expressions
+			val subscriptions = new ArrayList
+
+			for (e : exps) {
+				switch (e) {
+					XVariableDeclaration: {
+						m.members += e.toField(e.name, e.type) [
+							documentation = e.documentation
+							initializer = e.right
+							^final = !e.isWriteable
+							^static = true
+						]
+					}
+					Event case e.emitter != null && e.emitter.cronExpression != null: {
+						// TODO: add subscription to subscriptions
+						// NodeModelUtils.getNode(e.emitter.cronExpression).text
+					}
+					Event case e.emitter != null && e.emitter.cronExpression == null: {
+						m.members += e.toField(e.name, typeRef(String)) [
+							documentation = e.documentation
+							initializer = '''"demo"'''
+						]
+					}
+					Handler: {
+						m.members += e.createClass(isPreIndexingPhase)
+					}
+					default: {
+						// subscriptions...
+					}
+				}
+			}
+
+			m.members += monitor.toConstructor [
+				body = '''initialize();'''
+			]
+
+			m.members += monitor.toMethod("initialize", typeRef(void)) [
+				body = '''
+					«FOR subscription : subscriptions»
+						«JobScheduler».schedule(null, new «CronExpression»(""), null);
+					«ENDFOR»
+					«IF monitor.usings != null»
+						«FOR namespace : monitor.usings»
+							«namespace.name» = new «namespace.name»();
+						«ENDFOR»
+					«ENDIF»
+				'''
+			]
+
+			if (monitor.usings != null) {
+				for (namespace : monitor.usings.filter[n|n.name != null]) {
+					m.members += namespace.toField(namespace.name, typeRef(namespace.fullyQualifiedName.toString)) [
+						^static = true
+					]
+				}
+			}
+		]
+	}
+
+	def dispatch void infer(Namespace namespace, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
+		namespace.createProxy(isPreIndexingPhase, acceptor, true)
+		namespace.createClass(isPreIndexingPhase, acceptor)
+	}
+
+	def JvmGenericType createClass(Handler handler, boolean isPreIndexingPhase) {
+		val handlerImpl = handler.toClass(handler.name) [
+			if (!isPreIndexingPhase) {
+				^static = true
+				superTypes += typeRef(Job)
+
+				members += handler.toMethod("execute", typeRef(void)) [
+					documentation = handler.documentation
+					exceptions += typeRef(JobExecutionException)
+					parameters += handler.toParameter("context" + System.nanoTime(), typeRef(JobExecutionContext))
+					body = handler.body
+				]
+			}
+		]
+
+		return handlerImpl
+	}
+
+	def JvmGenericType createClass(Namespace namespace, boolean isPreIndexingPhase, IJvmDeclaredTypeAcceptor acceptor) {
+
+		val namespaceImpl = namespace.toClass(namespace.fullyQualifiedName + "Namespace") [
+			if (!isPreIndexingPhase) {
+
+				val List<XVariableDeclaration> declarations = getVariableDeclarations(namespace)
+				superTypes += typeRef(BasicNamespace)
+
+				for (decl : declarations) {
+					val name = decl.fullyQualifiedName.toString.replace(".", "_")
+					val type = decl.type // ?: inferredType(decl.right)
+					members += decl.toField(name, type) [
+						initializer = decl.right
+					]
+				}
+
+				members += namespace.toConstructor [
+					exceptions += typeRef(Exception)
+					body = '''
+						super("«namespace.fullyQualifiedName»");
+						«FOR decl : declarations»
+							registerVariable("«decl.fullyQualifiedName»", «decl.fullyQualifiedName.toString.replace(".", "_")», false);
+						«ENDFOR»
+					'''
+				]
+			}
+		]
+
+		namespaceImpl.eAdapters.add(new OutputConfigurationAdapter(
+			PascaniOutputConfigurationProvider::NAMESPACES_OUTPUT
+		))
+		acceptor.accept(namespaceImpl)
+
+		return namespaceImpl
+	}
+
+	def List<XVariableDeclaration> getVariableDeclarations(TypeDeclaration typeDecl) {
+		val List<XVariableDeclaration> variables = new ArrayList<XVariableDeclaration>()
+
+		for (e : typeDecl.body.expressions) {
+			switch (e) {
+				TypeDeclaration: {
+					variables.addAll(getVariableDeclarations(e))
+				}
+				XVariableDeclaration: {
+					variables.add(e)
+				}
+			}
+		}
+
+		return variables
+	}
+
+	def JvmGenericType createProxy(Namespace namespace, boolean isPreIndexingPhase, IJvmDeclaredTypeAcceptor acceptor,
+		boolean isParentNamespace) {
+
+		val namespaceProxyImpl = namespace.toClass(namespace.fullyQualifiedName) [
+
+			if (!isPreIndexingPhase) {
+				documentation = namespace.documentation
+
+				for (e : namespace.body.expressions) {
+					switch (e) {
+						Namespace: {
+							val internalClass = createProxy(e, isPreIndexingPhase, acceptor, false)
+							members += internalClass
+							members += e.toField(e.name, typeRef(internalClass)) [
+								initializer = '''new «internalClass.simpleName»()'''
+							]
+							members += e.toMethod(e.name, typeRef(internalClass)) [
+								body = '''return this.«e.name»;'''
+							]
+						}
+					}
+				}
+
+				for (e : namespace.body.expressions) {
+					switch (e) {
+						XVariableDeclaration: {
+							val name = e.fullyQualifiedName.toString
+							val type = e.type // ?: inferredType(e.right)
+							val cast = if(type != null) "(" + type.simpleName + ")"
+
+							members += e.toMethod(e.name, type) [
+								body = '''return «cast» getVariable("«name»");'''
+							]
+
+							if (e.isWriteable) {
+								members += e.toMethod(e.name, typeRef(Void.TYPE)) [
+									parameters += e.toParameter(e.name, type)
+									body = '''setVariable("«name»", «e.name»);'''
+								]
+							}
+						}
+					}
+				}
+
+				// TODO: Handle the exception by loggging it
+				if (isParentNamespace) {
+					members += namespace.toField(namespace.name + "Proxy", typeRef(NamespaceProxy))
+					members += namespace.toConstructor [
+						body = '''
+							try {
+								String routingKey = "«namespace.fullyQualifiedName»";
+								this.«namespace.name»Proxy = new «NamespaceProxy»(routingKey);
+							} catch(«Exception» e) {
+								e.printStackTrace();
+							}
+						'''
+					]
+
+					members += namespace.toMethod("getVariable", typeRef(Serializable)) [
+						parameters += namespace.toParameter("variable", typeRef(String))
+						body = '''return this.«namespace.name»Proxy.getVariable(variable);'''
+					]
+
+					members += namespace.toMethod("setVariable", typeRef(void)) [
+						parameters += namespace.toParameter("variable", typeRef(String))
+						parameters += namespace.toParameter("value", typeRef(Serializable))
+						body = '''this.«namespace.name»Proxy.setVariable(variable, value);'''
+					]
+				}
+			}
+		]
+
+		if (isParentNamespace) {
+			val output = PascaniOutputConfigurationProvider::MONITORS_OUTPUT
+
+			namespaceProxyImpl.eAdapters.add(new OutputConfigurationAdapter(output))
+			acceptor.accept(namespaceProxyImpl)
+		}
+
+		return namespaceProxyImpl;
+	}
+
+}

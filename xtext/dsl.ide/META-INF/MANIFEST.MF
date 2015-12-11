@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: dsl.ide
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: dsl.ide;singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: dsl,
+ org.eclipse.xtext.ide,
+ org.eclipse.xtext.xbase.ide
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Export-Package: org.pascani.ide.contentassist.antlr,
+ org.pascani.ide.contentassist.antlr.internal
+
