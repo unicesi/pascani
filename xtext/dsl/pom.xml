@@ -87,7 +87,6 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-	
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
@@ -135,6 +134,7 @@
 					</filesets>
 				</configuration>
 			</plugin>
+
 		</plugins>
 		<pluginManagement>
 			<plugins>
