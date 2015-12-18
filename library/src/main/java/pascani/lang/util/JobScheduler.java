@@ -103,12 +103,7 @@ public class JobScheduler {
 	 */
 	public static void schedule(Class<? extends Job> jobClass,
 			CronExpression expression) throws SchedulerException {
-
-		JobDetail jobDetail = newJob(jobClass).build();
-		Trigger trigger = newTrigger().startNow()
-				.withSchedule(cronSchedule(expression)).build();
-
-		schedule(jobDetail, trigger);
+		schedule(jobClass, expression, new JobDataMap());
 	}
 	
 	/**
