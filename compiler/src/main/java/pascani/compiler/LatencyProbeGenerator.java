@@ -49,9 +49,6 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 
 /**
- * TODO: Check if producing events blocks the execution. If so, make
- * {@link AbstractProducer} a {@link Thread}
- * 
  * TODO: Generate the SCA composites
  * 
  * TODO: The probe must be initialized. The initialization code must be

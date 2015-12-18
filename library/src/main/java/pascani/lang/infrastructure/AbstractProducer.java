@@ -27,6 +27,9 @@ import pascani.lang.util.LocalEventProducer;
 import com.google.common.eventbus.Subscribe;
 
 /**
+ * TODO: Check if producing events blocks the execution. If so, make
+ * {@link AbstractProducer} a {@link Thread}
+ * 
  * Abstract implementation of a message queue producer, containing only one
  * public method for posting {@link Event} objects to the infrastructure.
  * <p>
