@@ -42,6 +42,7 @@ import org.quartz.JobExecutionException
 import pascani.lang.infrastructure.BasicNamespace
 import pascani.lang.infrastructure.NamespaceProxy
 import pascani.lang.util.JobScheduler
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -81,7 +82,21 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 					Event case e.emitter != null && e.emitter.cronExpression != null: {
 						// TODO: add subscription to subscriptions
+						// TODO: change the subscription: subscription = job scheduling
+						// Hacer: inicializar los cron exp en el constructor
 						// NodeModelUtils.getNode(e.emitter.cronExpression).text
+						m.members += e.toField(e.name, typeRef(CronExpression)) [
+							documentation = e.documentation
+							initializer = '''new «CronExpression»("«NodeModelUtils.getNode(e.emitter.cronExpression).text»")'''
+						]
+						
+						var String initializer;
+						
+						if(e.emitter.cronExpression.constant != null) {
+							initializer = '''«»'''
+						} else {
+							initializer = '''new «CronExpression»("«NodeModelUtils.getNode(e.emitter.cronExpression).text»")'''
+						}
 					}
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
 						m.members += e.toField(e.name, typeRef(String)) [
