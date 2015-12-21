@@ -49,6 +49,8 @@ import org.pascani.pascani.TerminalCronElement
 import org.pascani.pascani.TypeDeclaration
 import org.eclipse.xtext.xbase.XAssignment
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
+import org.ow2.scesame.qoscare.core.scaspec.SCAPort
+import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
 
 /**
  * This class contains custom validation rules. 
@@ -80,7 +82,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 	static val UNSUPPORTED_OPERATION = "unsupportedOperation"
 	static val NOT_SERIALIZABLE_TYPE = "notSerializableType"
 	static val IMPLICIT_TYPE = "implicitType"
-	static val NON_EVENT_PARAMETER = "nonEventParameter"
+	static val INVALID_PARAMETER_TYPE = "invalidParameterType"
 
 	override boolean isLocallyUsed(EObject target, EObject containerToFindUsage) {
 		var isUsed = false;
@@ -310,7 +312,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 
 		if (paramType.getSuperType(pascani.lang.Event) == null) {
 			error("The parameter type must be subclass of Event", PascaniPackage.Literals.HANDLER__PARAM,
-				NON_EVENT_PARAMETER)
+				INVALID_PARAMETER_TYPE)
 		}
 	}
 
@@ -351,6 +353,12 @@ class PascaniValidator extends AbstractPascaniValidator {
 						// TODO: when pascani library is ready:
 						// validate correspondence between event type and emitter type
 						// validate probe
+						val emitterType = event.emitter.emitter.actualType
+						if (emitterType.getSuperType(SCAPort) == null ||
+							emitterType.getSuperType(SCAComponent) == null) {
+							error("The emitter type must be subclass either of SCAComponent or SCAPort",
+								PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
+						}
 					}
 				}
 			}
