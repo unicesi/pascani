@@ -20,15 +20,12 @@ package pascani.lang.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.ow2.frascati.remote.introspection.RemoteScaDomain;
-import org.ow2.frascati.remote.introspection.resources.Component;
-import org.ow2.frascati.remote.introspection.resources.Port;
-import org.ow2.frascati.remote.introspection.resources.Property;
 import org.ow2.scesame.qoscare.core.scaspec.FraSCAti2QoSCAre;
 import org.ow2.scesame.qoscare.core.scaspec.SCAComponent;
 import org.ow2.scesame.qoscare.core.scaspec.SCADomain;
@@ -86,7 +83,7 @@ public class ComponentManager {
 	 *            The name of the service to search
 	 * @return the Java class representing the Port complex type
 	 */
-	public static SCAPort service(Component component, String serviceName) {
+	public static SCAPort service(SCAComponent component, String serviceName) {
 		return port(component.getServices(), serviceName);
 	}
 
@@ -100,7 +97,7 @@ public class ComponentManager {
 	 *            The name of the reference to search
 	 * @return the Java class representing the Port complex type
 	 */
-	public static SCAPort reference(Component component, String referenceName) {
+	public static SCAPort reference(SCAComponent component, String referenceName) {
 		return port(component.getServices(), referenceName);
 	}
 
@@ -114,26 +111,26 @@ public class ComponentManager {
 	 *            The name of the property to search
 	 * @return the Java class representing the Property complex type
 	 */
-	public static SCAProperty property(Component component, String propertyName) {
-		Property property = null;
-		for (Property p : component.getProperties()) {
+	public static SCAProperty property(SCAComponent component, String propertyName) {
+		SCAProperty property = null;
+		for (SCAProperty p : component.getProperties()) {
 			if (p.getName().equals(propertyName)) {
 				property = p;
 				break;
 			}
 		}
-		return FraSCAti2QoSCAre.convertProperty(property);
+		return property;
 	}
 
-	private static SCAPort port(List<Port> ports, String portName) {
-		Port service = null;
-		for (Port port : ports) {
+	private static SCAPort port(Collection<SCAPort> ports, String portName) {
+		SCAPort service = null;
+		for (SCAPort port : ports) {
 			if (port.getName().equals(portName)) {
 				service = port;
 				break;
 			}
 		}
-		return FraSCAti2QoSCAre.convertPort(service);
+		return service;
 	}
 
 	private static URI initializeDefaultUri() {
