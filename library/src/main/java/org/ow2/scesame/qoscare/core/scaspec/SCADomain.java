@@ -24,12 +24,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class SCADomain extends SCANamedNode {
-	protected String domainName = null;
+	
 	protected Collection<SCAComponent> composites;
 
 	public SCADomain(String dname) {
 		super("Component Domain Container");
-		domainName = dname;
 		composites = new ArrayList<SCAComponent>();
 	}
 
@@ -43,6 +42,10 @@ public class SCADomain extends SCANamedNode {
 
 	public void addComposite(SCAComponent composite) {
 		this.composites.add(composite);
+	}
+	
+	public String getName() {
+		return name;
 	}
 
 }

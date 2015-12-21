@@ -63,9 +63,9 @@ public class ComponentManager {
 	 * @return the Java class representing the Component complex type
 	 */
 	public static SCAComponent lookup(String componentName, URI bindingUri) {
-		SCAComponent component = null;
+		SCAComponent component = null;System.err.println(getRemoteScaDomain(bindingUri).getComposites());
 		for (SCAComponent c : getRemoteScaDomain(bindingUri).getComposites()) {
-			if (c.name.equals(componentName)) {
+			if (c.getName().equals(componentName)) {
 				component = c;
 				break;
 			}

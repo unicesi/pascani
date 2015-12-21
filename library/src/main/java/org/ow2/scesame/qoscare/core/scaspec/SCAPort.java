@@ -37,14 +37,12 @@ public class SCAPort extends SCANamedNode {
 	 *            The Port name.
 	 */
 	public SCAPort(String name) {
-		super(name);
-		implement = null;
-		this.wiredTo = "Unwired";
+		this(name, "Unwired");
 	}
 
 	public SCAPort(String name, String wiredTo) {
 		super(name);
-		implement = null;
+		this.implement = null;
 		this.wiredTo = wiredTo;
 	}
 
@@ -62,14 +60,14 @@ public class SCAPort extends SCANamedNode {
 		sb.append("  bindings:\n");
 		for (SCABinding b : this.bindings) {
 			sb.append("  kind=").append(b.type).append("\n");
-			for (SCAAttribute att : b.attributs) {
+			for (SCAAttribute att : b.attributes) {
 				sb.append(att.name).append("=").append(att.value).append("\n");
 			}
 		}
 
 		return sb.toString();
 	}
-
+	
 	public String getName() {
 		return name;
 	}

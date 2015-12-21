@@ -37,4 +37,8 @@ public class SCAProperty extends SCAAttribute {
 	public SCAProperty(String name, String value, String type) {
 		super(name, value, type);
 	}
+	
+	public String getName() {
+		return name;
+	}
 }

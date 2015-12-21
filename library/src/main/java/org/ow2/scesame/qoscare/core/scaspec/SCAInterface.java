@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class SCAInterface extends SCANamedNode {
+
 	public String clazz;
 	public Collection<SCAMethod> methods = new ArrayList<SCAMethod>();
 
@@ -41,6 +42,10 @@ public class SCAInterface extends SCANamedNode {
 		super(name);
 		this.clazz = Class;
 		this.methods.addAll(methods);
+	}
+	
+	public String getName() {
+		return name;
 	}
 
 }

@@ -23,17 +23,18 @@ package org.ow2.scesame.qoscare.core.scaspec;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
 import org.ow2.scesame.qoscare.core.scaspec.SCANamedNode;
 
 /**
  * This class is a REST resource used to represent an SCA component/composite.
  */
 public class SCAComponent extends SCANamedNode {
+	
 	public static enum Status {
 		STARTED, STOPPED, UNKNOWN
 	};
 
-	public String name = null;
 	public Status status = Status.STOPPED;
 
 	public Collection<SCAComponent> children = new ArrayList<SCAComponent>();
@@ -86,6 +87,10 @@ public class SCAComponent extends SCANamedNode {
 	 */
 	public void setStopped() {
 		this.status = Status.STOPPED;
+	}
+	
+	public String getName() {
+		return name;
 	}
 
 	public Collection<SCAPort> getServices() {

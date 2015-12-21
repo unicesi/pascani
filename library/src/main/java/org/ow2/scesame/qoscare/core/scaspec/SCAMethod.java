@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class SCAMethod extends SCANamedNode {
-	public String name;
-	public String resultat;
+	
+	public String resultAt;
 	public Collection<String> exceptions = new ArrayList<String>();
 	public Collection<SCAComponent> intents = new ArrayList<SCAComponent>();
 	public Collection<SCAParameter> parameters = new ArrayList<SCAParameter>();
@@ -35,16 +35,20 @@ public class SCAMethod extends SCANamedNode {
 		super(name);
 	}
 
-	public SCAMethod(String name, String resultat) {
+	public SCAMethod(String name, String resultAt) {
 		super(name);
-		this.resultat = resultat;
+		this.resultAt = resultAt;
 	}
 
 	public SCAMethod(String name, String resultat,
 			Collection<SCAParameter> parameters) {
 		super(name);
-		this.resultat = resultat;
+		this.resultAt = resultat;
 		this.parameters.addAll(parameters);
+	}
+	
+	public String getName() {
+		return name;
 	}
 
 	public Collection<String> getExceptions() {

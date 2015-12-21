@@ -22,10 +22,15 @@
 package org.ow2.scesame.qoscare.core.scaspec;
 
 public class SCAParameter extends SCANamedNode {
+	
 	public String type;
 
 	public SCAParameter(String name, String type) {
 		super(name);
 		this.type = type;
+	}
+	
+	public String getName() {
+		return name;
 	}
 }
