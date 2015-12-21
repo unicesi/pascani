@@ -43,6 +43,7 @@ import pascani.lang.infrastructure.BasicNamespace
 import pascani.lang.infrastructure.NamespaceProxy
 import pascani.lang.util.JobScheduler
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+import pascani.lang.util.CronConstant
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -67,10 +68,10 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		))
 
 		acceptor.accept(monitorImpl) [ m |
-			val exps = monitor.body.expressions
 			val subscriptions = new ArrayList
+			val cronEvents = new ArrayList
 
-			for (e : exps) {
+			for (e : monitor.body.expressions) {
 				switch (e) {
 					XVariableDeclaration: {
 						m.members += e.toField(e.name, e.type) [
@@ -83,20 +84,10 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					Event case e.emitter != null && e.emitter.cronExpression != null: {
 						// TODO: add subscription to subscriptions
 						// TODO: change the subscription: subscription = job scheduling
-						// Hacer: inicializar los cron exp en el constructor
-						// NodeModelUtils.getNode(e.emitter.cronExpression).text
+						cronEvents.add(e)
 						m.members += e.toField(e.name, typeRef(CronExpression)) [
 							documentation = e.documentation
-							initializer = '''new «CronExpression»("«NodeModelUtils.getNode(e.emitter.cronExpression).text»")'''
 						]
-						
-						var String initializer;
-						
-						if(e.emitter.cronExpression.constant != null) {
-							initializer = '''«»'''
-						} else {
-							initializer = '''new «CronExpression»("«NodeModelUtils.getNode(e.emitter.cronExpression).text»")'''
-						}
 					}
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
 						m.members += e.toField(e.name, typeRef(String)) [
@@ -113,12 +104,26 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				}
 			}
 
+			// TODO: handle and log the exception
 			m.members += monitor.toConstructor [
-				body = '''initialize();'''
+				body = '''
+					try {
+						initialize();
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
+				'''
 			]
 
 			m.members += monitor.toMethod("initialize", typeRef(void)) [
 				body = '''
+					«FOR cronEvent : cronEvents»
+						«IF(cronEvent.emitter.cronExpression.constant != null)»
+							this.«cronEvent.name» = «typeRef(CronConstant)».valueOf("«cronEvent.emitter.cronExpression.constant.toUpperCase»").expression();
+						«ELSE»
+							this.«cronEvent.name» = new «CronExpression»("«NodeModelUtils.getNode(cronEvent.emitter.cronExpression).text.trim()»");
+						«ENDIF»
+					«ENDFOR»
 					«FOR subscription : subscriptions»
 						«JobScheduler».schedule(null, new «CronExpression»(""), null);
 					«ENDFOR»
@@ -128,6 +133,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						«ENDFOR»
 					«ENDIF»
 				'''
+				exceptions += typeRef(Exception)
 			]
 
 			if (monitor.usings != null) {
