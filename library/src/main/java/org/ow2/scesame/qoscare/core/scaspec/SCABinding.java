@@ -25,11 +25,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class SCABinding extends SCANamedNode {
+	
 	public static enum Kind {
 		WS, REST, RMI, JSONRPC, JMS, UNKNOWN
 	};
 
-	public Collection<SCAAttribute> attributs = new ArrayList<SCAAttribute>();
+	public Collection<SCAAttribute> attributes = new ArrayList<SCAAttribute>();
 	public Kind type;
 
 	public SCABinding(Kind type) {
@@ -37,18 +38,18 @@ public class SCABinding extends SCANamedNode {
 		this.type = type;
 	}
 
-	public SCABinding(Kind type, Collection<SCAAttribute> attributs) {
+	public SCABinding(Kind type, Collection<SCAAttribute> attributes) {
 		super("binding");
 		this.type = type;
-		this.attributs = attributs;
+		this.attributes = attributes;
 	}
 
 	public String getKind() {
 		return type.name();
 	}
 
-	public Collection<SCAAttribute> getAttribute() {
-		return attributs;
+	public Collection<SCAAttribute> getAttributes() {
+		return attributes;
 	}
 
 	public void setKind(String kind) {
@@ -65,7 +66,7 @@ public class SCABinding extends SCANamedNode {
 	}
 
 	public void setAttribute(Collection<SCAAttribute> attributes) {
-		this.attributs = attributes;
+		this.attributes = attributes;
 	}
 
 }

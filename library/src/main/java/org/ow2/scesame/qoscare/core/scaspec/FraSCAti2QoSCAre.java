@@ -113,7 +113,7 @@ public final class FraSCAti2QoSCAre {
 	public final static SCABinding convertBinding(Binding fb) {
 		SCABinding qb = new SCABinding(convertBindingKind(fb.getKind()));
 		for (Attribute a : fb.getAttributes()) {
-			qb.attributs.add(convertAttribute(a));
+			qb.attributes.add(convertAttribute(a));
 		}
 		return qb;
 	}
