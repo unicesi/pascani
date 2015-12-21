@@ -1,8 +1,5 @@
 package pascani.lang.util;
 
-import java.text.ParseException;
-
-import org.quartz.CronExpression;
 
 /**
  * This enumeration facilitates the use of cron expressions by allowing to
@@ -15,17 +12,13 @@ public enum CronConstant {
 			"0 0 0 * * 0"), DAILY("0 0 0 * * *"), HOURLY("0 0 * * * *"), MINUTELY(
 			"0 * * * * *"), SECONDLY("* * * * * *");
 
-	private CronExpression expression;
+	private String expression;
 
 	CronConstant(String expression) {
-		try {
-			this.expression = new CronExpression(expression);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		this.expression = expression;
 	}
 
-	public CronExpression expression() {
+	public String expression() {
 		return this.expression;
 	}
 }

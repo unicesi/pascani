@@ -119,9 +119,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				body = '''
 					«FOR cronEvent : cronEvents»
 						«IF(cronEvent.emitter.cronExpression.constant != null)»
-							this.«cronEvent.name» = «typeRef(CronConstant)».valueOf("«cronEvent.emitter.cronExpression.constant.toUpperCase»").expression();
+							this.«cronEvent.name» = new «typeRef(CronExpression)»(«typeRef(CronConstant)».valueOf("«cronEvent
+								.emitter.cronExpression.constant.toUpperCase»").expression());
 						«ELSE»
-							this.«cronEvent.name» = new «CronExpression»("«NodeModelUtils.getNode(cronEvent.emitter.cronExpression).text.trim()»");
+							this.«cronEvent.name» = new «typeRef(CronExpression)»("«NodeModelUtils
+								.getNode(cronEvent.emitter.cronExpression).text.trim()»");
 						«ENDIF»
 					«ENDFOR»
 					«FOR subscription : subscriptions»
