@@ -29,6 +29,11 @@ import org.ow2.frascati.remote.introspection.RemoteScaDomain;
 import org.ow2.frascati.remote.introspection.resources.Component;
 import org.ow2.frascati.remote.introspection.resources.Port;
 import org.ow2.frascati.remote.introspection.resources.Property;
+import org.ow2.scesame.qoscare.core.scaspec.FraSCAti2QoSCAre;
+import org.ow2.scesame.qoscare.core.scaspec.SCAComponent;
+import org.ow2.scesame.qoscare.core.scaspec.SCADomain;
+import org.ow2.scesame.qoscare.core.scaspec.SCAPort;
+import org.ow2.scesame.qoscare.core.scaspec.SCAProperty;
 
 /**
  * This implementation provides utility methods to look up SCA components
@@ -47,7 +52,7 @@ public class ComponentManager {
 	 *            The name of the running SCA component
 	 * @return the Java class representing the Component complex type
 	 */
-	public static Component lookup(String componentName) {
+	public static SCAComponent lookup(String componentName) {
 		return lookup(componentName, DEFAULT_BINDING_URI);
 	}
 
@@ -60,8 +65,15 @@ public class ComponentManager {
 	 *            The URI where the FraSCAti runtime is running
 	 * @return the Java class representing the Component complex type
 	 */
-	public static Component lookup(String componentName, URI bindingUri) {
-		return getRemoteScaDomain(bindingUri).getComponent(componentName);
+	public static SCAComponent lookup(String componentName, URI bindingUri) {
+		SCAComponent component = null;
+		for (SCAComponent c : getRemoteScaDomain(bindingUri).getComposites()) {
+			if (c.name.equals(componentName)) {
+				component = c;
+				break;
+			}
+		}
+		return component;
 	}
 
 	/**
@@ -74,7 +86,7 @@ public class ComponentManager {
 	 *            The name of the service to search
 	 * @return the Java class representing the Port complex type
 	 */
-	public static Port service(Component component, String serviceName) {
+	public static SCAPort service(Component component, String serviceName) {
 		return port(component.getServices(), serviceName);
 	}
 
@@ -88,7 +100,7 @@ public class ComponentManager {
 	 *            The name of the reference to search
 	 * @return the Java class representing the Port complex type
 	 */
-	public static Port reference(Component component, String referenceName) {
+	public static SCAPort reference(Component component, String referenceName) {
 		return port(component.getServices(), referenceName);
 	}
 
@@ -102,7 +114,7 @@ public class ComponentManager {
 	 *            The name of the property to search
 	 * @return the Java class representing the Property complex type
 	 */
-	public static Property property(Component component, String propertyName) {
+	public static SCAProperty property(Component component, String propertyName) {
 		Property property = null;
 		for (Property p : component.getProperties()) {
 			if (p.getName().equals(propertyName)) {
@@ -110,10 +122,10 @@ public class ComponentManager {
 				break;
 			}
 		}
-		return property;
+		return FraSCAti2QoSCAre.convertProperty(property);
 	}
 
-	private static Port port(List<Port> ports, String portName) {
+	private static SCAPort port(List<Port> ports, String portName) {
 		Port service = null;
 		for (Port port : ports) {
 			if (port.getName().equals(portName)) {
@@ -121,7 +133,7 @@ public class ComponentManager {
 				break;
 			}
 		}
-		return service;
+		return FraSCAti2QoSCAre.convertPort(service);
 	}
 
 	private static URI initializeDefaultUri() {
@@ -134,14 +146,15 @@ public class ComponentManager {
 		return uri;
 	}
 
-	private static RemoteScaDomain getRemoteScaDomain(URI bindingUri) {
+	private static SCADomain getRemoteScaDomain(URI bindingUri) {
 		RemoteScaDomain domain = introspection.get(bindingUri);
 		if (domain == null) {
 			domain = JAXRSClientFactory.create(bindingUri + "/introspection",
 					RemoteScaDomain.class);
 			introspection.put(bindingUri, domain);
 		}
-		return domain;
+		return FraSCAti2QoSCAre.convert(bindingUri.toString(),
+				domain.getDomainComposites());
 	}
 
 }
