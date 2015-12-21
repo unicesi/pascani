@@ -30,13 +30,14 @@ import org.ow2.scesame.qoscare.core.scaspec.SCANamedNode;
  * This class is a REST resource used to represent an SCA component/composite.
  */
 public class SCAComponent extends SCANamedNode {
-	
+
 	public static enum Status {
 		STARTED, STOPPED, UNKNOWN
 	};
 
 	public Status status = Status.STOPPED;
 
+	public String clazz;
 	public Collection<SCAComponent> children = new ArrayList<SCAComponent>();
 	public Collection<SCAProperty> properties = new ArrayList<SCAProperty>();
 	public Collection<SCAPort> services = new ArrayList<SCAPort>();
@@ -53,6 +54,18 @@ public class SCAComponent extends SCANamedNode {
 	}
 
 	/**
+	 * Get a Component with a set name and class.
+	 * 
+	 * @param name
+	 *            The component name.
+	 * @param clazz
+	 *            The class implementing the component.
+	 */
+	public SCAComponent(String name, String clazz) {
+		this(name, clazz, Status.STOPPED);
+	}
+	
+	/**
 	 * Get a Component with name and status set.
 	 * 
 	 * @param name
@@ -61,7 +74,22 @@ public class SCAComponent extends SCANamedNode {
 	 *            The component status.
 	 */
 	public SCAComponent(String name, Status status) {
+		this(name, null, status);
+	}
+
+	/**
+	 * Get a Component with name and status set.
+	 * 
+	 * @param name
+	 *            The component name.
+	 * @param clazz
+	 *            The class implementing the component.
+	 * @param status
+	 *            The component status.
+	 */
+	public SCAComponent(String name, String clazz, Status status) {
 		super(name);
+		this.clazz = clazz;
 		this.status = status;
 	}
 
@@ -88,7 +116,7 @@ public class SCAComponent extends SCANamedNode {
 	public void setStopped() {
 		this.status = Status.STOPPED;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
