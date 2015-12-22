@@ -29,14 +29,20 @@ import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.validation.Check
+import org.eclipse.xtext.xbase.XAbstractFeatureCall
+import org.eclipse.xtext.xbase.XAssignment
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
+import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
+import org.ow2.scesame.qoscare.core.scaspec.SCAMethod
+import org.ow2.scesame.qoscare.core.scaspec.SCAPort
 import org.pascani.pascani.CronElement
 import org.pascani.pascani.CronElementList
 import org.pascani.pascani.CronExpression
 import org.pascani.pascani.Event
 import org.pascani.pascani.EventEmitter
+import org.pascani.pascani.EventType
 import org.pascani.pascani.Handler
 import org.pascani.pascani.IncrementCronElement
 import org.pascani.pascani.Model
@@ -47,13 +53,7 @@ import org.pascani.pascani.PascaniPackage
 import org.pascani.pascani.RangeCronElement
 import org.pascani.pascani.TerminalCronElement
 import org.pascani.pascani.TypeDeclaration
-import org.eclipse.xtext.xbase.XAssignment
-import org.eclipse.xtext.xbase.XAbstractFeatureCall
-import org.ow2.scesame.qoscare.core.scaspec.SCAPort
-import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
 import pascani.lang.Probe
-import org.pascani.pascani.EventType
-import org.ow2.scesame.qoscare.core.scaspec.SCAMethod
 
 /**
  * This class contains custom validation rules. 
@@ -70,10 +70,12 @@ class PascaniValidator extends AbstractPascaniValidator {
 	static val NON_CAPITAL_NAME = "nonCapitalName"
 	static val INVALID_FILE_NAME = "invalidFileName"
 	static val INVALID_PACKAGE_NAME = "invalidPackageName"
+	static val INVALID_PARAMETER_TYPE = "invalidParameterType"
 	static val DUPLICATE_LOCAL_VARIABLE = "duplicateLocalVariable"
 	static val DISCOURAGED_USAGE = "discouragedUsage"
 	static val EXPECTED_ON = "expectedOn"
 	static val UNEXPECTED_EVENT_EMITTER = "unexpectedEventEmitter"
+	static val UNEXPECTED_EVENT_SPECIFIER = "unexpectedEventSpecifier"
 	static val EXPECTED_CRON_CONSTANT = "expectedCronConstant"
 	static val EXPECTED_VARIABLE = "expectedVariable"
 	static val UNEXPECTED_CRON_NTH = "unexpectedCronNth"
@@ -85,7 +87,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 	static val UNSUPPORTED_OPERATION = "unsupportedOperation"
 	static val NOT_SERIALIZABLE_TYPE = "notSerializableType"
 	static val IMPLICIT_TYPE = "implicitType"
-	static val INVALID_PARAMETER_TYPE = "invalidParameterType"
 
 	override boolean isLocallyUsed(EObject target, EObject containerToFindUsage) {
 		var isUsed = false;
@@ -379,6 +380,15 @@ class PascaniValidator extends AbstractPascaniValidator {
 					}
 				}
 			}
+		}
+	}
+	
+	@Check
+	def checkEventSpecifier(EventEmitter emitter) {
+		if(emitter.specifier != null && !emitter.eventType.equals(EventType.CHANGE)) {
+			error(
+				"Only change events are allowed to use value specifiers", 
+				PascaniPackage.Literals.EVENT_EMITTER__SPECIFIER, UNEXPECTED_EVENT_SPECIFIER)
 		}
 	}
 
