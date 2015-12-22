@@ -9,6 +9,6 @@
 			<accessrule kind="accessible" pattern="org/eclipse/xtext/**"/>
 		</accessrules>
 	</classpathentry>
-	<classpathentry kind="lib" path="library-0.0.1-SNAPSHOT-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="library-0.0.1-SNAPSHOT-jar-with-dependencies.jar" sourcepath="library-0.0.1-SNAPSHOT-sources.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
