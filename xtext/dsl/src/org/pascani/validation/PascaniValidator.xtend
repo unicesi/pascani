@@ -51,6 +51,7 @@ import org.eclipse.xtext.xbase.XAssignment
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
 import org.ow2.scesame.qoscare.core.scaspec.SCAPort
 import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
+import pascani.lang.Probe
 
 /**
  * This class contains custom validation rules. 
@@ -350,15 +351,21 @@ class PascaniValidator extends AbstractPascaniValidator {
 							PascaniPackage.Literals.EVENT_TYPE.ELiterals.join(", "),
 							PascaniPackage.Literals.EVENT__EMITTER, EXPECTED_VARIABLE)
 					} else {
-						// TODO: when pascani library is ready:
-						// validate correspondence between event type and emitter type
-						// validate probe
 						val emitterType = event.emitter.emitter.actualType
+						val probeType = event.emitter.probe.actualType
+						
 						if (emitterType.getSuperType(SCAPort) == null ||
 							emitterType.getSuperType(SCAComponent) == null) {
 							error("The emitter type must be subclass either of SCAComponent or SCAPort",
 								PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
 						}
+						if (probeType.getSuperType(Probe) == null) {
+							error("The probe type must be subclass of Probe",
+								PascaniPackage.Literals.EVENT_EMITTER__PROBE, INVALID_PARAMETER_TYPE)
+						}
+						// TODO: validate correspondence between event type and emitter type
+						// Change events are only applicable to variables, the rest of event types 
+						// are applicable to methods, services, and components
 					}
 				}
 			}
