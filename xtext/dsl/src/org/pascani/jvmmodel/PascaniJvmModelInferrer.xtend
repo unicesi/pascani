@@ -24,16 +24,23 @@ import java.util.ArrayList
 import java.util.List
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.naming.IQualifiedNameProvider
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.xbase.XVariableDeclaration
+import org.eclipse.xtext.xbase.compiler.ImportManager
+import org.eclipse.xtext.xbase.compiler.XbaseCompiler
+import org.eclipse.xtext.xbase.compiler.output.FakeTreeAppendable
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.pascani.outputconfiguration.OutputConfigurationAdapter
 import org.pascani.outputconfiguration.PascaniOutputConfigurationProvider
 import org.pascani.pascani.Event
+import org.pascani.pascani.EventSpecifier
 import org.pascani.pascani.Handler
 import org.pascani.pascani.Monitor
 import org.pascani.pascani.Namespace
+import org.pascani.pascani.RelationalEventSpecifier
+import org.pascani.pascani.RelationalOperator
 import org.pascani.pascani.TypeDeclaration
 import org.quartz.CronExpression
 import org.quartz.Job
@@ -41,9 +48,8 @@ import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
 import pascani.lang.infrastructure.BasicNamespace
 import pascani.lang.infrastructure.NamespaceProxy
-import pascani.lang.util.JobScheduler
-import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import pascani.lang.util.CronConstant
+import pascani.lang.util.JobScheduler
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -59,6 +65,8 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	@Inject extension JvmTypesBuilder
 
 	@Inject extension IQualifiedNameProvider
+	
+	@Inject extension XbaseCompiler
 
 	def dispatch void infer(Monitor monitor, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val monitorImpl = monitor.toClass(monitor.fullyQualifiedName)
@@ -70,6 +78,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		acceptor.accept(monitorImpl) [ m |
 			val subscriptions = new ArrayList
 			val cronEvents = new ArrayList
+			val importManager = new ImportManager(true, m)
 
 			for (e : monitor.body.expressions) {
 				switch (e) {
@@ -92,7 +101,15 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
 						m.members += e.toField(e.name, typeRef(String)) [
 							documentation = e.documentation
+							// TODO: must be an Event with parameters corresponding to the grammar (values are instances of Serializable)
 							initializer = '''"demo"'''
+							if (e.emitter.specifier != null) {
+								var code = ""
+								if (e.emitter.specifier instanceof RelationalEventSpecifier)
+									code = parseSpecifier(importManager, "changeEvent", e.emitter.specifier as RelationalEventSpecifier)
+								else
+									code = parseSpecifier(importManager, "changeEvent", e.emitter.specifier)
+							}
 						]
 					}
 					Handler: {
@@ -146,6 +163,50 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				}
 			}
 		]
+	}
+
+	def String parseSpecifier(ImportManager importManager, String changeEvent, RelationalEventSpecifier specifier) {
+		var left = ""
+		var right = ""
+
+		if (specifier.left instanceof RelationalEventSpecifier)
+			left = parseSpecifier(importManager, changeEvent, specifier.left as RelationalEventSpecifier)
+		else
+			left = parseSpecifier(importManager, changeEvent, specifier.left)
+
+		if (specifier.right instanceof RelationalEventSpecifier)
+			right = parseSpecifier(importManager, changeEvent, specifier.right as RelationalEventSpecifier)
+		else
+			right = parseSpecifier(importManager, changeEvent, specifier.right)
+
+		'''
+			«left» «parseSpecifierLogOp(specifier.operator)» «right»
+		'''
+	}
+
+	// FIXME: reproduce explicit parentheses
+	def String parseSpecifier(ImportManager importManager, String changeEvent, EventSpecifier specifier) {
+		val op = parseSpecifierRelOp(specifier)
+		val result = new FakeTreeAppendable(importManager)
+		// FIXME: this is not compiling
+		val value = specifier.value.compileAsJavaExpression(result, specifier.value.inferredType)
+
+		if (specifier.isPercentage) {
+			'''«typeRef(Math)».abs(«changeEvent».previousValue()-«changeEvent».value()) «op» «changeEvent».previousValue()*(«value»/100.0)'''
+		} else {
+			'''«changeEvent».value() «op» «value»'''
+		}
+	}
+
+	def parseSpecifierRelOp(EventSpecifier specifier) {
+		if (specifier.isAbove) '''>''' 
+		else if (specifier.isBelow) '''<''' 
+		else if (specifier.isEqual) '''=='''
+	}
+
+	def parseSpecifierLogOp(RelationalOperator op) {
+		if (op.equals(RelationalOperator.OR)) '''||''' 
+		else if (op.equals(RelationalOperator.AND)) '''&&'''
 	}
 
 	def dispatch void infer(Namespace namespace, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
