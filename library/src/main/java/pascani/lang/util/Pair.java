@@ -5,6 +5,8 @@ import java.io.Serializable;
 import com.google.common.base.Objects;
 
 /**
+ * @deprecated Use {@link org.eclipse.xtext.xbase.lib.Pair} instead
+ * <p>
  * Adapted from {@link org.eclipse.xtext.xbase.lib.Pair}. This implementation
  * makes the original class serializable.
  * 
@@ -23,6 +25,7 @@ import com.google.common.base.Objects;
  * 
  * @contributor Miguel Jiménez
  */
+@Deprecated
 public final class Pair<K, V> implements Serializable {
 
 	/**
