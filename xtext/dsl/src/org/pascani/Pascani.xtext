@@ -93,13 +93,8 @@ enum RelationalOperator
 	;
 
 EventSpecifier
-	:	(below ?= 'below' | above ?= 'above' | equal ?= 'equal' 'to') value = EventSpecifierValue
+	:	(below ?= 'below' | above ?= 'above' | equal ?= 'equal' 'to') value = XExpression (percentage ?= '%%')?
 	|	'(' RelationalEventSpecifier ')'
-	;
-	
-EventSpecifierValue
-	:	value = Number (percentage ?= '%')?
-	| 	variable = QualifiedName
 	;
 
 /*
