@@ -22,7 +22,9 @@ import com.google.inject.Inject
 import java.io.Serializable
 import java.util.ArrayList
 import java.util.List
+import java.util.UUID
 import org.eclipse.xtext.common.types.JvmGenericType
+import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.xbase.XVariableDeclaration
@@ -46,9 +48,11 @@ import org.quartz.CronExpression
 import org.quartz.Job
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
+import pascani.lang.events.IntervalEvent
 import pascani.lang.infrastructure.BasicNamespace
 import pascani.lang.infrastructure.NamespaceProxy
 import pascani.lang.util.CronConstant
+import pascani.lang.util.EventHandler
 import pascani.lang.util.JobScheduler
 
 /**
@@ -113,14 +117,17 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						]
 					}
 					Handler: {
-						m.members += e.createClass(isPreIndexingPhase)
+						if (e.param.parameterType.type.qualifiedName.equals(IntervalEvent.canonicalName)) {
+							m.members += e.createJobClass(isPreIndexingPhase)
+						} else {
+							m.members += e.createClass(isPreIndexingPhase);
+						}
 					}
 					default: {
 						// subscriptions...
 					}
 				}
 			}
-
 			// TODO: handle and log the exception
 			m.members += monitor.toConstructor [
 				body = '''
@@ -131,7 +138,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 				'''
 			]
-
 			m.members += monitor.toMethod("initialize", typeRef(void)) [
 				body = '''
 					«FOR cronEvent : cronEvents»
@@ -163,6 +169,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				}
 			}
 		]
+	}
+
+	def dispatch void infer(Namespace namespace, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
+		namespace.createProxy(isPreIndexingPhase, acceptor, true)
+		namespace.createClass(isPreIndexingPhase, acceptor)
 	}
 
 	def String parseSpecifier(ImportManager importManager, String changeEvent, RelationalEventSpecifier specifier) {
@@ -209,27 +220,50 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		else if (op.equals(RelationalOperator.AND)) '''&&'''
 	}
 
-	def dispatch void infer(Namespace namespace, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
-		namespace.createProxy(isPreIndexingPhase, acceptor, true)
-		namespace.createClass(isPreIndexingPhase, acceptor)
+	def JvmGenericType createJobClass(Handler handler, boolean isPreIndexingPhase) {
+		val clazz = createClass(handler, isPreIndexingPhase)
+		val expressionVar = "expression" + System.nanoTime()
+		val contextVar = "context" + System.nanoTime()
+		
+		clazz.superTypes += typeRef(Job)
+		clazz.members += handler.toField(expressionVar, typeRef(String))
+		clazz.members += handler.toSetter(expressionVar, typeRef(String))
+		clazz.members += handler.toMethod("execute", typeRef(void)) [
+			exceptions += typeRef(JobExecutionException)
+			parameters += handler.toParameter(contextVar, typeRef(JobExecutionContext))
+			body = '''
+				«contextVar».getMergedJobDataMap();
+				handle(new «typeRef(IntervalEvent)»(«typeRef(UUID)».randomUUID(), this.«expressionVar»));
+			'''
+		]
+		return clazz
 	}
-
+	
 	def JvmGenericType createClass(Handler handler, boolean isPreIndexingPhase) {
-		val handlerImpl = handler.toClass(handler.name) [
+		val eventVar = "event"
+		handler.toClass(handler.name) [
 			if (!isPreIndexingPhase) {
 				^static = true
-				superTypes += typeRef(Job)
-
-				members += handler.toMethod("execute", typeRef(void)) [
-					documentation = handler.documentation
-					exceptions += typeRef(JobExecutionException)
-					parameters += handler.toParameter("context" + System.nanoTime(), typeRef(JobExecutionContext))
-					body = handler.body
+				superTypes += typeRef(EventHandler)
+				members += handler.toMethod("handle", typeRef(void)) [
+					parameters += handler.toParameter(eventVar, typeRef(pascani.lang.Event))
+					body = '''
+						«handler.name»((«typeRef(handler.param.parameterType.type.qualifiedName)») «eventVar»);
+					'''
 				]
+				members += createMethod(handler, isPreIndexingPhase)
 			}
 		]
-
-		return handlerImpl
+	}
+	
+	def JvmOperation createMethod(Handler handler, boolean isPreIndexingPhase) {
+		handler.toMethod(handler.name, typeRef(void)) [
+			if (!isPreIndexingPhase) {
+				documentation = handler.documentation
+				parameters += handler.toParameter(handler.param.name, typeRef(handler.param.parameterType.type.qualifiedName))
+				body = handler.body	
+			}
+		]
 	}
 
 	def JvmGenericType createClass(Namespace namespace, boolean isPreIndexingPhase, IJvmDeclaredTypeAcceptor acceptor) {
