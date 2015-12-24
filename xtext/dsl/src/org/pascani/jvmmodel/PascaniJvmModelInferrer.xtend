@@ -82,7 +82,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		acceptor.accept(monitorImpl) [ m |
 			val subscriptions = new ArrayList
 			val cronEvents = new ArrayList
-			val importManager = new ImportManager(true, m)
+//			val importManager = new ImportManager(true, m)
 
 			for (e : monitor.body.expressions) {
 				switch (e) {
@@ -108,11 +108,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							// TODO: must be an Event with parameters corresponding to the grammar (values are instances of Serializable)
 							initializer = '''"demo"'''
 							if (e.emitter.specifier != null) {
-								var code = ""
-								if (e.emitter.specifier instanceof RelationalEventSpecifier)
-									code = parseSpecifier(importManager, "changeEvent", e.emitter.specifier as RelationalEventSpecifier)
-								else
-									code = parseSpecifier(importManager, "changeEvent", e.emitter.specifier)
+//								var code = ""
+//								if (e.emitter.specifier instanceof RelationalEventSpecifier)
+//									code = parseSpecifier(importManager, "changeEvent", e.emitter.specifier as RelationalEventSpecifier)
+//								else
+//									code = parseSpecifier(importManager, "changeEvent", e.emitter.specifier)
 							}
 						]
 					}
