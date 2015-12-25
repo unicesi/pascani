@@ -18,19 +18,19 @@
  */
 package org.pascani.jvmmodel
 
+import com.google.common.base.Function
 import com.google.inject.Inject
 import java.io.Serializable
+import java.math.BigDecimal
 import java.util.ArrayList
 import java.util.List
 import java.util.UUID
 import org.eclipse.xtext.common.types.JvmGenericType
+import org.eclipse.xtext.common.types.JvmMember
 import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.xbase.XVariableDeclaration
-import org.eclipse.xtext.xbase.compiler.ImportManager
-import org.eclipse.xtext.xbase.compiler.XbaseCompiler
-import org.eclipse.xtext.xbase.compiler.output.FakeTreeAppendable
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
@@ -48,12 +48,15 @@ import org.quartz.CronExpression
 import org.quartz.Job
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
+import pascani.lang.Probe
+import pascani.lang.events.ChangeEvent
 import pascani.lang.events.IntervalEvent
 import pascani.lang.infrastructure.BasicNamespace
 import pascani.lang.infrastructure.NamespaceProxy
 import pascani.lang.util.CronConstant
 import pascani.lang.util.EventHandler
 import pascani.lang.util.JobScheduler
+import pascani.lang.util.NonPeriodicEvent
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -69,8 +72,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	@Inject extension JvmTypesBuilder
 
 	@Inject extension IQualifiedNameProvider
-	
-	@Inject extension XbaseCompiler
 
 	def dispatch void infer(Monitor monitor, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val monitorImpl = monitor.toClass(monitor.fullyQualifiedName)
@@ -82,7 +83,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		acceptor.accept(monitorImpl) [ m |
 			val subscriptions = new ArrayList
 			val cronEvents = new ArrayList
-//			val importManager = new ImportManager(true, m)
 
 			for (e : monitor.body.expressions) {
 				switch (e) {
@@ -103,24 +103,18 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						]
 					}
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
-						m.members += e.toField(e.name, typeRef(String)) [
-							documentation = e.documentation
-							// TODO: must be an Event with parameters corresponding to the grammar (values are instances of Serializable)
-							initializer = '''"demo"'''
-							if (e.emitter.specifier != null) {
-//								var code = ""
-//								if (e.emitter.specifier instanceof RelationalEventSpecifier)
-//									code = parseSpecifier(importManager, "changeEvent", e.emitter.specifier as RelationalEventSpecifier)
-//								else
-//									code = parseSpecifier(importManager, "changeEvent", e.emitter.specifier)
-							}
+						m.members += e.createClass(monitor)
+						m.members += e.toField(e.name, typeRef(monitor.name + "$" + e.name)) [
+							^final = true
+							^static = true
+							initializer = '''new «monitor.name + "$" + e.name»()'''
 						]
 					}
 					Handler: {
 						if (e.param.parameterType.type.qualifiedName.equals(IntervalEvent.canonicalName)) {
-							m.members += e.createJobClass(isPreIndexingPhase)
+							m.members += e.createJobClass()
 						} else {
-							m.members += e.createClass(isPreIndexingPhase);
+							m.members += e.createClass();
 						}
 					}
 					default: {
@@ -176,55 +170,61 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		namespace.createClass(isPreIndexingPhase, acceptor)
 	}
 
-	def String parseSpecifier(ImportManager importManager, String changeEvent, RelationalEventSpecifier specifier) {
+	def String parseSpecifier(String changeEvent, RelationalEventSpecifier specifier, List<JvmMember> members) {
 		var left = ""
 		var right = ""
 
 		if (specifier.left instanceof RelationalEventSpecifier)
-			left = parseSpecifier(importManager, changeEvent, specifier.left as RelationalEventSpecifier)
+			left = parseSpecifier(changeEvent, specifier.left as RelationalEventSpecifier, members)
 		else
-			left = parseSpecifier(importManager, changeEvent, specifier.left)
+			left = parseSpecifier(changeEvent, specifier.left, members)
 
 		if (specifier.right instanceof RelationalEventSpecifier)
-			right = parseSpecifier(importManager, changeEvent, specifier.right as RelationalEventSpecifier)
+			right = parseSpecifier(changeEvent, specifier.right as RelationalEventSpecifier, members)
 		else
-			right = parseSpecifier(importManager, changeEvent, specifier.right)
+			right = parseSpecifier(changeEvent, specifier.right, members)
 
 		'''
-			«left» «parseSpecifierLogOp(specifier.operator)» «right»
+			«left» «parseSpecifierLogOp(specifier.operator)»
+			«right»
 		'''
 	}
 
 	// FIXME: reproduce explicit parentheses
-	def String parseSpecifier(ImportManager importManager, String changeEvent, EventSpecifier specifier) {
+	def String parseSpecifier(String changeEvent, EventSpecifier specifier, List<JvmMember> members) {
 		val op = parseSpecifierRelOp(specifier)
-		val result = new FakeTreeAppendable(importManager)
-		// FIXME: this is not compiling
-		val value = specifier.value.compileAsJavaExpression(result, specifier.value.inferredType)
-
-		if (specifier.isPercentage) {
-			'''«typeRef(Math)».abs(«changeEvent».previousValue()-«changeEvent».value()) «op» «changeEvent».previousValue()*(«value»/100.0)'''
+		val suffix = System.nanoTime()
+		val typeRef = typeRef(BigDecimal)
+		members += specifier.value.toField("value" + suffix, specifier.value.inferredType) [
+			initializer = specifier.value
+		]
+		if (specifier.
+			isPercentage) {
+			'''
+				(new «typeRef.qualifiedName»(«changeEvent».previousValue().toString()).subtract(
+				 new «typeRef.qualifiedName»(«changeEvent».value().toString())
+				)).abs().doubleValue() «op» new «typeRef.qualifiedName»(«changeEvent».previousValue().toString()).doubleValue() * (this.value«suffix» / 100.0)
+			'''
 		} else {
-			'''«changeEvent».value() «op» «value»'''
+			'''
+				new «typeRef.qualifiedName»(«changeEvent».value().toString()).doubleValue() «op» this.value«suffix»
+			'''
 		}
 	}
 
 	def parseSpecifierRelOp(EventSpecifier specifier) {
-		if (specifier.isAbove) '''>''' 
-		else if (specifier.isBelow) '''<''' 
-		else if (specifier.isEqual) '''=='''
+		if (specifier.isAbove) '''>''' else if (specifier.isBelow) '''<''' else if (specifier.isEqual) '''=='''
 	}
 
 	def parseSpecifierLogOp(RelationalOperator op) {
-		if (op.equals(RelationalOperator.OR)) '''||''' 
-		else if (op.equals(RelationalOperator.AND)) '''&&'''
+		if (op.equals(RelationalOperator.OR)) '''||''' else if (op.equals(RelationalOperator.AND)) '''&&'''
 	}
 
-	def JvmGenericType createJobClass(Handler handler, boolean isPreIndexingPhase) {
-		val clazz = createClass(handler, isPreIndexingPhase)
+	def JvmGenericType createJobClass(Handler handler) {
+		val clazz = createClass(handler)
 		val expressionVar = "expression" + System.nanoTime()
 		val contextVar = "context" + System.nanoTime()
-		
+
 		clazz.superTypes += typeRef(Job)
 		clazz.members += handler.toField(expressionVar, typeRef(String))
 		clazz.members += handler.toSetter(expressionVar, typeRef(String))
@@ -238,39 +238,117 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		]
 		return clazz
 	}
-	
-	def JvmGenericType createClass(Handler handler, boolean isPreIndexingPhase) {
+
+	def JvmGenericType createClass(Handler handler) {
 		val eventVar = "event"
 		handler.toClass(handler.name) [
-			if (!isPreIndexingPhase) {
-				^static = true
-				superTypes += typeRef(EventHandler)
-				members += handler.toMethod("handle", typeRef(void)) [
-					parameters += handler.toParameter(eventVar, typeRef(pascani.lang.Event))
-					body = '''
-						«handler.name»((«typeRef(handler.param.parameterType.type.qualifiedName)») «eventVar»);
-					'''
-				]
-				members += createMethod(handler, isPreIndexingPhase)
-			}
+			^static = true
+			superTypes += typeRef(EventHandler)
+			members += handler.toMethod("handle", typeRef(void)) [
+				parameters += handler.toParameter(eventVar, typeRef(pascani.lang.Event))
+				body = '''
+					«handler.name»((«typeRef(handler.param.parameterType.type.qualifiedName)») «eventVar»);
+				'''
+			]
+			members += createMethod(handler)
 		]
 	}
-	
-	def JvmOperation createMethod(Handler handler, boolean isPreIndexingPhase) {
+
+	def JvmOperation createMethod(Handler handler) {
 		handler.toMethod(handler.name, typeRef(void)) [
-			if (!isPreIndexingPhase) {
-				documentation = handler.documentation
-				parameters += handler.toParameter(handler.param.name, typeRef(handler.param.parameterType.type.qualifiedName))
-				body = handler.body	
+			documentation = handler.documentation
+			parameters +=
+				handler.toParameter(handler.param.name, typeRef(handler.param.parameterType.type.qualifiedName))
+			body = handler.body
+		]
+	}
+
+	def JvmGenericType createClass(Event e, Monitor monitor) {
+		e.toClass(monitor.fullyQualifiedName + "$" + e.name) [
+			val varSuffix = System.nanoTime()
+			val specifierTypeRef = typeRef(Function, typeRef(ChangeEvent), typeRef(Boolean))
+			val eventTypeRef = typeRef(Class, wildcardExtends(typeRef(pascani.lang.Event, wildcard())))
+			val eventTypeRefName = '''pascani.lang.events.«e.emitter.eventType.toString.toLowerCase.toFirstUpper»Event'''
+
+			^static = true
+			documentation = e.documentation
+			superTypes += typeRef(NonPeriodicEvent)
+			members += e.emitter.toField("type" + varSuffix, eventTypeRef) [
+				initializer = '''«eventTypeRefName».class'''
+			]
+			members += e.emitter.toMethod("getType", eventTypeRef) [
+				body = '''return this.type«varSuffix»;'''
+			]
+			members += e.emitter.toField("emitter" + varSuffix, e.emitter.emitter.inferredType) [
+				initializer = e.emitter.emitter
+			]
+			members += e.emitter.toMethod("getEmitter", typeRef(Object)) [
+				body = '''return this.emitter«varSuffix»;'''
+			]
+			members += e.emitter.toMethod("pause", typeRef(void)) [
+				body = ''''''
+			]
+			members += e.emitter.toMethod("resume", typeRef(void)) [
+				body = ''''''
+			]
+
+			if (e.emitter.specifier != null) {
+				members += e.emitter.specifier.toClass("specifier" + varSuffix) [
+					val fields = new ArrayList<JvmMember>
+					val code = new ArrayList
+					if (e.emitter.specifier instanceof RelationalEventSpecifier)
+						code.add(
+							parseSpecifier("changeEvent" + varSuffix,
+								e.emitter.specifier as RelationalEventSpecifier, fields))
+					else
+						code.add(parseSpecifier("changeEvent" + varSuffix, e.emitter.specifier, fields))
+
+					superTypes += specifierTypeRef
+					members += fields
+					members += e.emitter.specifier.toMethod("apply", typeRef(Boolean)) [
+						parameters += e.emitter.specifier.toParameter("changeEvent" + varSuffix, typeRef(ChangeEvent))
+						body = '''return «code.get(0)»;'''
+					]
+					members += e.emitter.specifier.toMethod("equals", typeRef(boolean)) [
+						parameters += e.emitter.specifier.toParameter("object", typeRef(Object))
+						body = '''return false;''' // Don't care
+					]
+				]
+				members += e.emitter.specifier.toMethod("getSpecifier", specifierTypeRef) [
+					body = '''return new specifier«varSuffix»();'''
+				]
+
+			} else {
+				members += e.toMethod("getSpecifier", specifierTypeRef) [
+					// There is no validation to perform, all events are welcomed
+					body = '''
+						return new «specifierTypeRef»() {
+							public «Boolean.simpleName» apply(«typeRef(ChangeEvent).simpleName» event) {
+								return true;
+							}
+						};
+					'''
+				]
+			}
+
+			if (e.emitter.probe != null) {
+				members += e.emitter.probe.toField("probe" + varSuffix, typeRef(Probe)) [
+					initializer = e.emitter.probe
+				]
+				members += e.emitter.probe.toMethod("getProbe", typeRef(Probe)) [
+					body = '''return this.probe«varSuffix»;'''
+				]
+			} else {
+				members += e.toMethod("getProbe", typeRef(Probe)) [
+					body = '''return null;'''
+				]
 			}
 		]
 	}
 
 	def JvmGenericType createClass(Namespace namespace, boolean isPreIndexingPhase, IJvmDeclaredTypeAcceptor acceptor) {
-
 		val namespaceImpl = namespace.toClass(namespace.fullyQualifiedName + "Namespace") [
 			if (!isPreIndexingPhase) {
-
 				val List<XVariableDeclaration> declarations = getVariableDeclarations(namespace)
 				superTypes += typeRef(BasicNamespace)
 
@@ -281,7 +359,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						initializer = decl.right
 					]
 				}
-
 				members += namespace.toConstructor [
 					exceptions += typeRef(Exception)
 					body = '''
@@ -293,18 +370,15 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				]
 			}
 		]
-
 		namespaceImpl.eAdapters.add(new OutputConfigurationAdapter(
 			PascaniOutputConfigurationProvider::NAMESPACES_OUTPUT
 		))
 		acceptor.accept(namespaceImpl)
-
 		return namespaceImpl
 	}
 
 	def List<XVariableDeclaration> getVariableDeclarations(TypeDeclaration typeDecl) {
 		val List<XVariableDeclaration> variables = new ArrayList<XVariableDeclaration>()
-
 		for (e : typeDecl.body.expressions) {
 			switch (e) {
 				TypeDeclaration: {
@@ -315,15 +389,12 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				}
 			}
 		}
-
 		return variables
 	}
 
 	def JvmGenericType createProxy(Namespace namespace, boolean isPreIndexingPhase, IJvmDeclaredTypeAcceptor acceptor,
 		boolean isParentNamespace) {
-
 		val namespaceProxyImpl = namespace.toClass(namespace.fullyQualifiedName) [
-
 			if (!isPreIndexingPhase) {
 				documentation = namespace.documentation
 
@@ -341,7 +412,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						}
 					}
 				}
-
 				for (e : namespace.body.expressions) {
 					switch (e) {
 						XVariableDeclaration: {
@@ -363,7 +433,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 				}
 
-				// TODO: Handle the exception by loggging it
+				// TODO: Handle the exception by logging it
 				if (isParentNamespace) {
 					members += namespace.toField(namespace.name + "Proxy", typeRef(NamespaceProxy))
 					members += namespace.toConstructor [
@@ -376,12 +446,10 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							}
 						'''
 					]
-
 					members += namespace.toMethod("getVariable", typeRef(Serializable)) [
 						parameters += namespace.toParameter("variable", typeRef(String))
 						body = '''return this.«namespace.name»Proxy.getVariable(variable);'''
 					]
-
 					members += namespace.toMethod("setVariable", typeRef(void)) [
 						parameters += namespace.toParameter("variable", typeRef(String))
 						parameters += namespace.toParameter("value", typeRef(Serializable))
@@ -393,7 +461,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 
 		if (isParentNamespace) {
 			val output = PascaniOutputConfigurationProvider::MONITORS_OUTPUT
-
 			namespaceProxyImpl.eAdapters.add(new OutputConfigurationAdapter(output))
 			acceptor.accept(namespaceProxyImpl)
 		}
