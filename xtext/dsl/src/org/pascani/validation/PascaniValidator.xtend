@@ -54,6 +54,7 @@ import org.pascani.pascani.RangeCronElement
 import org.pascani.pascani.TerminalCronElement
 import org.pascani.pascani.TypeDeclaration
 import pascani.lang.Probe
+import javax.swing.JOptionPane
 
 /**
  * This class contains custom validation rules. 
@@ -302,7 +303,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 				default: false
 			}
 		]
-
 		if (!duplicates.isEmpty) {
 			error("Duplicate local variable " + event.name, PascaniPackage.Literals.EVENT__NAME,
 				DUPLICATE_LOCAL_VARIABLE)
@@ -312,9 +312,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 	@Check
 	def checkHandlerParameter(Handler handler) {
 		// TODO check: handler if subscribed to events, the parameter must be the corresponding event type
-		val paramType = handler.param.actualType
-
-		if (paramType.getSuperType(pascani.lang.Event) == null) {
+		if (handler.param.actualType.getSuperType(pascani.lang.Event) == null) {
 			error("The parameter type must be subclass of Event", PascaniPackage.Literals.HANDLER__PARAM,
 				INVALID_PARAMETER_TYPE)
 		}
@@ -385,10 +383,17 @@ class PascaniValidator extends AbstractPascaniValidator {
 	
 	@Check
 	def checkEventSpecifier(EventEmitter emitter) {
-		if(emitter.specifier != null && !emitter.eventType.equals(EventType.CHANGE)) {
-			error(
-				"Only change events are allowed to use value specifiers", 
-				PascaniPackage.Literals.EVENT_EMITTER__SPECIFIER, UNEXPECTED_EVENT_SPECIFIER)
+		if (emitter.specifier != null) {
+			if (!emitter.eventType.equals(EventType.CHANGE)) {
+				error(
+					"Only change events are allowed to use value specifiers", 
+					PascaniPackage.Literals.EVENT_EMITTER__SPECIFIER, UNEXPECTED_EVENT_SPECIFIER)	
+			}
+			if (emitter.specifier.value.actualType.getSuperType(Number) == null) {
+				error(
+					"Only numerical values are allowed in value specifiers", 
+					PascaniPackage.Literals.EVENT_SPECIFIER__VALUE, INVALID_PARAMETER_TYPE)
+			}
 		}
 	}
 
