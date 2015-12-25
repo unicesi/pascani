@@ -11,7 +11,7 @@ import pascani.lang.events.ChangeEvent;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public interface EventSpecification {
+public interface NonPeriodicEvent extends ManagedEvent {
 
 	public Class<? extends Event<?>> getType();
 
