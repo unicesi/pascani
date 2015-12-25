@@ -54,7 +54,6 @@ import org.pascani.pascani.RangeCronElement
 import org.pascani.pascani.TerminalCronElement
 import org.pascani.pascani.TypeDeclaration
 import pascani.lang.Probe
-import javax.swing.JOptionPane
 
 /**
  * This class contains custom validation rules. 
