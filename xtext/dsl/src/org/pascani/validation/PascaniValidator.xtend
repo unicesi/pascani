@@ -34,6 +34,7 @@ import org.eclipse.xtext.xbase.XAssignment
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
+import org.eclipse.xtext.xbase.jvmmodel.JvmTypeReferenceBuilder
 import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
 import org.ow2.scesame.qoscare.core.scaspec.SCAMethod
 import org.ow2.scesame.qoscare.core.scaspec.SCAPort
@@ -42,6 +43,7 @@ import org.pascani.pascani.CronElementList
 import org.pascani.pascani.CronExpression
 import org.pascani.pascani.Event
 import org.pascani.pascani.EventEmitter
+import org.pascani.pascani.EventSpecifier
 import org.pascani.pascani.EventType
 import org.pascani.pascani.Handler
 import org.pascani.pascani.IncrementCronElement
@@ -63,6 +65,8 @@ import pascani.lang.Probe
 class PascaniValidator extends AbstractPascaniValidator {
 
 	@Inject extension IQualifiedNameProvider
+	
+	@Inject extension JvmTypeReferenceBuilder
 
 	private List<String> cronConstants = newArrayList("reboot", "yearly", "annually", "monthly", "weekly", "daily",
 		"hourly", "minutely", "secondly")
@@ -357,6 +361,18 @@ class PascaniValidator extends AbstractPascaniValidator {
 	}
 	
 	@Check
+	def checkEventSpecifierValue(EventSpecifier specifier) {
+		val List<Object> numericalPrimitives = newArrayList('byte', 'short', 'int', 'long', 'float', 'double')
+		val actualType = specifier.value.actualType
+		if (!actualType.allSuperTypes.contains(typeRef(Number)) 
+			|| !numericalPrimitives.map[e | actualType.canonicalName.equals(e)].reduce[e,v | e || v]) {
+			error(
+				"Only numerical values are allowed in value specifiers", 
+				PascaniPackage.Literals.EVENT_SPECIFIER__VALUE, INVALID_PARAMETER_TYPE)
+		}
+	}
+	
+	@Check
 	def checkEventSpecifier(EventEmitter emitter) {
 		if (emitter.specifier != null && !emitter.eventType.equals(EventType.CHANGE)) {
 			error(
@@ -384,12 +400,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 						"The emitter type must be subclass either of SCAMethod, SCAPort or SCAComponent",
 						PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
 			}
-			// FIXME: this is causing errors
-//			if (emitter.specifier.value.actualType.getSuperType(Number) == null) {
-//				error(
-//					"Only numerical values are allowed in value specifiers", 
-//					PascaniPackage.Literals.EVENT_SPECIFIER__VALUE, INVALID_PARAMETER_TYPE)
-//			}
 		}
 	}
 
