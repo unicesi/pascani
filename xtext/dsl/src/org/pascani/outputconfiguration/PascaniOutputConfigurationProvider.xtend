@@ -25,8 +25,7 @@ import java.util.Set
 
 class PascaniOutputConfigurationProvider implements IOutputConfigurationProvider {
 
-	public static final String MONITORS_OUTPUT = "monitors";
-	public static final String NAMESPACES_OUTPUT = "namespaces";
+	public static final String PASCANI_OUTPUT = "pascani";
 	public static final String TARGET_SYSTEM_OUTPUT = "target";
 
 	/**
@@ -42,21 +41,13 @@ class PascaniOutputConfigurationProvider implements IOutputConfigurationProvider
 		defaultOutput.setCleanUpDerivedResources(true)
 		defaultOutput.setSetDerivedProperty(true)
 
-		val monitorsOutput = new OutputConfiguration(MONITORS_OUTPUT)
-		monitorsOutput.setDescription("Output folder for monitoring components")
-		monitorsOutput.setOutputDirectory("./src-gen-monitors")
+		val monitorsOutput = new OutputConfiguration(org.pascani.outputconfiguration.PascaniOutputConfigurationProvider.PASCANI_OUTPUT)
+		monitorsOutput.setDescription("Output folder for Pascani elements")
+		monitorsOutput.setOutputDirectory("./pascani-gen")
 		monitorsOutput.setOverrideExistingResources(true)
 		monitorsOutput.setCreateOutputDirectory(true)
 		monitorsOutput.setCleanUpDerivedResources(true)
 		monitorsOutput.setSetDerivedProperty(true)
-
-		val namespacesOutput = new OutputConfiguration(NAMESPACES_OUTPUT)
-		namespacesOutput.setDescription("Output folder for namespace components")
-		namespacesOutput.setOutputDirectory("./src-gen-namespaces")
-		namespacesOutput.setOverrideExistingResources(true)
-		namespacesOutput.setCreateOutputDirectory(true)
-		namespacesOutput.setCleanUpDerivedResources(true)
-		namespacesOutput.setSetDerivedProperty(true)
 
 		val targetOutput = new OutputConfiguration(TARGET_SYSTEM_OUTPUT)
 		targetOutput.setDescription("Output folder for target-system components")
@@ -66,7 +57,7 @@ class PascaniOutputConfigurationProvider implements IOutputConfigurationProvider
 		targetOutput.setCleanUpDerivedResources(true)
 		targetOutput.setSetDerivedProperty(true)
 
-		return newHashSet(defaultOutput, monitorsOutput, namespacesOutput, targetOutput)
+		return newHashSet(defaultOutput, monitorsOutput, targetOutput)
 	}
 
 }

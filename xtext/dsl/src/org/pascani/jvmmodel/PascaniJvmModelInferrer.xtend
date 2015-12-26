@@ -77,7 +77,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		val monitorImpl = monitor.toClass(monitor.fullyQualifiedName)
 
 		monitorImpl.eAdapters.add(new OutputConfigurationAdapter(
-			PascaniOutputConfigurationProvider::MONITORS_OUTPUT
+			PascaniOutputConfigurationProvider::PASCANI_OUTPUT
 		))
 
 		acceptor.accept(monitorImpl) [ m |
@@ -371,7 +371,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			}
 		]
 		namespaceImpl.eAdapters.add(new OutputConfigurationAdapter(
-			PascaniOutputConfigurationProvider::NAMESPACES_OUTPUT
+			PascaniOutputConfigurationProvider::PASCANI_OUTPUT
 		))
 		acceptor.accept(namespaceImpl)
 		return namespaceImpl
@@ -460,7 +460,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		]
 
 		if (isParentNamespace) {
-			val output = PascaniOutputConfigurationProvider::MONITORS_OUTPUT
+			val output = PascaniOutputConfigurationProvider::PASCANI_OUTPUT
 			namespaceProxyImpl.eAdapters.add(new OutputConfigurationAdapter(output))
 			acceptor.accept(namespaceProxyImpl)
 		}
