@@ -350,30 +350,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 						error("Invalid event type '" + event.emitter.cronExpression.constant + "', valid types are " +
 							PascaniPackage.Literals.EVENT_TYPE.ELiterals.join(", "),
 							PascaniPackage.Literals.EVENT__EMITTER, EXPECTED_VARIABLE)
-					} else {
-						val emitterType = event.emitter.emitter.actualType
-						val probeType = event.emitter.probe.actualType
-
-						if (probeType.getSuperType(Probe) == null) {
-							error("The probe type must be subclass of Probe",
-								PascaniPackage.Literals.EVENT_EMITTER__PROBE, INVALID_PARAMETER_TYPE)
-						}
-
-						if (event.emitter.eventType.equals(EventType.CHANGE)) {
-							// TODO: validate emitter comes from a namespace
-							if (emitterType.getSuperType(Serializable) == null) {
-								error("The emitter type must be subclass of Serializable",
-									PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
-							}
-						} else {
-							if (emitterType.getSuperType(SCAMethod) == null ||
-								emitterType.getSuperType(SCAPort) == null ||
-								emitterType.getSuperType(SCAComponent) == null) {
-									error(
-										"The emitter type must be subclass either of SCAMethod, SCAPort or SCAComponent",
-										PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
-							}
-						}
 					}
 				}
 			}
@@ -382,11 +358,31 @@ class PascaniValidator extends AbstractPascaniValidator {
 	
 	@Check
 	def checkEventSpecifier(EventEmitter emitter) {
-		if (emitter.specifier != null) {
-			if (!emitter.eventType.equals(EventType.CHANGE)) {
-				error(
-					"Only change events are allowed to use value specifiers", 
-					PascaniPackage.Literals.EVENT_EMITTER__SPECIFIER, UNEXPECTED_EVENT_SPECIFIER)	
+		if (emitter.specifier != null && !emitter.eventType.equals(EventType.CHANGE)) {
+			error(
+				"Only change events are allowed to use value specifiers", 
+				PascaniPackage.Literals.EVENT_EMITTER__SPECIFIER, UNEXPECTED_EVENT_SPECIFIER)
+		}
+		
+		val emitterType = emitter.emitter.actualType
+		if (emitter.probe.actualType.getSuperType(Probe) == null) {
+			error("The probe type must be subclass of Probe",
+				PascaniPackage.Literals.EVENT_EMITTER__PROBE, INVALID_PARAMETER_TYPE)
+		}
+
+		if (emitter.eventType.equals(EventType.CHANGE)) {
+			// TODO: validate emitter comes from a namespace
+			if (emitterType.getSuperType(Serializable) == null) {
+				error("The emitter type must be subclass of Serializable",
+					PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
+			}
+		} else {
+			if (emitterType.getSuperType(SCAMethod) == null ||
+				emitterType.getSuperType(SCAPort) == null ||
+				emitterType.getSuperType(SCAComponent) == null) {
+					error(
+						"The emitter type must be subclass either of SCAMethod, SCAPort or SCAComponent",
+						PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
 			}
 			// FIXME: this is causing errors
 //			if (emitter.specifier.value.actualType.getSuperType(Number) == null) {
