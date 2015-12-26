@@ -34,7 +34,6 @@ import org.eclipse.xtext.xbase.XAssignment
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
-import org.eclipse.xtext.xbase.jvmmodel.JvmTypeReferenceBuilder
 import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
 import org.ow2.scesame.qoscare.core.scaspec.SCAMethod
 import org.ow2.scesame.qoscare.core.scaspec.SCAPort
@@ -65,8 +64,6 @@ import pascani.lang.Probe
 class PascaniValidator extends AbstractPascaniValidator {
 
 	@Inject extension IQualifiedNameProvider
-	
-	@Inject extension JvmTypeReferenceBuilder
 
 	private List<String> cronConstants = newArrayList("reboot", "yearly", "annually", "monthly", "weekly", "daily",
 		"hourly", "minutely", "secondly")
@@ -297,6 +294,15 @@ class PascaniValidator extends AbstractPascaniValidator {
 	}
 
 	@Check
+	def checkHandlerParameter(Handler handler) {
+		// TODO check: handler if subscribed to events, the parameter must be the corresponding event type
+		if (handler.param.actualType.getSuperType(pascani.lang.Event) == null) {
+			error("The parameter type must be subclass of Event", PascaniPackage.Literals.HANDLER__PARAM,
+				INVALID_PARAMETER_TYPE)
+		}
+	}
+	
+	@Check
 	def checkEventNameIsUnique(Event event) {
 		val parent = event.eContainer.eContainer as Monitor
 		val duplicates = parent.body.expressions.filter [ e |
@@ -309,15 +315,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 		if (!duplicates.isEmpty) {
 			error("Duplicate local variable " + event.name, PascaniPackage.Literals.EVENT__NAME,
 				DUPLICATE_LOCAL_VARIABLE)
-		}
-	}
-
-	@Check
-	def checkHandlerParameter(Handler handler) {
-		// TODO check: handler if subscribed to events, the parameter must be the corresponding event type
-		if (handler.param.actualType.getSuperType(pascani.lang.Event) == null) {
-			error("The parameter type must be subclass of Event", PascaniPackage.Literals.HANDLER__PARAM,
-				INVALID_PARAMETER_TYPE)
 		}
 	}
 	
@@ -361,19 +358,21 @@ class PascaniValidator extends AbstractPascaniValidator {
 	}
 	
 	@Check
-	def checkEventSpecifierValue(EventSpecifier specifier) {
+	def checkEventSpecifier(EventSpecifier specifier) {
 		val List<Object> numericalPrimitives = newArrayList('byte', 'short', 'int', 'long', 'float', 'double')
 		val actualType = specifier.value.actualType
-		if (!actualType.allSuperTypes.contains(typeRef(Number)) 
-			|| !numericalPrimitives.map[e | actualType.canonicalName.equals(e)].reduce[e,v | e || v]) {
-			error(
-				"Only numerical values are allowed in value specifiers", 
+		val superTypes = actualType.allSuperTypes.map[t|t.canonicalName]
+		val isNumerical = superTypes.contains(Number.simpleName) || numericalPrimitives.map [e |
+			actualType.canonicalName.equals(e)
+		].reduce[e, v|e || v]
+		if (!isNumerical) {
+			error("Only numerical expressions are allowed in value specifiers",
 				PascaniPackage.Literals.EVENT_SPECIFIER__VALUE, INVALID_PARAMETER_TYPE)
 		}
 	}
 	
 	@Check
-	def checkEventSpecifier(EventEmitter emitter) {
+	def checkEventEmitter(EventEmitter emitter) {
 		if (emitter.specifier != null && !emitter.eventType.equals(EventType.CHANGE)) {
 			error(
 				"Only change events are allowed to use value specifiers", 
