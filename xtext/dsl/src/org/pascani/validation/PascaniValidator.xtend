@@ -388,11 +388,12 @@ class PascaniValidator extends AbstractPascaniValidator {
 					"Only change events are allowed to use value specifiers", 
 					PascaniPackage.Literals.EVENT_EMITTER__SPECIFIER, UNEXPECTED_EVENT_SPECIFIER)	
 			}
-			if (emitter.specifier.value.actualType.getSuperType(Number) == null) {
-				error(
-					"Only numerical values are allowed in value specifiers", 
-					PascaniPackage.Literals.EVENT_SPECIFIER__VALUE, INVALID_PARAMETER_TYPE)
-			}
+			// FIXME: this is causing errors
+//			if (emitter.specifier.value.actualType.getSuperType(Number) == null) {
+//				error(
+//					"Only numerical values are allowed in value specifiers", 
+//					PascaniPackage.Literals.EVENT_SPECIFIER__VALUE, INVALID_PARAMETER_TYPE)
+//			}
 		}
 	}
 
