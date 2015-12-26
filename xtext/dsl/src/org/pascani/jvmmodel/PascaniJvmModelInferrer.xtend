@@ -439,8 +439,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					members += namespace.toConstructor [
 						body = '''
 							try {
-								String routingKey = "«namespace.fullyQualifiedName»";
-								this.«namespace.name»Proxy = new «NamespaceProxy»(routingKey);
+								this.«namespace.name»Proxy = new «NamespaceProxy»("«namespace.fullyQualifiedName»");
 							} catch(«Exception» e) {
 								e.printStackTrace();
 							}
