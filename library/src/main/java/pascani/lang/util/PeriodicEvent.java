@@ -9,7 +9,7 @@ import org.quartz.CronExpression;
  */
 public interface PeriodicEvent extends ManagedEvent {
 	
-	public CronExpression expression();
+	public CronExpression getExpression();
 	
 	public void updateExpression(CronExpression expression);
 
