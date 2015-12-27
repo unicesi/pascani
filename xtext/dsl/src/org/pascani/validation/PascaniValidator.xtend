@@ -366,8 +366,8 @@ class PascaniValidator extends AbstractPascaniValidator {
 			actualType.canonicalName.equals(e)
 		].reduce[e, v|e || v]
 		if (!isNumerical) {
-			error("Only numerical expressions are allowed in value specifiers",
-				PascaniPackage.Literals.EVENT_SPECIFIER__VALUE, INVALID_PARAMETER_TYPE)
+			error("Only numerical expressions are allowed in value specifiers, instead " + actualType.canonicalName +
+				" was found", PascaniPackage.Literals.EVENT_SPECIFIER__VALUE, INVALID_PARAMETER_TYPE)
 		}
 	}
 	
