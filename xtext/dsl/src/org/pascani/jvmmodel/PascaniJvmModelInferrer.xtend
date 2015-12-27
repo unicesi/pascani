@@ -186,8 +186,9 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	// FIXME: reproduce explicit parentheses
 	def String parseSpecifier(String changeEvent, EventSpecifier specifier, List<JvmMember> members) {
 		val op = parseSpecifierRelOp(specifier)
+		val suffix = System.nanoTime()
 		val typeRef = typeRef(BigDecimal)
-		members += specifier.value.toField("value", specifier.value.inferredType) [
+		members += specifier.value.toField("value" + suffix, specifier.value.inferredType) [
 			initializer = specifier.value
 		]
 		if (specifier.
@@ -195,11 +196,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			'''
 				(new «typeRef.qualifiedName»(«changeEvent».previousValue().toString()).subtract(
 				 new «typeRef.qualifiedName»(«changeEvent».value().toString())
-				)).abs().doubleValue() «op» new «typeRef.qualifiedName»(«changeEvent».previousValue().toString()).doubleValue() * (this.value / 100.0)
+				)).abs().doubleValue() «op» new «typeRef.qualifiedName»(«changeEvent».previousValue().toString()).doubleValue() * (this.value«suffix» / 100.0)
 			'''
 		} else {
 			'''
-				new «typeRef.qualifiedName»(«changeEvent».value().toString()).doubleValue() «op» this.value
+				new «typeRef.qualifiedName»(«changeEvent».value().toString()).doubleValue() «op» this.value«suffix»
 			'''
 		}
 	}
@@ -289,6 +290,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 
 	def JvmGenericType createNonPeriodicClass(Event e, Monitor monitor) {
 		e.toClass(monitor.fullyQualifiedName + "$" + e.name) [
+			val varSuffix = System.nanoTime()
 			val specifierTypeRef = typeRef(Function, typeRef(ChangeEvent), typeRef(Boolean))
 			val eventTypeRef = typeRef(Class, wildcardExtends(typeRef(pascani.lang.Event, wildcard())))
 			val eventTypeRefName = '''pascani.lang.events.«e.emitter.eventType.toString.toLowerCase.toFirstUpper»Event'''
@@ -301,30 +303,34 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					initialize();
 				'''
 			]
-			members += e.emitter.toField("type", eventTypeRef) [
+			members += e.emitter.toField("type" + varSuffix, eventTypeRef) [
 				initializer = '''«eventTypeRefName».class'''
 			]
-			members += e.emitter.toGetter("type", eventTypeRef)
-			members += e.emitter.toField("emitter", e.emitter.emitter.inferredType) [
+			members += e.emitter.toMethod("getType", eventTypeRef) [
+				body = '''return this.type«varSuffix»;'''
+			]
+			members += e.emitter.toField("emitter" + varSuffix, e.emitter.emitter.inferredType) [
 				initializer = e.emitter.emitter
 			]
-			members += e.emitter.toGetter("emitter", typeRef(Object))
+			members += e.emitter.toMethod("getEmitter", typeRef(Object)) [
+				body = '''return this.emitter«varSuffix»;'''
+			]
 			members += managedEventMembers(e)
 
 			if (e.emitter.specifier != null) {
-				members += e.emitter.specifier.toClass("Specifier") [
+				members += e.emitter.specifier.toClass("Specifier" + varSuffix) [
 					val fields = new ArrayList<JvmMember>
 					val code = new ArrayList
 					if (e.emitter.specifier instanceof RelationalEventSpecifier)
-						code.add(parseSpecifier("changeEvent",
+						code.add(parseSpecifier("changeEvent" + varSuffix,
 								e.emitter.specifier as RelationalEventSpecifier, fields))
 					else
-						code.add(parseSpecifier("changeEvent", e.emitter.specifier, fields))
+						code.add(parseSpecifier("changeEvent" + varSuffix, e.emitter.specifier, fields))
 
 					superTypes += specifierTypeRef
 					members += fields
 					members += e.emitter.specifier.toMethod("apply", typeRef(Boolean)) [
-						parameters += e.emitter.specifier.toParameter("changeEvent", typeRef(ChangeEvent))
+						parameters += e.emitter.specifier.toParameter("changeEvent" + varSuffix, typeRef(ChangeEvent))
 						body = '''return «code.get(0)»;'''
 					]
 					members += e.emitter.specifier.toMethod("equals", typeRef(boolean)) [
@@ -333,7 +339,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					]
 				]
 				members += e.emitter.specifier.toMethod("getSpecifier", specifierTypeRef) [
-					body = '''return new Specifier();'''
+					body = '''return new Specifier«varSuffix»();'''
 				]
 
 			} else {
@@ -350,10 +356,12 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			}
 
 			if (e.emitter.probe != null) {
-				members += e.emitter.probe.toField("probe", typeRef(Probe)) [
+				members += e.emitter.probe.toField("probe" + varSuffix, typeRef(Probe)) [
 					initializer = e.emitter.probe
 				]
-				members += e.emitter.probe.toGetter("probe", typeRef(Probe))
+				members += e.emitter.probe.toMethod("getProbe", typeRef(Probe)) [
+					body = '''return this.probe«varSuffix»;'''
+				]
 			} else {
 				members += e.toMethod("getProbe", typeRef(Probe)) [
 					body = '''return null;'''
