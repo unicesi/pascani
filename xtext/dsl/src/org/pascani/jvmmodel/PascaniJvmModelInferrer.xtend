@@ -57,6 +57,7 @@ import pascani.lang.util.CronConstant
 import pascani.lang.util.EventHandler
 import pascani.lang.util.JobScheduler
 import pascani.lang.util.NonPeriodicEvent
+import pascani.lang.util.PeriodicEvent
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -82,7 +83,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 
 		acceptor.accept(monitorImpl) [ m |
 			val subscriptions = new ArrayList
-			val cronEvents = new ArrayList
 
 			for (e : monitor.body.expressions) {
 				switch (e) {
@@ -97,13 +97,15 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					Event case e.emitter != null && e.emitter.cronExpression != null: {
 						// TODO: add subscription to subscriptions
 						// TODO: change the subscription: subscription = job scheduling
-						cronEvents.add(e)
-						m.members += e.toField(e.name, typeRef(CronExpression)) [
-							documentation = e.documentation
+						m.members += e.createPeriodicClass(monitor)
+						m.members += e.toField(e.name, typeRef(monitor.name + "$" + e.name)) [
+							^final = true
+							^static = true
+							initializer = '''new «monitor.name + "$" + e.name»()'''
 						]
 					}
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
-						m.members += e.createClass(monitor)
+						m.members += e.createNonPeriodicClass(monitor)
 						m.members += e.toField(e.name, typeRef(monitor.name + "$" + e.name)) [
 							^final = true
 							^static = true
@@ -114,7 +116,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						if (e.param.parameterType.type.qualifiedName.equals(IntervalEvent.canonicalName)) {
 							m.members += e.createJobClass()
 						} else {
-							m.members += e.createClass();
+							m.members += e.createNonPeriodicClass();
 						}
 					}
 					default: {
@@ -134,15 +136,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			]
 			m.members += monitor.toMethod("initialize", typeRef(void)) [
 				body = '''
-					«FOR cronEvent : cronEvents»
-						«IF(cronEvent.emitter.cronExpression.constant != null)»
-							this.«cronEvent.name» = new «typeRef(CronExpression)»(«typeRef(CronConstant)».valueOf("«cronEvent
-								.emitter.cronExpression.constant.toUpperCase»").expression());
-						«ELSE»
-							this.«cronEvent.name» = new «typeRef(CronExpression)»("«NodeModelUtils
-								.getNode(cronEvent.emitter.cronExpression).text.trim()»");
-						«ENDIF»
-					«ENDFOR»
 					«FOR subscription : subscriptions»
 						«JobScheduler».schedule(null, new «CronExpression»(""), null);
 					«ENDFOR»
@@ -221,7 +214,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	}
 
 	def JvmGenericType createJobClass(Handler handler) {
-		val clazz = createClass(handler)
+		val clazz = createNonPeriodicClass(handler)
 		val expressionVar = "expression" + System.nanoTime()
 		val contextVar = "context" + System.nanoTime()
 
@@ -239,7 +232,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		return clazz
 	}
 
-	def JvmGenericType createClass(Handler handler) {
+	def JvmGenericType createNonPeriodicClass(Handler handler) {
 		val eventVar = "event"
 		handler.toClass(handler.name) [
 			^static = true
@@ -262,16 +255,52 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			body = handler.body
 		]
 	}
+	
+	def JvmGenericType createPeriodicClass(Event e, Monitor monitor) {
+		e.toClass(monitor.fullyQualifiedName + "$" + e.name) [
+			documentation = e.documentation
+			^static = true
+			superTypes += typeRef(PeriodicEvent)
+			members += e.toField("expression", typeRef(CronExpression))
+			members += e.toGetter("expression", typeRef(CronExpression))
+			// TODO: handle the exception (idea: Xtend's sneaky throw with logging capabilities)
+			members += e.toConstructor [
+				body = '''
+					try {
+						«IF (e.emitter.cronExpression.constant != null)»
+							this.expression = new «typeRef(CronExpression)»(«typeRef(CronConstant)».valueOf("«e.emitter.cronExpression.constant.toUpperCase»").expression());
+						«ELSE»
+							this.expression = new «typeRef(CronExpression)»("«NodeModelUtils.getNode(e.emitter.cronExpression).text.trim()»");
+						«ENDIF»
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
+				'''
+			]
+			members += e.toMethod("updateExpression", typeRef(void)) [
+				parameters += e.toParameter("expression", typeRef(CronExpression))
+				body = '''
+					this.expression = expression;
+				'''
+			]
+			members += e.emitter.toMethod("pause", typeRef(void)) [
+				body = ''''''
+			]
+			members += e.emitter.toMethod("resume", typeRef(void)) [
+				body = ''''''
+			]
+		]
+	}
 
-	def JvmGenericType createClass(Event e, Monitor monitor) {
+	def JvmGenericType createNonPeriodicClass(Event e, Monitor monitor) {
 		e.toClass(monitor.fullyQualifiedName + "$" + e.name) [
 			val varSuffix = System.nanoTime()
 			val specifierTypeRef = typeRef(Function, typeRef(ChangeEvent), typeRef(Boolean))
 			val eventTypeRef = typeRef(Class, wildcardExtends(typeRef(pascani.lang.Event, wildcard())))
 			val eventTypeRefName = '''pascani.lang.events.«e.emitter.eventType.toString.toLowerCase.toFirstUpper»Event'''
 
-			^static = true
 			documentation = e.documentation
+			^static = true
 			superTypes += typeRef(NonPeriodicEvent)
 			members += e.emitter.toField("type" + varSuffix, eventTypeRef) [
 				initializer = '''«eventTypeRefName».class'''
