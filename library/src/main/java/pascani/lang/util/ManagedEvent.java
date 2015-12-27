@@ -10,5 +10,7 @@ public interface ManagedEvent {
 	public void pause();
 	
 	public void resume();
+	
+	public void subscribe(EventHandler handler);
 
 }
