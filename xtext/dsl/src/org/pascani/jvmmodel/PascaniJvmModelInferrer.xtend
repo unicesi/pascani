@@ -260,12 +260,13 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			documentation = e.documentation
 			^static = true
 			superTypes += typeRef(PeriodicEvent)
-			members += e.toField("expression", typeRef(CronExpression))
-			members += e.toGetter("expression", typeRef(CronExpression))
+			members += e.emitter.toField("expression", typeRef(CronExpression))
+			members += e.emitter.toGetter("expression", typeRef(CronExpression))
 			// TODO: handle the exception (idea: Xtend's sneaky throw with logging capabilities)
 			members += e.toConstructor [
 				body = '''
 					try {
+						initialize();
 						«IF (e.emitter.cronExpression.constant != null)»
 							this.expression = new «typeRef(CronExpression)»(«typeRef(CronConstant)».valueOf("«e.emitter.cronExpression.constant.toUpperCase»").expression());
 						«ELSE»
@@ -276,18 +277,13 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 				'''
 			]
-			members += e.toMethod("updateExpression", typeRef(void)) [
-				parameters += e.toParameter("expression", typeRef(CronExpression))
+			members += e.emitter.toMethod("updateExpression", typeRef(void)) [
+				parameters += e.emitter.toParameter("expression", typeRef(CronExpression))
 				body = '''
 					this.expression = expression;
 				'''
 			]
-			members += e.emitter.toMethod("pause", typeRef(void)) [
-				body = ''''''
-			]
-			members += e.emitter.toMethod("resume", typeRef(void)) [
-				body = ''''''
-			]
+			members += managedEventMembers(e)
 		]
 	}
 
@@ -300,6 +296,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			documentation = e.documentation
 			^static = true
 			superTypes += typeRef(NonPeriodicEvent)
+			members += e.toConstructor[
+				body = '''
+					initialize();
+				'''
+			]
 			members += e.emitter.toField("type", eventTypeRef) [
 				initializer = '''«eventTypeRefName».class'''
 			]
@@ -308,12 +309,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				initializer = e.emitter.emitter
 			]
 			members += e.emitter.toGetter("emitter", typeRef(Object))
-			members += e.emitter.toMethod("pause", typeRef(void)) [
-				body = ''''''
-			]
-			members += e.emitter.toMethod("resume", typeRef(void)) [
-				body = ''''''
-			]
+			members += managedEventMembers(e)
 
 			if (e.emitter.specifier != null) {
 				members += e.emitter.specifier.toClass("Specifier") [
@@ -364,6 +360,38 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				]
 			}
 		]
+	}
+	
+	def List<JvmMember> managedEventMembers(Event e) {
+		val members = new ArrayList<JvmMember>
+		members += e.emitter.toField("paused", typeRef(boolean)) [
+			^volatile = true
+		]
+		members += e.emitter.toField("subscribers", typeRef(List, typeRef(EventHandler)))
+		members += e.emitter.toMethod("initialize", typeRef(void)) [
+			body = '''
+				this.paused = false;
+				this.subscribers = new «typeRef(ArrayList)»<«typeRef(EventHandler)»>();
+			'''
+		]
+		members += e.emitter.toMethod("pause", typeRef(void)) [
+			body = '''
+				this.paused = true;
+			'''
+		]
+		members += e.emitter.toMethod("resume", typeRef(void)) [
+			body = '''
+				this.paused = false;
+			'''
+		]
+		members += e.emitter.toMethod("subscribe", typeRef(void)) [
+			parameters += e.emitter.toParameter("handler", typeRef(EventHandler))
+			body = '''
+				
+			'''
+		]
+		
+		return members
 	}
 
 	def JvmGenericType createClass(Namespace namespace, boolean isPreIndexingPhase, IJvmDeclaredTypeAcceptor acceptor) {
