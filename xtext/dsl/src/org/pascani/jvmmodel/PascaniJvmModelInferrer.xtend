@@ -137,9 +137,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				body = '''
 					try {
 						initialize();
-						«FOR i : 0..blocks.size - 1»
-							applyCustomCode«i»();
-						«ENDFOR»
+						«IF(blocks.size > 0)»
+							«FOR i : 0..blocks.size - 1»
+								applyCustomCode«i»();
+							«ENDFOR»
+						«ENDIF»
 					} catch(Exception e) {
 						e.printStackTrace();
 					}
