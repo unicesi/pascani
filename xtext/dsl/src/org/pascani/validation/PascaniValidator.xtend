@@ -255,18 +255,27 @@ class PascaniValidator extends AbstractPascaniValidator {
 
 	@Check
 	def checkPascaniVariableDeclaration(XVariableDeclaration varDecl) {
-		/*
-		 * XBase already check variable declarations in the Java context, 
-		 * so this check is with regard to Pascani elements only
-		 */
 		val parent = varDecl.eContainer.eContainer // the first parent is a XBlockExpression
 		switch (parent) {
 			Monitor: {
-				var duplicate = parent.usings.filter[n|n.name.equals(varDecl.name)]
+				val duplicateVars = parent.body.expressions.filter [ v |
+					switch (v) {
+						XVariableDeclaration case v.name.equals(varDecl.name): {
+							return true
+						}
+						default:
+							return false
+					}
+				]
+				val duplicateUsings = parent.usings.filter[n|n.name.equals(varDecl.name)]
 
-				if (!duplicate.isEmpty) {
+				if (!duplicateUsings.isEmpty) {
 					error("Local variable " + varDecl.name + " duplicates namespace " +
-						duplicate.get(0).fullyQualifiedName, XbasePackage.Literals.XVARIABLE_DECLARATION__NAME,
+						duplicateUsings.get(0).fullyQualifiedName, XbasePackage.Literals.XVARIABLE_DECLARATION__NAME,
+						DUPLICATE_LOCAL_VARIABLE)
+				}
+				if (!duplicateVars.isEmpty) {
+					error("Duplicate local variable " + varDecl.name, XbasePackage.Literals.XVARIABLE_DECLARATION__NAME,
 						DUPLICATE_LOCAL_VARIABLE)
 				}
 			}
