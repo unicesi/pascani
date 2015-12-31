@@ -75,6 +75,8 @@ class PascaniValidator extends AbstractPascaniValidator {
 	static val DUPLICATE_LOCAL_VARIABLE = "duplicateLocalVariable"
 	static val DISCOURAGED_USAGE = "discouragedUsage"
 	static val EXPECTED_ON = "expectedOn"
+	static val EXPECTED_WHITESPACE = "expectedWhitespace"
+	static val EXPECTED_MONITOR_PROBE = "expectedMonitorProbe"
 	static val UNEXPECTED_EVENT_EMITTER = "unexpectedEventEmitter"
 	static val UNEXPECTED_EVENT_SPECIFIER = "unexpectedEventSpecifier"
 	static val EXPECTED_CRON_CONSTANT = "expectedCronConstant"
@@ -83,7 +85,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 	static val UNEXPECTED_CRON_INCREMENT = "unexpectedCronIncrement"
 	static val UNEXPECTED_CRON_CONSTANT = "unexpectedCronConstant"
 	static val UNEXPECTED_CRON_RANGE = "unexpectedCronRange"
-	static val EXPECTED_WHITESPACE = "expectedWhitespace"
+	static val UNEXPECTED_MONITOR_PROBE = "unexpectedMonitorProbe"
 	static val UNEXPECTED_SPECIAL_CHARACTER = "unexpectedSpecialCharacter"
 	static val UNSUPPORTED_OPERATION = "unsupportedOperation"
 	static val NOT_SERIALIZABLE_TYPE = "notSerializableType"
@@ -382,17 +384,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 	
 	@Check
 	def checkEventEmitter(EventEmitter emitter) {
-		if (emitter.specifier != null && !emitter.eventType.equals(EventType.CHANGE)) {
-			error(
-				"Only change events are allowed to use value specifiers", 
-				PascaniPackage.Literals.EVENT_EMITTER__SPECIFIER, UNEXPECTED_EVENT_SPECIFIER)
-		}
-		
 		val emitterType = emitter.emitter.actualType
-		if (emitter.probe.actualType.getSuperType(Probe) == null) {
-			error("The probe type must be subclass of Probe",
-				PascaniPackage.Literals.EVENT_EMITTER__PROBE, INVALID_PARAMETER_TYPE)
-		}
 
 		if (emitter.eventType.equals(EventType.CHANGE)) {
 			// TODO: validate emitter comes from a namespace
@@ -400,13 +392,26 @@ class PascaniValidator extends AbstractPascaniValidator {
 				error("The emitter type must be subclass of Serializable",
 					PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
 			}
+			if (emitter.probe != null) {
+				error("Change events must not specify a monitor probe", PascaniPackage.Literals.EVENT_EMITTER__PROBE,
+					UNEXPECTED_MONITOR_PROBE)
+			}
 		} else {
-			if (emitterType.getSuperType(SCAMethod) == null ||
-				emitterType.getSuperType(SCAPort) == null ||
+			if (emitter.specifier != null) {
+				error("Only change events are allowed to use value specifiers",
+					PascaniPackage.Literals.EVENT_EMITTER__SPECIFIER, UNEXPECTED_EVENT_SPECIFIER)
+			}
+			if (emitterType.getSuperType(SCAMethod) == null && emitterType.getSuperType(SCAPort) == null &&
 				emitterType.getSuperType(SCAComponent) == null) {
-					error(
-						"The emitter type must be subclass either of SCAMethod, SCAPort or SCAComponent",
-						PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
+				error("The emitter type must be subclass either of SCAMethod, SCAPort or SCAComponent",
+					PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
+			}
+			if (emitter.probe == null) {
+				error(emitter.eventType.toString.toFirstUpper + " events must specify a monitor probe",
+					PascaniPackage.Literals.EVENT_EMITTER__PROBE, EXPECTED_MONITOR_PROBE)
+			} else if (emitter.probe.actualType.getSuperType(Probe) == null) {
+				error("The probe type must be subclass of Probe", PascaniPackage.Literals.EVENT_EMITTER__PROBE,
+					INVALID_PARAMETER_TYPE)
 			}
 		}
 	}
