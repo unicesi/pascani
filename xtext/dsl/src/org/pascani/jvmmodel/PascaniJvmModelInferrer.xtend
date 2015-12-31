@@ -98,18 +98,18 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						// TODO: add subscription to subscriptions
 						// TODO: change the subscription: subscription = job scheduling
 						m.members += e.createPeriodicClass(monitor)
-						m.members += e.toField(e.name, typeRef(monitor.name + "$" + e.name)) [
+						m.members += e.toField(e.name, typeRef(monitor.name + "_" + e.name)) [
 							^final = true
 							^static = true
-							initializer = '''new «monitor.name + "$" + e.name»()'''
+							initializer = '''new «monitor.name + "_" + e.name»()'''
 						]
 					}
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
 						m.members += e.createNonPeriodicClass(monitor)
-						m.members += e.toField(e.name, typeRef(monitor.name + "$" + e.name)) [
+						m.members += e.toField(e.name, typeRef(monitor.name + "_" + e.name)) [
 							^final = true
 							^static = true
-							initializer = '''new «monitor.name + "$" + e.name»()'''
+							initializer = '''new «monitor.name + "_" + e.name»()'''
 						]
 					}
 					Handler: {
@@ -118,10 +118,10 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						} else {
 							m.members += e.createNonPeriodicClass(monitor);
 						}
-						m.members += e.toField(e.name, typeRef(monitor.name + "$" + e.name)) [
+						m.members += e.toField(e.name, typeRef(monitor.name + "_" + e.name)) [
 							^final = true
 							^static = true
-							initializer = '''new «monitor.name + "$" + e.name»()'''
+							initializer = '''new «monitor.name + "_" + e.name»()'''
 						]
 					}
 					default: {
@@ -239,7 +239,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 
 	def JvmGenericType createNonPeriodicClass(Handler handler, Monitor monitor) {
 		val eventVar = "event"
-		handler.toClass(monitor.name + "$" + handler.name) [
+		handler.toClass(monitor.name + "_" + handler.name) [
 			^static = true
 			superTypes += typeRef(EventHandler)
 			members += handler.toMethod("handle", typeRef(void)) [
@@ -262,7 +262,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	}
 	
 	def JvmGenericType createPeriodicClass(Event e, Monitor monitor) {
-		e.toClass(monitor.fullyQualifiedName + "$" + e.name) [
+		e.toClass(monitor.fullyQualifiedName + "_" + e.name) [
 			documentation = e.documentation
 			^static = true
 			superTypes += typeRef(PeriodicEvent)
@@ -294,7 +294,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	}
 
 	def JvmGenericType createNonPeriodicClass(Event e, Monitor monitor) {
-		e.toClass(monitor.fullyQualifiedName + "$" + e.name) [
+		e.toClass(monitor.fullyQualifiedName + "_" + e.name) [
 			val varSuffix = System.nanoTime()
 			val specifierTypeRef = typeRef(Function, typeRef(ChangeEvent), typeRef(Boolean))
 			val eventTypeRef = typeRef(Class, wildcardExtends(typeRef(pascani.lang.Event, wildcard())))
