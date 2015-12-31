@@ -277,7 +277,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 				val duplicateVars = parent.body.expressions.filter [ v |
 					switch (v) {
 						XVariableDeclaration case v.name.equals(varDecl.name): {
-							return true
+							return !v.equals(varDecl)
 						}
 						default:
 							return false
