@@ -28,6 +28,7 @@ import java.util.UUID
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmMember
 import org.eclipse.xtext.common.types.JvmOperation
+import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.xbase.XVariableDeclaration
@@ -140,6 +141,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				'''
 			]
 			m.members += monitor.toMethod("initialize", typeRef(void)) [
+				visibility = JvmVisibility::PRIVATE
 				body = '''
 					«FOR subscription : subscriptions»
 						«JobScheduler».schedule(null, new «CronExpression»(""), null);
@@ -382,6 +384,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		]
 		members += e.emitter.toField("subscribers", typeRef(List, typeRef(EventHandler)))
 		members += e.emitter.toMethod("initialize", typeRef(void)) [
+			visibility = JvmVisibility::PRIVATE
 			body = '''
 				this.paused = false;
 				this.subscribers = new «typeRef(ArrayList)»<«typeRef(EventHandler)»>();
