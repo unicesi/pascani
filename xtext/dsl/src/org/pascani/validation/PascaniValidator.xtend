@@ -238,6 +238,22 @@ class PascaniValidator extends AbstractPascaniValidator {
 	}
 
 	@Check
+	def checkEventNameIsUnique(Event event) {
+		val parent = event.eContainer.eContainer as Monitor
+		val duplicates = parent.body.expressions.filter [ e |
+			switch (e) {
+				XVariableDeclaration: e.name.equals(event.name)
+				Event: e.name.equals(event.name) && !e.equals(event)
+				default: false
+			}
+		]
+		if (!duplicates.isEmpty) {
+			error("Duplicate local variable " + event.name, PascaniPackage.Literals.EVENT__NAME,
+				DUPLICATE_LOCAL_VARIABLE)
+		}
+	}
+
+	@Check
 	def checkHandlerNameIsUnique(Handler handler) {
 		val parent = handler.eContainer.eContainer as Monitor
 		val duplicates = parent.body.expressions.filter [ e |
@@ -308,22 +324,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 		if (handler.param.actualType.getSuperType(pascani.lang.Event) == null) {
 			error("The parameter type must be subclass of Event", PascaniPackage.Literals.HANDLER__PARAM,
 				INVALID_PARAMETER_TYPE)
-		}
-	}
-	
-	@Check
-	def checkEventNameIsUnique(Event event) {
-		val parent = event.eContainer.eContainer as Monitor
-		val duplicates = parent.body.expressions.filter [ e |
-			switch (e) {
-				XVariableDeclaration: e.name.equals(event.name)
-				Event: e.name.equals(event.name) && !e.equals(event)
-				default: false
-			}
-		]
-		if (!duplicates.isEmpty) {
-			error("Duplicate local variable " + event.name, PascaniPackage.Literals.EVENT__NAME,
-				DUPLICATE_LOCAL_VARIABLE)
 		}
 	}
 	
