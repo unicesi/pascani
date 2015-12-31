@@ -46,6 +46,7 @@ MonitorBlockExpression returns XBlockExpression
 
 InternalMonitorDeclaration returns XExpression
 	:	XVariableDeclaration
+	|	XBlockExpression
 	|	EventDeclaration
 	|	HandlerDeclaration
 	;
