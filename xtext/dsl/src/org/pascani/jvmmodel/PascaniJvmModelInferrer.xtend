@@ -59,6 +59,7 @@ import pascani.lang.util.EventHandler
 import pascani.lang.util.JobScheduler
 import pascani.lang.util.NonPeriodicEvent
 import pascani.lang.util.PeriodicEvent
+import org.eclipse.xtext.xbase.XBlockExpression
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -83,6 +84,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		))
 
 		acceptor.accept(monitorImpl) [ m |
+			val blocks = new ArrayList
 			val subscriptions = new ArrayList
 
 			for (e : monitor.body.expressions) {
@@ -125,8 +127,8 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							initializer = '''new «monitor.name + "_" + e.name»()'''
 						]
 					}
-					default: {
-						// subscriptions...
+					XBlockExpression: {
+						blocks += e
 					}
 				}
 			}
@@ -135,6 +137,9 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				body = '''
 					try {
 						initialize();
+						«FOR i : 0..blocks.size - 1»
+							applyCustomCode«i»();
+						«ENDFOR»
 					} catch(Exception e) {
 						e.printStackTrace();
 					}
@@ -154,7 +159,13 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				'''
 				exceptions += typeRef(Exception)
 			]
-
+			for(var i = 0; i < blocks.size; i++) {
+				val ic = i;
+				m.members += monitor.toMethod("applyCustomCode" + ic, typeRef(void)) [
+					visibility = JvmVisibility::PRIVATE
+					body = blocks.get(ic)
+				]
+			}
 			if (monitor.usings != null) {
 				for (namespace : monitor.usings.filter[n|n.name != null]) {
 					m.members += namespace.toField(namespace.name, typeRef(namespace.fullyQualifiedName.toString)) [
