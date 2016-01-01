@@ -109,7 +109,8 @@ public class ComponentManager {
 	 *            The name of the reference to search
 	 * @return the Java class representing the Port complex type
 	 */
-	public static SCAPort reference(SCAComponent component, String referenceName) {
+	public static SCAPort reference(SCAComponent component,
+			String referenceName) {
 		return port(component.getServices(), referenceName);
 	}
 
@@ -123,7 +124,8 @@ public class ComponentManager {
 	 *            The name of the property to search
 	 * @return the Java class representing the Property complex type
 	 */
-	public static SCAProperty property(SCAComponent component, String propertyName) {
+	public static SCAProperty property(SCAComponent component,
+			String propertyName) {
 		SCAProperty property = null;
 		for (SCAProperty p : component.getProperties()) {
 			if (p.getName().equals(propertyName)) {
@@ -144,35 +146,43 @@ public class ComponentManager {
 		}
 		return service;
 	}
-	
+
 	/**
 	 * Execute a FraSCAti Script statement in the default FraSCAti runtime
 	 * 
-	 * @param script The script to execute
-	 * @param bindingUri The URI where the FraSCAti runtime is running
+	 * @param script
+	 *            The script to execute
+	 * @param bindingUri
+	 *            The URI where the FraSCAti runtime is running
 	 * @return The result of evaluating the given script
-	 * @throws ScriptException if something bad happens!
+	 * @throws ScriptException
+	 *             if something bad happens!
 	 */
-	public static Collection<SCANamedNode> eval(String script) throws ScriptException {
+	public static Collection<SCANamedNode> eval(String script)
+			throws ScriptException {
 		return eval(script, DEFAULT_BINDING_URI);
 	}
-	
+
 	/**
 	 * Execute a FraSCAti Script statement in the specified FraSCAti runtime
 	 * 
-	 * @param script The script to execute
-	 * @param bindingUri The URI where the FraSCAti runtime is running
+	 * @param script
+	 *            The script to execute
+	 * @param bindingUri
+	 *            The URI where the FraSCAti runtime is running
 	 * @return The result of evaluating the given script
-	 * @throws ScriptException if something bad happens!
+	 * @throws ScriptException
+	 *             if something bad happens!
 	 */
-	public static Collection<SCANamedNode> eval(String script, URI bindingUri) throws ScriptException {
+	public static Collection<SCANamedNode> eval(String script, URI bindingUri)
+			throws ScriptException {
 		List<SCANamedNode> nodes = new ArrayList<SCANamedNode>();
 		for (Node node : getReconfigurationInstance(bindingUri).eval(script)) {
-			if(node instanceof Component)
+			if (node instanceof Component)
 				nodes.add(FraSCAti2QoSCAre.convertComponent((Component) node));
-			else if(node instanceof Property)
+			else if (node instanceof Property)
 				nodes.add(FraSCAti2QoSCAre.convertProperty((Property) node));
-			else if(node instanceof Port)
+			else if (node instanceof Port)
 				nodes.add(FraSCAti2QoSCAre.convertPort((Port) node));
 		}
 		return nodes;
@@ -198,7 +208,7 @@ public class ComponentManager {
 		return FraSCAti2QoSCAre.convert(bindingUri.toString(),
 				domain.getDomainComposites());
 	}
-	
+
 	private static Reconfiguration getReconfigurationInstance(URI bindingUri) {
 		Reconfiguration instance = reconfiguration.get(bindingUri);
 		if (instance == null) {
