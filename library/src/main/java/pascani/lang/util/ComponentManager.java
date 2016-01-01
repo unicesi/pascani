@@ -20,15 +20,25 @@ package pascani.lang.util;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.script.ScriptException;
+
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
+import org.ow2.frascati.remote.introspection.Reconfiguration;
 import org.ow2.frascati.remote.introspection.RemoteScaDomain;
+import org.ow2.frascati.remote.introspection.resources.Component;
+import org.ow2.frascati.remote.introspection.resources.Node;
+import org.ow2.frascati.remote.introspection.resources.Port;
+import org.ow2.frascati.remote.introspection.resources.Property;
 import org.ow2.scesame.qoscare.core.scaspec.FraSCAti2QoSCAre;
 import org.ow2.scesame.qoscare.core.scaspec.SCAComponent;
 import org.ow2.scesame.qoscare.core.scaspec.SCADomain;
+import org.ow2.scesame.qoscare.core.scaspec.SCANamedNode;
 import org.ow2.scesame.qoscare.core.scaspec.SCAPort;
 import org.ow2.scesame.qoscare.core.scaspec.SCAProperty;
 
@@ -37,9 +47,11 @@ import org.ow2.scesame.qoscare.core.scaspec.SCAProperty;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
+@SuppressWarnings("restriction")
 public class ComponentManager {
 
 	protected static final Map<URI, RemoteScaDomain> introspection = new HashMap<URI, RemoteScaDomain>();
+	protected static final Map<URI, Reconfiguration> reconfiguration = new HashMap<URI, Reconfiguration>();
 	protected static URI DEFAULT_BINDING_URI = initializeDefaultUri();
 
 	/**
@@ -132,6 +144,39 @@ public class ComponentManager {
 		}
 		return service;
 	}
+	
+	/**
+	 * Execute a FraSCAti Script statement in the default FraSCAti runtime
+	 * 
+	 * @param script The script to execute
+	 * @param bindingUri The URI where the FraSCAti runtime is running
+	 * @return The result of evaluating the given script
+	 * @throws ScriptException if something bad happens!
+	 */
+	public static Collection<SCANamedNode> eval(String script) throws ScriptException {
+		return eval(script, DEFAULT_BINDING_URI);
+	}
+	
+	/**
+	 * Execute a FraSCAti Script statement in the specified FraSCAti runtime
+	 * 
+	 * @param script The script to execute
+	 * @param bindingUri The URI where the FraSCAti runtime is running
+	 * @return The result of evaluating the given script
+	 * @throws ScriptException if something bad happens!
+	 */
+	public static Collection<SCANamedNode> eval(String script, URI bindingUri) throws ScriptException {
+		List<SCANamedNode> nodes = new ArrayList<SCANamedNode>();
+		for (Node node : getReconfigurationInstance(bindingUri).eval(script)) {
+			if(node instanceof Component)
+				nodes.add(FraSCAti2QoSCAre.convertComponent((Component) node));
+			else if(node instanceof Property)
+				nodes.add(FraSCAti2QoSCAre.convertProperty((Property) node));
+			else if(node instanceof Port)
+				nodes.add(FraSCAti2QoSCAre.convertPort((Port) node));
+		}
+		return nodes;
+	}
 
 	private static URI initializeDefaultUri() {
 		URI uri = null;
@@ -152,6 +197,16 @@ public class ComponentManager {
 		}
 		return FraSCAti2QoSCAre.convert(bindingUri.toString(),
 				domain.getDomainComposites());
+	}
+	
+	private static Reconfiguration getReconfigurationInstance(URI bindingUri) {
+		Reconfiguration instance = reconfiguration.get(bindingUri);
+		if (instance == null) {
+			instance = JAXRSClientFactory.create(bindingUri + "/reconfig",
+					Reconfiguration.class);
+			reconfiguration.put(bindingUri, instance);
+		}
+		return instance;
 	}
 
 }
