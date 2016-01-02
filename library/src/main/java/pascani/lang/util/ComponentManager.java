@@ -18,6 +18,8 @@
  */
 package pascani.lang.util;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -29,6 +31,9 @@ import java.util.Map;
 import javax.script.ScriptException;
 
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
+import org.ow2.frascati.mojo.ContributionUtil;
+import org.ow2.frascati.remote.introspection.Deployment;
+import org.ow2.frascati.remote.introspection.FileUtil;
 import org.ow2.frascati.remote.introspection.Reconfiguration;
 import org.ow2.frascati.remote.introspection.RemoteScaDomain;
 import org.ow2.frascati.remote.introspection.resources.Component;
@@ -43,15 +48,57 @@ import org.ow2.scesame.qoscare.core.scaspec.SCAPort;
 import org.ow2.scesame.qoscare.core.scaspec.SCAProperty;
 
 /**
- * This implementation provides utility methods to look up SCA components
+ * This implementation provides utility methods to ease introspection,
+ * reconfiguration and deployment of SCA components
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-@SuppressWarnings("restriction")
 public class ComponentManager {
+	
+	public static class DeploymentBuilder {
+		private final Collection<File> jars = new ArrayList<File>();
+		private final Collection<String> deployables = new ArrayList<String>();
+		private final String contributionName;
+		
+		public DeploymentBuilder(String contributionName) {
+			this.contributionName = contributionName;
+		}
+		
+		public DeploymentBuilder withJars(String... files) {
+			for(String file : files)
+				jars.add(new File(file));
+			return this;
+		}
+		
+		public DeploymentBuilder withDeployables(String... composites) {
+			for(String composite : composites)
+				deployables.add(composite);
+			return this;
+		}
+		
+		public boolean deploy() {
+			return deploy(DEFAULT_BINDING_URI);
+		}
+		
+		public boolean deploy(URI bindingUri) {
+			Deployment instance = getDeploymentInstance(bindingUri);
+			File workingDir = new File("./target");
+			File contribFile = ContributionUtil.makeContribution(jars, deployables,
+					contributionName, workingDir);
+			String base64 = null;
+			try {
+			    base64 = FileUtil.getStringFromFile(contribFile);
+			} catch (IOException e) {
+				// TODO: log the exception
+			    e.printStackTrace();
+			}
+			return instance.deploy(base64) == 0;
+		}
+	}
 
 	protected static final Map<URI, RemoteScaDomain> introspection = new HashMap<URI, RemoteScaDomain>();
 	protected static final Map<URI, Reconfiguration> reconfiguration = new HashMap<URI, Reconfiguration>();
+	protected static final Map<URI, Deployment> deployment = new HashMap<URI, Deployment>();
 	protected static URI DEFAULT_BINDING_URI = initializeDefaultUri();
 
 	/**
@@ -187,12 +234,17 @@ public class ComponentManager {
 		}
 		return nodes;
 	}
+	
+	public static DeploymentBuilder deploy(String contributionName) {
+		return new DeploymentBuilder(contributionName);
+	}
 
 	private static URI initializeDefaultUri() {
 		URI uri = null;
 		try {
 			uri = new URI("http://localhost:8090");
 		} catch (URISyntaxException e) {
+			// TODO: log the exception
 			e.printStackTrace();
 		}
 		return uri;
@@ -208,6 +260,11 @@ public class ComponentManager {
 	private static Reconfiguration getReconfigurationInstance(URI bindingUri) {
 		return getInstance(bindingUri, "reconfig", reconfiguration,
 				Reconfiguration.class);
+	}
+	
+	private static Deployment getDeploymentInstance(URI bindingUri) {
+		return getInstance(bindingUri, "deploy", deployment,
+				Deployment.class);
 	}
 	
 	private static <T> T getInstance(URI bindingUri, String path,
