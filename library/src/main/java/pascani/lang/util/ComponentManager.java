@@ -199,22 +199,24 @@ public class ComponentManager {
 	}
 
 	private static SCADomain getRemoteScaDomain(URI bindingUri) {
-		RemoteScaDomain domain = introspection.get(bindingUri);
-		if (domain == null) {
-			domain = JAXRSClientFactory.create(bindingUri + "/introspection",
-					RemoteScaDomain.class);
-			introspection.put(bindingUri, domain);
-		}
+		RemoteScaDomain domain = getInstance(bindingUri, "introspection",
+				introspection, RemoteScaDomain.class);
 		return FraSCAti2QoSCAre.convert(bindingUri.toString(),
 				domain.getDomainComposites());
 	}
 
 	private static Reconfiguration getReconfigurationInstance(URI bindingUri) {
-		Reconfiguration instance = reconfiguration.get(bindingUri);
+		return getInstance(bindingUri, "reconfig", reconfiguration,
+				Reconfiguration.class);
+	}
+	
+	private static <T> T getInstance(URI bindingUri, String path,
+			Map<URI, T> map, Class<T> clazz) {
+		T instance = map.get(bindingUri);
 		if (instance == null) {
-			instance = JAXRSClientFactory.create(bindingUri + "/reconfig",
-					Reconfiguration.class);
-			reconfiguration.put(bindingUri, instance);
+			instance = JAXRSClientFactory.create(bindingUri + "/" + path,
+					clazz);
+			map.put(bindingUri, instance);
 		}
 		return instance;
 	}
