@@ -373,9 +373,10 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				visibility = JvmVisibility::PRIVATE
 				body = '''
 					String routingKey = «IF(e.emitter.eventType.equals(EventType.CHANGE))»"«e.emitter.emitter.fullyQualifiedName»"«ELSE»"«probeName»"«ENDIF»;
+					String exchange = «IF(e.emitter.eventType.equals(EventType.CHANGE))»"namespaces_exchange"«ELSE»"probes_exchange"«ENDIF»;
 					try {
 						this.consumer = new «typeRef(RabbitMQConsumer)»(
-							«typeRef(PascaniRuntime)».getEnvironment().get("probes_exchange"), routingKey, «typeRef(Context)».«Context.MONITOR.toString») {
+							«typeRef(PascaniRuntime)».getEnvironment().get(exchange), routingKey, «typeRef(Context)».«Context.MONITOR.toString») {
 							@Override public void delegateEventHandling(final Event<?> event) {
 								boolean notify = true;
 								if (event.getClass().equals(type«varSuffix»)) {
