@@ -60,6 +60,9 @@ import pascani.lang.util.JobScheduler
 import pascani.lang.util.NonPeriodicEvent
 import pascani.lang.util.PeriodicEvent
 import org.eclipse.xtext.xbase.XBlockExpression
+import org.eclipse.xtext.xbase.XMemberFeatureCall
+import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
+import org.ow2.scesame.qoscare.core.scaspec.SCAPort
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -75,6 +78,10 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	@Inject extension JvmTypesBuilder
 
 	@Inject extension IQualifiedNameProvider
+	
+	val newProbeId = ComponentManager.canonicalName + ".newProbe"
+	val cNewProbe = newProbeId + "(" + SCAComponent.canonicalName + "," + Class.canonicalName + "[])"
+	val pNewProbe = newProbeId + "(" + SCAPort.canonicalName + "," + Class.canonicalName + "[])"
 
 	def dispatch void infer(Monitor monitor, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val monitorImpl = monitor.toClass(monitor.fullyQualifiedName)
@@ -96,6 +103,14 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							^final = !e.isWriteable
 							^static = true
 						]
+						if (e.right instanceof XMemberFeatureCall) {
+							val featureCall = e.right as XMemberFeatureCall
+							val isProbeDeclaration = featureCall.feature.identifier.equals(cNewProbe) ||
+								featureCall.feature.identifier.equals(pNewProbe)
+							if (isProbeDeclaration) {
+								println(featureCall)
+							}
+						}
 					}
 					Event case e.emitter != null && e.emitter.cronExpression != null: {
 						// TODO: add subscription to subscriptions
