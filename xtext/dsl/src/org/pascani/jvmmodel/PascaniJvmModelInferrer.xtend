@@ -55,14 +55,21 @@ import pascani.lang.events.IntervalEvent
 import pascani.lang.infrastructure.BasicNamespace
 import pascani.lang.infrastructure.NamespaceProxy
 import pascani.lang.util.CronConstant
-import pascani.lang.util.EventHandler
 import pascani.lang.util.JobScheduler
 import pascani.lang.util.NonPeriodicEvent
 import pascani.lang.util.PeriodicEvent
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XMemberFeatureCall
+import pascani.lang.util.ComponentManager
 import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
 import org.ow2.scesame.qoscare.core.scaspec.SCAPort
+import java.util.Observer
+import java.util.Observable
+import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer
+import pascani.lang.PascaniRuntime
+import pascani.lang.PascaniRuntime.Context
+import org.pascani.pascani.EventType
+import pascani.lang.infrastructure.AbstractConsumer
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -261,21 +268,23 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			parameters += handler.toParameter(contextVar, typeRef(JobExecutionContext))
 			body = '''
 				«contextVar».getMergedJobDataMap();
-				handle(new «typeRef(IntervalEvent)»(«typeRef(UUID)».randomUUID(), this.«expressionVar»));
+				«handler.name»(new «typeRef(IntervalEvent)»(«typeRef(UUID)».randomUUID(), this.«expressionVar»));
 			'''
 		]
 		return clazz
 	}
 
 	def JvmGenericType createNonPeriodicClass(Handler handler, Monitor monitor) {
-		val eventVar = "event"
 		handler.toClass(monitor.name + "_" + handler.name) [
 			^static = true
-			superTypes += typeRef(EventHandler)
-			members += handler.toMethod("handle", typeRef(void)) [
-				parameters += handler.toParameter(eventVar, typeRef(pascani.lang.Event))
+			superTypes += typeRef(Observer)
+			members += handler.toMethod("update", typeRef(void)) [
+				parameters += handler.toParameter("observable", typeRef(Observable))
+				parameters += handler.toParameter("argument", typeRef(Object))
 				body = '''
-					«handler.name»((«typeRef(handler.param.parameterType.type.qualifiedName)») «eventVar»);
+					if (argument instanceof «typeRef(handler.param.parameterType.type.qualifiedName)») {
+						«handler.name»((«typeRef(handler.param.parameterType.type.qualifiedName)») argument);
+					}
 				'''
 			]
 			members += createMethod(handler)
@@ -295,11 +304,17 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		e.toClass(monitor.fullyQualifiedName + "_" + e.name) [
 			documentation = e.documentation
 			^static = true
+			superTypes += typeRef(Observable)
 			superTypes += typeRef(PeriodicEvent)
 			members += e.emitter.toField("expression", typeRef(CronExpression))
-			members += e.emitter.toGetter("expression", typeRef(CronExpression))
 			// TODO: handle the exception (idea: Xtend's sneaky throw with logging capabilities)
 			members += e.toConstructor [
+				body = '''
+					initialize();
+				'''
+			]
+			members += e.toMethod("initialize", typeRef(void)) [
+				visibility = JvmVisibility::PRIVATE
 				body = '''
 					try {
 						initialize();
@@ -313,6 +328,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 				'''
 			]
+			members += e.emitter.toGetter("expression", typeRef(CronExpression))
 			members += e.emitter.toMethod("updateExpression", typeRef(void)) [
 				parameters += e.emitter.toParameter("expression", typeRef(CronExpression))
 				body = '''
@@ -329,23 +345,57 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			val specifierTypeRef = typeRef(Function, typeRef(ChangeEvent), typeRef(Boolean))
 			val eventTypeRef = typeRef(Class, wildcardExtends(typeRef(pascani.lang.Event, wildcard())))
 			val eventTypeRefName = '''pascani.lang.events.«e.emitter.eventType.toString.toLowerCase.toFirstUpper»Event'''
+			// TODO: update the probe's name when the naming mechanism is defined
+			val probeName = "probe"
 
 			documentation = e.documentation
 			^static = true
+			superTypes += typeRef(Observable)
 			superTypes += typeRef(NonPeriodicEvent)
+			members += e.emitter.toField("type" + varSuffix, eventTypeRef) [
+				initializer = '''«eventTypeRefName».class'''
+			]
+			members += e.emitter.toField("emitter" + varSuffix, e.emitter.emitter.inferredType) [
+				initializer = e.emitter.emitter
+			]
+			if (e.emitter.probe != null) {
+				members += e.emitter.probe.toField("probe" + varSuffix, typeRef(Probe)) [
+					initializer = e.emitter.probe
+				]	
+			}
+			members += e.toField("consumer", typeRef(AbstractConsumer))
 			members += e.toConstructor[
 				body = '''
 					initialize();
 				'''
 			]
-			members += e.emitter.toField("type" + varSuffix, eventTypeRef) [
-				initializer = '''«eventTypeRefName».class'''
+			members += e.emitter.toMethod("initialize", typeRef(void)) [
+				visibility = JvmVisibility::PRIVATE
+				body = '''
+					String routingKey = «IF(e.emitter.eventType.equals(EventType.CHANGE))»"«e.emitter.emitter.fullyQualifiedName»"«ELSE»"«probeName»"«ENDIF»;
+					try {
+						this.consumer = new «typeRef(RabbitMQConsumer)»(
+							«typeRef(PascaniRuntime)».getEnvironment().get("probes_exchange"), routingKey, «typeRef(Context)».«Context.MONITOR.toString») {
+							@Override public void delegateEventHandling(final Event<?> event) {
+								boolean notify = true;
+								if (event.getClass().equals(type«varSuffix»)) {
+									if (event instanceof «typeRef(ChangeEvent)») {
+										notify = getSpecifier().apply((«typeRef(ChangeEvent)») event);
+									}
+									if (notify) {
+										setChanged();
+										notifyObservers(event);
+									}
+								}
+							}
+						};
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
+				'''
 			]
 			members += e.emitter.toMethod("getType", eventTypeRef) [
 				body = '''return this.type«varSuffix»;'''
-			]
-			members += e.emitter.toField("emitter" + varSuffix, e.emitter.emitter.inferredType) [
-				initializer = e.emitter.emitter
 			]
 			members += e.emitter.toMethod("getEmitter", typeRef(Object)) [
 				body = '''return this.emitter«varSuffix»;'''
@@ -389,11 +439,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					'''
 				]
 			}
-
 			if (e.emitter.probe != null) {
-				members += e.emitter.probe.toField("probe" + varSuffix, typeRef(Probe)) [
-					initializer = e.emitter.probe
-				]
 				members += e.emitter.probe.toMethod("getProbe", typeRef(Probe)) [
 					body = '''return this.probe«varSuffix»;'''
 				]
@@ -409,14 +455,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		val members = new ArrayList<JvmMember>
 		members += e.emitter.toField("paused", typeRef(boolean)) [
 			^volatile = true
-		]
-		members += e.emitter.toField("subscribers", typeRef(List, typeRef(EventHandler)))
-		members += e.emitter.toMethod("initialize", typeRef(void)) [
-			visibility = JvmVisibility::PRIVATE
-			body = '''
-				this.paused = false;
-				this.subscribers = new «typeRef(ArrayList)»<«typeRef(EventHandler)»>();
-			'''
+			initializer = '''false'''
 		]
 		members += e.emitter.toMethod("pause", typeRef(void)) [
 			body = '''
@@ -429,12 +468,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			'''
 		]
 		members += e.emitter.toMethod("subscribe", typeRef(void)) [
-			parameters += e.emitter.toParameter("handler", typeRef(EventHandler))
+			parameters += e.emitter.toParameter("observer", typeRef(Observer))
 			body = '''
-				
+				addObserver(observer);
 			'''
 		]
-		
 		return members
 	}
 
