@@ -24,6 +24,8 @@ import java.io.Serializable
 import java.math.BigDecimal
 import java.util.ArrayList
 import java.util.List
+import java.util.Observable
+import java.util.Observer
 import java.util.UUID
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmMember
@@ -31,14 +33,21 @@ import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+import org.eclipse.xtext.xbase.XAbstractFeatureCall
+import org.eclipse.xtext.xbase.XBlockExpression
+import org.eclipse.xtext.xbase.XExpression
+import org.eclipse.xtext.xbase.XMemberFeatureCall
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
+import org.ow2.scesame.qoscare.core.scaspec.SCAPort
 import org.pascani.outputconfiguration.OutputConfigurationAdapter
 import org.pascani.outputconfiguration.PascaniOutputConfigurationProvider
 import org.pascani.pascani.Event
 import org.pascani.pascani.EventSpecifier
+import org.pascani.pascani.EventType
 import org.pascani.pascani.Handler
 import org.pascani.pascani.Monitor
 import org.pascani.pascani.Namespace
@@ -49,27 +58,21 @@ import org.quartz.CronExpression
 import org.quartz.Job
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
+import pascani.lang.PascaniRuntime
+import pascani.lang.PascaniRuntime.Context
 import pascani.lang.Probe
 import pascani.lang.events.ChangeEvent
 import pascani.lang.events.IntervalEvent
+import pascani.lang.infrastructure.AbstractConsumer
 import pascani.lang.infrastructure.BasicNamespace
 import pascani.lang.infrastructure.NamespaceProxy
+import pascani.lang.infrastructure.ProbeProxy
+import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer
+import pascani.lang.util.ComponentManager
 import pascani.lang.util.CronConstant
 import pascani.lang.util.JobScheduler
 import pascani.lang.util.NonPeriodicEvent
 import pascani.lang.util.PeriodicEvent
-import org.eclipse.xtext.xbase.XBlockExpression
-import org.eclipse.xtext.xbase.XMemberFeatureCall
-import pascani.lang.util.ComponentManager
-import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
-import org.ow2.scesame.qoscare.core.scaspec.SCAPort
-import java.util.Observer
-import java.util.Observable
-import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer
-import pascani.lang.PascaniRuntime
-import pascani.lang.PascaniRuntime.Context
-import org.pascani.pascani.EventType
-import pascani.lang.infrastructure.AbstractConsumer
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -345,8 +348,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			val specifierTypeRef = typeRef(Function, typeRef(ChangeEvent), typeRef(Boolean))
 			val eventTypeRef = typeRef(Class, wildcardExtends(typeRef(pascani.lang.Event, wildcard())))
 			val eventTypeRefName = '''pascani.lang.events.«e.emitter.eventType.toString.toLowerCase.toFirstUpper»Event'''
-			// TODO: update the probe's name when the naming mechanism is defined
-			val probeName = "probe"
 
 			documentation = e.documentation
 			^static = true
@@ -359,7 +360,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				initializer = e.emitter.emitter
 			]
 			if (e.emitter.probe != null) {
-				members += e.emitter.probe.toField("probe" + varSuffix, typeRef(Probe)) [
+				members += e.emitter.probe.toField("probe" + varSuffix, typeRef(ProbeProxy)) [
 					initializer = e.emitter.probe
 				]	
 			}
@@ -369,10 +370,19 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					initialize();
 				'''
 			]
+
+			val routingKey = new ArrayList
+			if (e.emitter.eventType.equals(EventType.CHANGE)) {
+				routingKey +=
+					monitor.name + "." + getParentNamespace(e.emitter.emitter) + ".getClass().getCanonicalName()"
+			} else {
+				routingKey += "this.probe" + varSuffix + ".routingKey()"
+			}
+			
 			members += e.emitter.toMethod("initialize", typeRef(void)) [
 				visibility = JvmVisibility::PRIVATE
 				body = '''
-					String routingKey = «IF(e.emitter.eventType.equals(EventType.CHANGE))»"«e.emitter.emitter.fullyQualifiedName»"«ELSE»"«probeName»"«ENDIF»;
+					String routingKey = «routingKey.get(0)»;
 					String exchange = «IF(e.emitter.eventType.equals(EventType.CHANGE))»"namespaces_exchange"«ELSE»"probes_exchange"«ENDIF»;
 					try {
 						this.consumer = new «typeRef(RabbitMQConsumer)»(
@@ -450,6 +460,16 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				]
 			}
 		]
+	}
+	
+	def String getParentNamespace(XExpression expression) {
+		var segments = new ArrayList
+		if (expression instanceof XAbstractFeatureCall) {
+			segments += expression.concreteSyntaxFeatureName
+			segments += getParentNamespace(expression.actualReceiver)
+			return segments.filterNull.last
+		}
+		return null
 	}
 	
 	def List<JvmMember> managedEventMembers(Event e) {
