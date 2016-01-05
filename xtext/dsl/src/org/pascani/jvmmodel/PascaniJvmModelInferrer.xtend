@@ -497,6 +497,12 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				addObserver(observer);
 			'''
 		]
+		members += e.toMethod("unsubscribe", typeRef(void)) [
+			parameters += e.emitter.toParameter("observer", typeRef(Observer))
+			body = '''
+				deleteObserver(observer);
+			'''
+		]
 		return members
 	}
 

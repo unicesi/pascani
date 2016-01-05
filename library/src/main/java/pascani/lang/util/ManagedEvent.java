@@ -14,5 +14,7 @@ public interface ManagedEvent {
 	public void resume();
 	
 	public void subscribe(Observer observer);
+	
+	public void unsubscribe(Observer observer);
 
 }
