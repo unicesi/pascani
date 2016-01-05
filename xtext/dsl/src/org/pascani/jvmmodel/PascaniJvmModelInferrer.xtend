@@ -274,7 +274,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			parameters += handler.toParameter(contextVar, typeRef(JobExecutionContext))
 			body = '''
 				«contextVar».getMergedJobDataMap();
-				«handler.name»(new «typeRef(IntervalEvent)»(«typeRef(UUID)».randomUUID(), this.«expressionVar»));
+				execute(new «typeRef(IntervalEvent)»(«typeRef(UUID)».randomUUID(), this.«expressionVar»));
 			'''
 		]
 		return clazz
@@ -289,7 +289,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				parameters += handler.toParameter("argument", typeRef(Object))
 				body = '''
 					if (argument instanceof «typeRef(handler.param.parameterType.type.qualifiedName)») {
-						«handler.name»((«typeRef(handler.param.parameterType.type.qualifiedName)») argument);
+						execute((«typeRef(handler.param.parameterType.type.qualifiedName)») argument);
 					}
 				'''
 			]
@@ -298,7 +298,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	}
 
 	def JvmOperation createMethod(Handler handler) {
-		handler.toMethod(handler.name, typeRef(void)) [
+		handler.toMethod("execute", typeRef(void)) [
 			documentation = handler.documentation
 			parameters +=
 				handler.toParameter(handler.param.name, typeRef(handler.param.parameterType.type.qualifiedName))
