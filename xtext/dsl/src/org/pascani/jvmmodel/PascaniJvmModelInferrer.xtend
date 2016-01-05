@@ -477,21 +477,21 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	
 	def List<JvmMember> managedEventMembers(Event e) {
 		val members = new ArrayList<JvmMember>
-		members += e.emitter.toField("paused", typeRef(boolean)) [
+		members += e.toField("paused", typeRef(boolean)) [
 			^volatile = true
 			initializer = '''false'''
 		]
-		members += e.emitter.toMethod("pause", typeRef(void)) [
+		members += e.toMethod("pause", typeRef(void)) [
 			body = '''
 				this.paused = true;
 			'''
 		]
-		members += e.emitter.toMethod("resume", typeRef(void)) [
+		members += e.toMethod("resume", typeRef(void)) [
 			body = '''
 				this.paused = false;
 			'''
 		]
-		members += e.emitter.toMethod("subscribe", typeRef(void)) [
+		members += e.toMethod("subscribe", typeRef(void)) [
 			parameters += e.emitter.toParameter("observer", typeRef(Observer))
 			body = '''
 				addObserver(observer);
