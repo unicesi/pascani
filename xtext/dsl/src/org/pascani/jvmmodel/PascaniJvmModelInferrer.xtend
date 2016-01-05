@@ -125,31 +125,34 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					Event case e.emitter != null && e.emitter.cronExpression != null: {
 						// TODO: add subscription to subscriptions
 						// TODO: change the subscription: subscription = job scheduling
-						m.members += e.createPeriodicClass(monitor)
-						m.members += e.toField(e.name, typeRef(monitor.name + "_" + e.name)) [
+						val nestedtype = e.createPeriodicClass(monitor)
+						m.members += nestedtype
+						m.members += e.toField(e.name, typeRef(nestedtype)) [
 							^final = true
 							^static = true
-							initializer = '''new «monitor.name + "_" + e.name»()'''
+							initializer = '''new «nestedtype.simpleName»()'''
 						]
 					}
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
-						m.members += e.createNonPeriodicClass(monitor)
-						m.members += e.toField(e.name, typeRef(monitor.name + "_" + e.name)) [
+						val nestedtype = e.createNonPeriodicClass(monitor)
+						m.members += nestedtype
+						m.members += e.toField(e.name, typeRef(nestedtype)) [
 							^final = true
 							^static = true
-							initializer = '''new «monitor.name + "_" + e.name»()'''
+							initializer = '''new «nestedtype.simpleName»()'''
 						]
 					}
 					Handler: {
-						if (e.param.parameterType.type.qualifiedName.equals(IntervalEvent.canonicalName)) {
-							m.members += e.createJobClass(monitor)
-						} else {
-							m.members += e.createNonPeriodicClass(monitor);
-						}
-						m.members += e.toField(e.name, typeRef(monitor.name + "_" + e.name)) [
+						val nestedtype = if (e.param.parameterType.type.qualifiedName.equals(IntervalEvent.canonicalName)) {
+								e.createJobClass(monitor)
+							} else {
+								e.createNonPeriodicClass(monitor);
+							}
+						m.members += nestedtype
+						m.members += e.toField(e.name, typeRef(nestedtype)) [
 							^final = true
 							^static = true
-							initializer = '''new «monitor.name + "_" + e.name»()'''
+							initializer = '''new «nestedtype.simpleName»()'''
 						]
 					}
 					XBlockExpression: {
