@@ -194,6 +194,13 @@ public class ProbeProxy implements Probe {
 	}
 	
 	/**
+	 * @return the routing key to which this proxy points
+	 */
+	public String routingKey() {
+		return this.client.routingKey();
+	}
+	
+	/**
 	 * Shutdowns connections
 	 * 
 	 * @throws Exception
