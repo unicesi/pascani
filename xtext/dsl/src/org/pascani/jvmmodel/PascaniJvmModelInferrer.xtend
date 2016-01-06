@@ -25,7 +25,6 @@ import java.math.BigDecimal
 import java.util.ArrayList
 import java.util.List
 import java.util.Observable
-import java.util.Observer
 import java.util.UUID
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmMember
@@ -70,6 +69,7 @@ import pascani.lang.infrastructure.ProbeProxy
 import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer
 import pascani.lang.util.ComponentManager
 import pascani.lang.util.CronConstant
+import pascani.lang.util.EventObserver
 import pascani.lang.util.JobScheduler
 import pascani.lang.util.NonPeriodicEvent
 import pascani.lang.util.PeriodicEvent
@@ -283,7 +283,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	def JvmGenericType createNonPeriodicClass(Handler handler, Monitor monitor) {
 		handler.toClass(monitor.name + "_" + handler.name) [
 			^static = true
-			superTypes += typeRef(Observer)
+			superTypes += typeRef(EventObserver, typeRef(handler.param.parameterType.type.qualifiedName))
 			members += handler.toMethod("update", typeRef(void)) [
 				parameters += handler.toParameter("observable", typeRef(Observable))
 				parameters += handler.toParameter("argument", typeRef(Object))
@@ -300,6 +300,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	def JvmOperation createMethod(Handler handler) {
 		handler.toMethod("execute", typeRef(void)) [
 			documentation = handler.documentation
+			annotations += annotationRef(Override)
 			parameters +=
 				handler.toParameter(handler.param.name, typeRef(handler.param.parameterType.type.qualifiedName))
 			body = handler.body
@@ -310,7 +311,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		e.toClass(monitor.fullyQualifiedName + "_" + e.name) [
 			documentation = e.documentation
 			^static = true
-			superTypes += typeRef(Observable)
 			superTypes += typeRef(PeriodicEvent)
 			members += e.emitter.toField("expression", typeRef(CronExpression))
 			// TODO: handle the exception (idea: Xtend's sneaky throw with logging capabilities)
@@ -336,12 +336,13 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			]
 			members += e.emitter.toGetter("expression", typeRef(CronExpression))
 			members += e.emitter.toMethod("updateExpression", typeRef(void)) [
+				annotations += annotationRef(Override)
 				parameters += e.emitter.toParameter("expression", typeRef(CronExpression))
 				body = '''
 					this.expression = expression;
 				'''
 			]
-			members += managedEventMembers(e)
+			members += managedEventMembers(e, IntervalEvent.canonicalName)
 		]
 	}
 
@@ -354,10 +355,9 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 
 			documentation = e.documentation
 			^static = true
-			superTypes += typeRef(Observable)
 			superTypes += typeRef(NonPeriodicEvent)
 			members += e.emitter.toField("type" + varSuffix, eventTypeRef) [
-				initializer = '''«eventTypeRefName».class'''
+				initializer = '''«typeRef(eventTypeRefName)».class'''
 			]
 			members += e.emitter.toField("emitter" + varSuffix, e.emitter.emitter.inferredType) [
 				initializer = e.emitter.emitter
@@ -409,12 +409,14 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				'''
 			]
 			members += e.emitter.toMethod("getType", eventTypeRef) [
+				annotations += annotationRef(Override)
 				body = '''return this.type«varSuffix»;'''
 			]
 			members += e.emitter.toMethod("getEmitter", typeRef(Object)) [
+				annotations += annotationRef(Override)
 				body = '''return this.emitter«varSuffix»;'''
 			]
-			members += managedEventMembers(e)
+			members += managedEventMembers(e, eventTypeRefName)
 
 			if (e.emitter.specifier != null) {
 				members += e.emitter.specifier.toClass("Specifier" + varSuffix) [
@@ -438,27 +440,19 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					]
 				]
 				members += e.emitter.specifier.toMethod("getSpecifier", specifierTypeRef) [
+					annotations += annotationRef(Override)
 					body = '''return new Specifier«varSuffix»();'''
 				]
 
-			} else {
-				members += e.toMethod("getSpecifier", specifierTypeRef) [
-					// There is no validation to perform, all events are welcomed
-					body = '''
-						return new «specifierTypeRef»() {
-							public «Boolean.simpleName» apply(«typeRef(ChangeEvent).simpleName» event) {
-								return true;
-							}
-						};
-					'''
-				]
 			}
 			if (e.emitter.probe != null) {
 				members += e.emitter.probe.toMethod("getProbe", typeRef(Probe)) [
+					annotations += annotationRef(Override)
 					body = '''return this.probe«varSuffix»;'''
 				]
 			} else {
 				members += e.toMethod("getProbe", typeRef(Probe)) [
+					annotations += annotationRef(Override)
 					body = '''return null;'''
 				]
 			}
@@ -475,32 +469,18 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		return null
 	}
 	
-	def List<JvmMember> managedEventMembers(Event e) {
+	def List<JvmMember> managedEventMembers(Event e, String eventTypeRefName) {
 		val members = new ArrayList<JvmMember>
-		members += e.toField("paused", typeRef(boolean)) [
-			^volatile = true
-			initializer = '''false'''
-		]
-		members += e.toMethod("pause", typeRef(void)) [
-			body = '''
-				this.paused = true;
-			'''
-		]
-		members += e.toMethod("resume", typeRef(void)) [
-			body = '''
-				this.paused = false;
-			'''
-		]
 		members += e.toMethod("subscribe", typeRef(void)) [
-			parameters += e.emitter.toParameter("observer", typeRef(Observer))
+			parameters += e.emitter.toParameter("eventObserver", typeRef(EventObserver, typeRef(eventTypeRefName)))
 			body = '''
-				addObserver(observer);
+				addObserver(eventObserver);
 			'''
 		]
 		members += e.toMethod("unsubscribe", typeRef(void)) [
-			parameters += e.emitter.toParameter("observer", typeRef(Observer))
+			parameters += e.emitter.toParameter("eventObserver", typeRef(EventObserver, typeRef(eventTypeRefName)))
 			body = '''
-				deleteObserver(observer);
+				deleteObserver(eventObserver);
 			'''
 		]
 		return members
