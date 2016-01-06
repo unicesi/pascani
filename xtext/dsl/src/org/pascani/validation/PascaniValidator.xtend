@@ -102,24 +102,29 @@ class PascaniValidator extends AbstractPascaniValidator {
 				 */
 				isUsed = true
 			} else if (containerToFindUsage.eContainer instanceof Monitor) {
-				for (handler : containerToFindUsage.expressions.filter(Handler)) {
-					for (expression : (handler.body as XBlockExpression).expressions) {
-						switch (expression) {
-							XAssignment: {
-								isUsed = isUsed || isLocallyUsed(target, expression)
-							}
-							XAbstractFeatureCall: {
-								isUsed = isUsed || isLocallyUsed(target, expression)
-							}
-							XVariableDeclaration: {
-								isUsed = isUsed || isLocallyUsed(target, expression)
-							}
-							default: {
-								// TODO: cover more cases
-							}
+				val expressions = containerToFindUsage.expressions.filter(Handler).map [ handler |
+					(handler.body as XBlockExpression).expressions
+				].flatten.toList
+				val declarations = containerToFindUsage.expressions.filter(XVariableDeclaration).filter [ declaration |
+					!declaration.equals(target)
+				]
+				expressions.addAll(declarations)
+				isUsed = expressions.exists [ expression |
+					switch (expression) {
+						XAssignment: {
+							isLocallyUsed(target, expression)
+						}
+						XAbstractFeatureCall: {
+							isLocallyUsed(target, expression)
+						}
+						XVariableDeclaration: {
+							isLocallyUsed(target, expression)
+						}
+						default: {
+							// TODO: cover more cases
 						}
 					}
-				}
+				]
 			}
 		}
 
