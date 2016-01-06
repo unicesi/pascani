@@ -102,35 +102,43 @@ class PascaniValidator extends AbstractPascaniValidator {
 				 */
 				isUsed = true
 			} else if (containerToFindUsage.eContainer instanceof Monitor) {
-				val expressions = containerToFindUsage.expressions.filter(Handler).map [ handler |
-					(handler.body as XBlockExpression).expressions
-				].flatten.toList
-				val declarations = containerToFindUsage.expressions.filter(XVariableDeclaration).filter [ declaration |
-					!declaration.equals(target)
+				val expressions = containerToFindUsage.expressions.map [ expression |
+					if (expression instanceof Handler) {
+						(expression.body as XBlockExpression).expressions
+					} else if(expression instanceof XBlockExpression) {
+						expression.expressions
+					} else {
+						newArrayList(expression)
+					}
+				].flatten.toList.filter[ expression |
+					!expression.equals(target)
 				]
-				expressions.addAll(declarations)
 				isUsed = expressions.exists [ expression |
 					switch (expression) {
-						XAssignment: {
-							isLocallyUsed(target, expression)
-						}
-						XAbstractFeatureCall: {
-							isLocallyUsed(target, expression)
-						}
-						XVariableDeclaration: {
-							isLocallyUsed(target, expression)
-						}
-						default: {
-							// TODO: cover more cases
-						}
+						XAssignment: isLocallyUsed(target, expression)
+						XAbstractFeatureCall: isLocallyUsed(target, expression)
+						XVariableDeclaration: isLocallyUsed(target, expression)
+						Event: isLocallyUsed(target, expression)
+						default: super.isLocallyUsed(target, containerToFindUsage) // TODO: cover more cases
 					}
 				]
 			}
 		}
 
-		return isUsed || super.isLocallyUsed(target, containerToFindUsage)
+		return isUsed
 	}
 
+	def boolean isLocallyUsed(EObject target, Event event) {
+		// event x raised on type of <emitter> using <probe>
+		var isUsed = if (event.emitter != null) {
+			isLocallyUsed(target, event.emitter.probe) ||
+			isLocallyUsed(target, event.emitter.emitter)
+		} else {
+			false
+		}
+		return isUsed
+	}
+	
 	def boolean isLocallyUsed(EObject target, XAssignment expression) {
 		val feature = expression.feature.qualifiedName
 		val isUsed = target.fullyQualifiedName.toString.equals(feature)
