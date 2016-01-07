@@ -30,6 +30,7 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.Trigger;
+import org.quartz.TriggerKey;
 
 /**
  * Simple wrapper implementation of the Quartz library to schedule jobs. This
@@ -106,6 +107,36 @@ public class JobScheduler {
 		schedule(jobClass, expression, new JobDataMap());
 	}
 	
+	/**
+	 * Removes the indicated job from the scheduler.
+	 * 
+	 * @param jobName
+	 *            The name of the job (must be unique)
+	 * @return whether the job was unscheduled or not
+	 * @throws SchedulerException
+	 *             if there is an internal Scheduler error.
+	 */
+	public static boolean unschedule(String jobName) throws SchedulerException {
+		return unschedule(jobName, null);
+	}
+
+	/**
+	 * Removes the indicated job from the scheduler.
+	 * 
+	 * @param jobName
+	 *            The name of the job (must be unique among the job group)
+	 * @param jobGroup
+	 *            The name of the group containing the job
+	 * @return whether the job was unscheduled or not
+	 * @throws SchedulerException
+	 *             if there is an internal Scheduler error.
+	 */
+	public static boolean unschedule(String jobName, String jobGroup)
+			throws SchedulerException {
+		return scheduler
+				.unscheduleJob(TriggerKey.triggerKey(jobName, jobGroup));
+	}
+
 	/**
 	 * Halts the <code>Scheduler</code>'s firing of <code>{@link Trigger}s</code>,
      * and cleans up all resources associated with the Scheduler. Equivalent to
