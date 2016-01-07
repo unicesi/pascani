@@ -377,7 +377,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			val routingKey = new ArrayList
 			if (e.emitter.eventType.equals(EventType.CHANGE)) {
 				routingKey +=
-					monitor.name + "." + getParentNamespace(e.emitter.emitter) + ".getClass().getCanonicalName()"
+					monitor.name + "." + getEmitterFQN(e.emitter.emitter).last + ".getClass().getCanonicalName()"
 			} else {
 				routingKey += "this.probe" + varSuffix + ".routingKey()"
 			}
@@ -385,21 +385,24 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			members += e.emitter.toMethod("initialize", typeRef(void)) [
 				visibility = JvmVisibility::PRIVATE
 				body = '''
-					String routingKey = «routingKey.get(0)»;
-					String exchange = «IF(e.emitter.eventType.equals(EventType.CHANGE))»"namespaces_exchange"«ELSE»"probes_exchange"«ENDIF»;
+					final String routingKey = «routingKey.get(0)»;
+					final String exchange = «IF (e.emitter.eventType.equals(EventType.CHANGE))»"namespaces_exchange"«ELSE»"probes_exchange"«ENDIF»;
 					try {
 						this.consumer = new «typeRef(RabbitMQConsumer)»(
 							«typeRef(PascaniRuntime)».getEnvironment().get(exchange), routingKey, «typeRef(Context)».«Context.MONITOR.toString») {
 							@Override public void delegateEventHandling(final Event<?> event) {
-								boolean notify = true;
 								if (event.getClass().equals(type«varSuffix»)) {
-									if (event instanceof «typeRef(ChangeEvent)») {
-										notify = getSpecifier().apply((«typeRef(ChangeEvent)») event);
-									}
-									if (notify) {
+									«IF (eventTypeRefName.equals(ChangeEvent.canonicalName))»
+										String variable = routingKey + ".«getEmitterFQN(e.emitter.emitter).toList.reverseView.drop(1).join(".")»";
+										if (getSpecifier().apply((«typeRef(ChangeEvent)») event)
+											&& ((«typeRef(ChangeEvent)») event).variable().equals(variable)) {
+											setChanged();
+											notifyObservers(event);
+										}
+									«ELSE»
 										setChanged();
 										notifyObservers(event);
-									}
+									«ENDIF»
 								}
 							}
 						};
@@ -459,14 +462,14 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		]
 	}
 	
-	def String getParentNamespace(XExpression expression) {
+	def Iterable<String> getEmitterFQN(XExpression expression) {
 		var segments = new ArrayList
 		if (expression instanceof XAbstractFeatureCall) {
 			segments += expression.concreteSyntaxFeatureName
-			segments += getParentNamespace(expression.actualReceiver)
-			return segments.filterNull.last
+			segments += getEmitterFQN(expression.actualReceiver)
+			return segments.filter[l|!l.isEmpty]
 		}
-		return null
+		return segments
 	}
 	
 	def List<JvmMember> managedEventMembers(Event e, String eventTypeRefName) {
