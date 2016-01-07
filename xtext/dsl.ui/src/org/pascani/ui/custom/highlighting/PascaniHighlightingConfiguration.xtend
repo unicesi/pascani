@@ -18,23 +18,21 @@
  */
 package org.pascani.ui.custom.highlighting
 
-import org.eclipse.xtext.ui.editor.syntaxcoloring.DefaultHighlightingConfiguration
-import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfigurationAcceptor
 import org.eclipse.swt.SWT
 import org.eclipse.swt.graphics.RGB
+import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfigurationAcceptor
+import org.eclipse.xtext.xbase.ui.highlighting.XbaseHighlightingConfiguration
 
-class PascaniHighlightingConfiguration extends DefaultHighlightingConfiguration {
+class PascaniHighlightingConfiguration extends XbaseHighlightingConfiguration {
 
 	public static val String RELATIONAL_OP_ID = "relational_op";
 	public static val String EVENT_TYPE_ID = "event_type";
 	public static val String CRON_EXPRESSION_ID = "cron_expression_constant";
 
 	override configure(IHighlightingConfigurationAcceptor acceptor) {
-
 		acceptor.acceptDefaultHighlighting(RELATIONAL_OP_ID, "Relational operators (and, or)", relationalOpTextStyle());
 		acceptor.acceptDefaultHighlighting(EVENT_TYPE_ID, "Event types", eventTypeTextStyle());
 		acceptor.acceptDefaultHighlighting(CRON_EXPRESSION_ID, "Cron expressions", cronExpressionTextStyle());
-
 		super.configure(acceptor);
 	}
 

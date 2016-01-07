@@ -22,31 +22,39 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.ide.editor.syntaxcoloring.IHighlightedPositionAcceptor
-import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.nodemodel.ILeafNode
 import org.eclipse.xtext.nodemodel.INode
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.util.CancelIndicator
+import org.eclipse.xtext.xbase.ide.highlighting.XbaseHighlightingCalculator
 import org.pascani.pascani.CronExpression
 import org.pascani.pascani.EventEmitter
 import org.pascani.pascani.PascaniPackage
 import org.pascani.pascani.RelationalEventSpecifier
 import org.pascani.pascani.util.PascaniSwitch
+import org.pascani.pascani.impl.RelationalEventSpecifierImpl
+import org.pascani.pascani.impl.EventEmitterImpl
+import org.pascani.pascani.impl.CronExpressionImpl
 
-class PascaniSemanticHighlightingCalculator implements ISemanticHighlightingCalculator {
+class PascaniSemanticHighlightingCalculator extends XbaseHighlightingCalculator {
 
 	override void provideHighlightingFor(XtextResource resource, IHighlightedPositionAcceptor acceptor,
 		CancelIndicator cancelIndicator) {
 		if (resource == null || resource.getParseResult() == null)
 			return;
 
+		val supported = newArrayList(RelationalEventSpecifierImpl, EventEmitterImpl, CronExpressionImpl)
 		val switcher = new HighlightingSwitch(acceptor);
-		val iter = EcoreUtil.getAllContents(resource, true);
+		val iterator = EcoreUtil.getAllContents(resource, true);
 
-		while (iter.hasNext()) {
-			val current = iter.next();
-			switcher.doSwitch(current);
+		while (iterator.hasNext()) {
+			val current = iterator.next();
+			if (supported.contains(current.class)) {
+				switcher.doSwitch(current);
+			} else {
+				super.highlightElement(current, acceptor, cancelIndicator)
+			}
 		}
 	}
 
