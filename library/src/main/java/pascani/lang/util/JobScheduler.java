@@ -83,7 +83,7 @@ public class JobScheduler {
 	 */
 	public static void schedule(Class<? extends Job> jobClass,
 			CronExpression expression, JobDataMap data)
-			throws SchedulerException {
+					throws SchedulerException {
 
 		JobDetail jobDetail = newJob(jobClass).usingJobData(data).build();
 		Trigger trigger = newTrigger().startNow()
@@ -120,7 +120,8 @@ public class JobScheduler {
 	}
 
 	/**
-	 * Removes the indicated job from the scheduler.
+	 * Removes the indicated job from the scheduler, when a job group has been
+	 * indicated in the {@link JobDetail}
 	 * 
 	 * @return whether the job was unscheduled or not
 	 * @throws SchedulerException
@@ -133,15 +134,15 @@ public class JobScheduler {
 	}
 
 	/**
-	 * Halts the <code>Scheduler</code>'s firing of <code>{@link Trigger}s</code>,
-     * and cleans up all resources associated with the Scheduler. Equivalent to
-     * <code>shutdown(false)</code>.
-     * 
-     * <p>
-     * The scheduler cannot be re-started.
-     * </p>
-     * 
-     * @see Scheduler#shutdown(boolean)
+	 * Halts the <code>Scheduler</code>'s firing of
+	 * <code>{@link Trigger}s</code>, and cleans up all resources associated
+	 * with the Scheduler. Equivalent to <code>shutdown(false)</code>.
+	 * 
+	 * <p>
+	 * The scheduler cannot be re-started.
+	 * </p>
+	 * 
+	 * @see Scheduler#shutdown(boolean)
 	 */
 	public static void shutdown() throws SchedulerException {
 		scheduler.shutdown();
