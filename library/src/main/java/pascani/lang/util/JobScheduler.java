@@ -106,35 +106,30 @@ public class JobScheduler {
 			CronExpression expression) throws SchedulerException {
 		schedule(jobClass, expression, new JobDataMap());
 	}
-	
+
 	/**
 	 * Removes the indicated job from the scheduler.
 	 * 
-	 * @param jobName
-	 *            The name of the job (must be unique)
 	 * @return whether the job was unscheduled or not
 	 * @throws SchedulerException
 	 *             if there is an internal Scheduler error.
 	 */
-	public static boolean unschedule(String jobName) throws SchedulerException {
-		return unschedule(jobName, null);
+	public static boolean unschedule(Class<? extends Job> jobClass)
+			throws SchedulerException {
+		return unschedule(jobClass, null);
 	}
 
 	/**
 	 * Removes the indicated job from the scheduler.
 	 * 
-	 * @param jobName
-	 *            The name of the job (must be unique among the job group)
-	 * @param jobGroup
-	 *            The name of the group containing the job
 	 * @return whether the job was unscheduled or not
 	 * @throws SchedulerException
 	 *             if there is an internal Scheduler error.
 	 */
-	public static boolean unschedule(String jobName, String jobGroup)
-			throws SchedulerException {
-		return scheduler
-				.unscheduleJob(TriggerKey.triggerKey(jobName, jobGroup));
+	public static boolean unschedule(Class<? extends Job> jobClass,
+			String jobGroup) throws SchedulerException {
+		return scheduler.unscheduleJob(
+				TriggerKey.triggerKey(jobClass.getCanonicalName(), jobGroup));
 	}
 
 	/**
