@@ -387,8 +387,8 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 								if (event.getClass().equals(type«varSuffix»)) {
 									«IF (eventTypeRefName.equals(ChangeEvent.canonicalName))»
 										String variable = routingKey + ".«getEmitterFQN(e.emitter.emitter).toList.reverseView.drop(1).join(".")»";
-										if (getSpecifier().apply((«typeRef(ChangeEvent)») event)
-											&& ((«typeRef(ChangeEvent)») event).variable().equals(variable)) {
+										if (((«typeRef(ChangeEvent)») event).variable().equals(variable)
+											&& getSpecifier().apply((«typeRef(ChangeEvent)») event)) {
 											setChanged();
 											notifyObservers(event);
 										}
