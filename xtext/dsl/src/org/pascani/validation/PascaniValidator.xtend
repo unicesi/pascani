@@ -119,13 +119,13 @@ class PascaniValidator extends AbstractPascaniValidator {
 						XAbstractFeatureCall: isLocallyUsed(target, expression)
 						XVariableDeclaration: isLocallyUsed(target, expression)
 						Event: isLocallyUsed(target, expression)
-						default: super.isLocallyUsed(target, containerToFindUsage) // TODO: cover more cases
+						default: false // TODO: cover more cases
 					}
 				]
 			}
 		}
 
-		return isUsed
+		return isUsed || super.isLocallyUsed(target, containerToFindUsage)
 	}
 
 	def boolean isLocallyUsed(EObject target, Event event) {
