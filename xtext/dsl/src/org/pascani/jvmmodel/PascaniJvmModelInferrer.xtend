@@ -55,6 +55,7 @@ import org.pascani.pascani.RelationalOperator
 import org.pascani.pascani.TypeDeclaration
 import org.quartz.CronExpression
 import org.quartz.Job
+import org.quartz.JobDataMap
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
 import pascani.lang.PascaniRuntime
@@ -102,8 +103,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 
 		acceptor.accept(monitorImpl) [ m |
 			val blocks = new ArrayList
-			val subscriptions = new ArrayList
-
 			for (e : monitor.body.expressions) {
 				switch (e) {
 					XVariableDeclaration: {
@@ -123,39 +122,37 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						}
 					}
 					Event case e.emitter != null && e.emitter.cronExpression != null: {
-						// TODO: add subscription to subscriptions
-						// TODO: change the subscription: subscription = job scheduling
-						val nestedtype = e.createPeriodicClass(monitor)
-						m.members += nestedtype
-						m.members += e.toField(e.name, typeRef(nestedtype)) [
+						val nestedType = e.createPeriodicClass(monitor)
+						m.members += nestedType
+						m.members += e.toField(e.name, typeRef(nestedType)) [
 							^final = true
 							^static = true
-							initializer = '''new «nestedtype.simpleName»()'''
+							initializer = '''new «nestedType.simpleName»()'''
 						]
 					}
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
-						val nestedtype = e.createNonPeriodicClass(monitor)
-						m.members += nestedtype
-						m.members += e.toField(e.name, typeRef(nestedtype)) [
+						val nestedType = e.createNonPeriodicClass(monitor)
+						m.members += nestedType
+						m.members += e.toField(e.name, typeRef(nestedType)) [
 							^final = true
 							^static = true
-							initializer = '''new «nestedtype.simpleName»()'''
+							initializer = '''new «nestedType.simpleName»()'''
 						]
 					}
 					Handler: {
-						val nestedtype = if (e.param.parameterType.type.qualifiedName.equals(IntervalEvent.canonicalName)) {
-								e.createJobClass(monitor)
-							} else {
-								e.createNonPeriodicClass(monitor);
-							}
-						m.members += nestedtype
-						m.members += e.toField(e.name, typeRef(nestedtype)) [
-							^final = true
-							^static = true
-							initializer = '''new «nestedtype.simpleName»()'''
-						]
+						if (e.param.parameterType.type.qualifiedName.equals(IntervalEvent.canonicalName)) {
+							m.members += e.createJobClass
+						} else {
+							val nestedType = e.createNonPeriodicClass(monitor.name + "_")
+							m.members += nestedType
+								m.members += e.toField(e.name, typeRef(nestedType)) [
+								^final = true
+								^static = true
+								initializer = '''new «nestedType.simpleName»()'''
+							]
+						}
 					}
-					XBlockExpression: {
+					XBlockExpression case !e.expressions.isEmpty: {
 						blocks += e
 					}
 				}
@@ -178,9 +175,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			m.members += monitor.toMethod("initialize", typeRef(void)) [
 				visibility = JvmVisibility::PRIVATE
 				body = '''
-					«FOR subscription : subscriptions»
-						«JobScheduler».schedule(null, new «CronExpression»(""), null);
-					«ENDFOR»
 					«IF monitor.usings != null»
 						«FOR namespace : monitor.usings»
 							«namespace.name» = new «namespace.name»();
@@ -261,27 +255,22 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		if (op.equals(RelationalOperator.OR)) '''||''' else if (op.equals(RelationalOperator.AND)) '''&&'''
 	}
 
-	def JvmGenericType createJobClass(Handler handler, Monitor monitor) {
-		val clazz = createNonPeriodicClass(handler, monitor)
-		val expressionVar = "expression" + System.nanoTime()
-		val contextVar = "context" + System.nanoTime()
-
+	def JvmGenericType createJobClass(Handler handler) {
+		val clazz = createNonPeriodicClass(handler, "")
 		clazz.superTypes += typeRef(Job)
-		clazz.members += handler.toField(expressionVar, typeRef(String))
-		clazz.members += handler.toSetter(expressionVar, typeRef(String))
 		clazz.members += handler.toMethod("execute", typeRef(void)) [
 			exceptions += typeRef(JobExecutionException)
-			parameters += handler.toParameter(contextVar, typeRef(JobExecutionContext))
+			parameters += handler.toParameter("context", typeRef(JobExecutionContext))
 			body = '''
-				«contextVar».getMergedJobDataMap();
-				execute(new «typeRef(IntervalEvent)»(«typeRef(UUID)».randomUUID(), this.«expressionVar»));
+				«typeRef(JobDataMap)» data = context.getJobDetail().getJobDataMap();
+				execute(new «typeRef(IntervalEvent)»(«typeRef(UUID)».randomUUID(), (String) data.get("expression")));
 			'''
 		]
 		return clazz
 	}
 
-	def JvmGenericType createNonPeriodicClass(Handler handler, Monitor monitor) {
-		handler.toClass(monitor.name + "_" + handler.name) [
+	def JvmGenericType createNonPeriodicClass(Handler handler, String classPrefix) {
+		handler.toClass(classPrefix + handler.name) [
 			^static = true
 			superTypes += typeRef(EventObserver, typeRef(handler.param.parameterType.type.qualifiedName))
 			members += handler.toMethod("update", typeRef(void)) [
@@ -313,6 +302,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			^static = true
 			superTypes += typeRef(PeriodicEvent)
 			members += e.emitter.toField("expression", typeRef(CronExpression))
+			members += e.toField("classes", typeRef(List, typeRef(Class, wildcardExtends(typeRef(Job)))))
 			// TODO: handle the exception (idea: Xtend's sneaky throw with logging capabilities)
 			members += e.toConstructor [
 				body = '''
@@ -323,12 +313,12 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				visibility = JvmVisibility::PRIVATE
 				body = '''
 					try {
-						initialize();
 						«IF (e.emitter.cronExpression.constant != null)»
 							this.expression = new «typeRef(CronExpression)»(«typeRef(CronConstant)».valueOf("«e.emitter.cronExpression.constant.toUpperCase»").expression());
 						«ELSE»
 							this.expression = new «typeRef(CronExpression)»("«NodeModelUtils.getNode(e.emitter.cronExpression).text.trim()»");
 						«ENDIF»
+						this.classes = new «typeRef(ArrayList, typeRef(Class, wildcardExtends(typeRef(Job))))»();
 					} catch(Exception e) {
 						e.printStackTrace();
 					}
@@ -340,6 +330,10 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				parameters += e.emitter.toParameter("expression", typeRef(CronExpression))
 				body = '''
 					this.expression = expression;
+					for («typeRef(Class)»<«wildcardExtends(typeRef(Job))»> clazz : this.classes) {
+						unsubscribe(clazz);
+						subscribe(clazz);
+					}
 				'''
 			]
 			members += managedEventMembers(e, IntervalEvent.canonicalName)
@@ -380,8 +374,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					monitor.name + "." + getEmitterFQN(e.emitter.emitter).last + ".getClass().getCanonicalName()"
 			} else {
 				routingKey += "this.probe" + varSuffix + ".routingKey()"
-			}
-			
+			}	
 			members += e.emitter.toMethod("initialize", typeRef(void)) [
 				visibility = JvmVisibility::PRIVATE
 				body = '''
@@ -474,18 +467,49 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	
 	def List<JvmMember> managedEventMembers(Event e, String eventTypeRefName) {
 		val members = new ArrayList<JvmMember>
-		members += e.toMethod("subscribe", typeRef(void)) [
-			parameters += e.emitter.toParameter("eventObserver", typeRef(EventObserver, typeRef(eventTypeRefName)))
-			body = '''
-				addObserver(eventObserver);
-			'''
-		]
-		members += e.toMethod("unsubscribe", typeRef(void)) [
-			parameters += e.emitter.toParameter("eventObserver", typeRef(EventObserver, typeRef(eventTypeRefName)))
-			body = '''
-				deleteObserver(eventObserver);
-			'''
-		]
+		if (e.emitter.cronExpression != null) {
+			members += e.toMethod("subscribe", typeRef(void)) [
+				parameters += e.emitter.toParameter("jobClass", typeRef(Class, wildcardExtends(typeRef(Job))))
+				// TODO: handle the exception
+				body = '''
+					if (!this.classes.contains(jobClass)) {
+						this.classes.add(jobClass);
+						«typeRef(JobDataMap)» data = new «typeRef(JobDataMap)»();
+						data.put("expression", getExpression().getCronExpression());
+						try {
+							«typeRef(JobScheduler)».schedule(jobClass, new «typeRef(CronExpression)»(getExpression().getCronExpression()), data);
+						} catch(Exception e) {
+							e.printStackTrace();
+						}
+					}
+				'''
+			]
+			members += e.toMethod("unsubscribe", typeRef(void)) [
+				parameters += e.emitter.toParameter("jobClass", typeRef(Class, wildcardExtends(typeRef(Job))))
+				// TODO: handle the exception
+				body = '''
+					this.classes.remove(jobClass);
+					try {
+						«typeRef(JobScheduler)».unschedule(jobClass);
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
+				'''
+			]
+		} else {
+			members += e.toMethod("subscribe", typeRef(void)) [
+				parameters += e.emitter.toParameter("eventObserver", typeRef(EventObserver, typeRef(eventTypeRefName)))
+				body = '''
+					addObserver(eventObserver);
+				'''
+			]
+			members += e.toMethod("unsubscribe", typeRef(void)) [
+				parameters += e.emitter.toParameter("eventObserver", typeRef(EventObserver, typeRef(eventTypeRefName)))
+				body = '''
+					deleteObserver(eventObserver);
+				'''
+			]	
+		}
 		return members
 	}
 
