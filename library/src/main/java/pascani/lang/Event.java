@@ -71,6 +71,13 @@ public abstract class Event<T> implements Comparable<Event<T>>, Serializable {
 	public UUID transactionId() {
 		return this.transactionId;
 	}
+	
+	/**
+	 * @return the timestamp when this event is raised, in nanoseconds
+	 */
+	public long timestamp() {
+		return this.timestamp;
+	}
 
 	/**
 	 * @return the value of this event
