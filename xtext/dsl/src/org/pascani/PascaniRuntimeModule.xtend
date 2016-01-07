@@ -18,18 +18,16 @@
  */
 package org.pascani
 
-import org.eclipse.xtext.naming.IQualifiedNameProvider
-import org.eclipse.xtext.generator.IOutputConfigurationProvider
-import org.eclipse.xtext.generator.IGenerator
-import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
-import org.eclipse.xtext.scoping.IScopeProvider
-import org.pascani.outputconfiguration.OutputConfigurationAwaredGenerator
-import org.pascani.scoping.PascaniImportedNamespaceAwareLocalScopeProvider
-import org.pascani.runtime.PascaniQualifiedNameProvider
-import org.pascani.outputconfiguration.PascaniOutputConfigurationProvider
-import org.pascani.scoping.PascaniScopeProvider
 import com.google.inject.Binder
 import com.google.inject.Singleton
+import org.eclipse.xtext.generator.IGenerator
+import org.eclipse.xtext.generator.IOutputConfigurationProvider
+import org.eclipse.xtext.naming.IQualifiedNameProvider
+import org.eclipse.xtext.scoping.IScopeProvider
+import org.pascani.outputconfiguration.OutputConfigurationAwaredGenerator
+import org.pascani.outputconfiguration.PascaniOutputConfigurationProvider
+import org.pascani.runtime.PascaniQualifiedNameProvider
+import org.pascani.scoping.PascaniScopeProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -38,13 +36,6 @@ class PascaniRuntimeModule extends AbstractPascaniRuntimeModule {
 
 	override Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
 		return PascaniQualifiedNameProvider;
-	}
-
-	override void configureIScopeProviderDelegate(com.google.inject.Binder binder) {
-		binder
-			.bind(org.eclipse.xtext.scoping.IScopeProvider)
-			.annotatedWith(com.google.inject.name.Names.named(AbstractDeclarativeScopeProvider.NAMED_DELEGATE))
-			.to(PascaniImportedNamespaceAwareLocalScopeProvider);
 	}
 
 	override Class<? extends IScopeProvider> bindIScopeProvider() {

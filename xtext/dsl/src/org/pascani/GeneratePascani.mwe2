@@ -30,14 +30,8 @@ Workflow {
 			project = StandardProjectConfig {
 				baseName = "dsl"
 				rootPath = rootPath
-				runtimeTest = {
-					enabled = false
-				}
 				eclipsePlugin = {
 					enabled = true
-				}
-				eclipsePluginTest = {
-					enabled = false
 				}
 				web = {
 					enabled = true
