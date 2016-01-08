@@ -25,39 +25,30 @@ import java.util.Set
 
 class PascaniOutputConfigurationProvider implements IOutputConfigurationProvider {
 
-	public static final String PASCANI_OUTPUT = "pascani";
-	public static final String TARGET_SYSTEM_OUTPUT = "target";
+	public static val PASCANI_OUTPUT = "pascani"
+	public static val SCA_OUTPUT = "sca"
+	public static val TARGET_SYSTEM_OUTPUT = "target"
 
 	/**
 	 * @return a set of {@link OutputConfiguration} available for the generator
 	 */
 	override Set<OutputConfiguration> getOutputConfigurations() {
-
-		val defaultOutput = new OutputConfiguration(IFileSystemAccess.DEFAULT_OUTPUT)
-		defaultOutput.setDescription("Output Folder")
-		defaultOutput.setOutputDirectory("./src-gen")
-		defaultOutput.setOverrideExistingResources(true)
-		defaultOutput.setCreateOutputDirectory(true)
-		defaultOutput.setCleanUpDerivedResources(true)
-		defaultOutput.setSetDerivedProperty(true)
-
-		val monitorsOutput = new OutputConfiguration(org.pascani.outputconfiguration.PascaniOutputConfigurationProvider.PASCANI_OUTPUT)
-		monitorsOutput.setDescription("Output folder for Pascani elements")
-		monitorsOutput.setOutputDirectory("./pascani-gen")
-		monitorsOutput.setOverrideExistingResources(true)
-		monitorsOutput.setCreateOutputDirectory(true)
-		monitorsOutput.setCleanUpDerivedResources(true)
-		monitorsOutput.setSetDerivedProperty(true)
-
-		val targetOutput = new OutputConfiguration(TARGET_SYSTEM_OUTPUT)
-		targetOutput.setDescription("Output folder for target-system components")
-		targetOutput.setOutputDirectory("./src-gen-target")
-		targetOutput.setOverrideExistingResources(true)
-		targetOutput.setCreateOutputDirectory(true)
-		targetOutput.setCleanUpDerivedResources(true)
-		targetOutput.setSetDerivedProperty(true)
-
-		return newHashSet(defaultOutput, monitorsOutput, targetOutput)
+		val defaultOutput = configure(IFileSystemAccess.DEFAULT_OUTPUT, "Output folder", "./src-gen")
+		val pascaniOutput = configure(PASCANI_OUTPUT, "Output folder for Pascani elements", "./pascani-gen")
+		val scaOutput = configure(SCA_OUTPUT, "Output folder for SCA elements", "./sca-gen")
+		val targetOutput = configure(TARGET_SYSTEM_OUTPUT, "Output folder for target-system components", "./src-gen-target")
+		return newHashSet(defaultOutput, pascaniOutput, scaOutput, targetOutput)
+	}
+	
+	def configure(String name, String description, String outputDirectory) {
+		val outputConf = new OutputConfiguration(name)
+		outputConf.setDescription(description)
+		outputConf.setOutputDirectory(outputDirectory)
+		outputConf.setOverrideExistingResources(true)
+		outputConf.setCreateOutputDirectory(true)
+		outputConf.setCleanUpDerivedResources(true)
+		outputConf.setSetDerivedProperty(true)
+		return outputConf
 	}
 
 }
