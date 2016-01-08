@@ -7,19 +7,11 @@ import pascani.lang.util.ServiceManager
 class PascaniImplicitlyImportedFeatures extends ImplicitlyImportedFeatures {
 	
 	override protected getStaticImportClasses() {
-		val staticImportClasses = super.getStaticImportClasses()
-		staticImportClasses.addAll(newArrayList(
-			ServiceManager
-		))
-		return staticImportClasses
+		return (super.getStaticImportClasses() + #[ServiceManager]).toList
 	}
 	
 	override protected getExtensionClasses() {
-		val extensionClasses = super.getExtensionClasses()
-		extensionClasses.addAll(newArrayList(
-			ComponentManager
-		))
-		return extensionClasses
-	}	
+		return (super.getExtensionClasses() + #[ComponentManager]).toList
+	}
 	
 }
