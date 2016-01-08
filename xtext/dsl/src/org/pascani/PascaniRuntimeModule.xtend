@@ -28,11 +28,22 @@ import org.pascani.outputconfiguration.OutputConfigurationAwaredGenerator
 import org.pascani.outputconfiguration.PascaniOutputConfigurationProvider
 import org.pascani.runtime.PascaniQualifiedNameProvider
 import org.pascani.scoping.PascaniScopeProvider
+import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
+import org.pascani.scoping.PascaniImplicitlyImportedFeatures
+import org.pascani.scoping.PascaniImportedNamespaceAwareLocalScopeProvider
+import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class PascaniRuntimeModule extends AbstractPascaniRuntimeModule {
+	
+	override void configureIScopeProviderDelegate(Binder binder) {
+		binder
+			.bind(org.eclipse.xtext.scoping.IScopeProvider)
+			.annotatedWith(com.google.inject.name.Names.named(AbstractDeclarativeScopeProvider.NAMED_DELEGATE))
+			.to(PascaniImportedNamespaceAwareLocalScopeProvider);
+	}
 
 	override Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
 		return PascaniQualifiedNameProvider;
@@ -48,6 +59,9 @@ class PascaniRuntimeModule extends AbstractPascaniRuntimeModule {
 			.bind(IOutputConfigurationProvider)
 			.to(PascaniOutputConfigurationProvider)
 			.in(Singleton);
+		binder
+			.bind(ImplicitlyImportedFeatures)
+			.to(PascaniImplicitlyImportedFeatures)
 	}
 
 	override Class<? extends IGenerator> bindIGenerator() {

@@ -19,20 +19,23 @@
 package org.pascani.scoping
 
 import java.util.List
+import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.scoping.impl.ImportNormalizer
 import org.eclipse.xtext.xbase.scoping.XImportSectionNamespaceScopeProvider
-import org.eclipse.xtext.naming.QualifiedName
-import com.google.common.collect.Lists
 
 class PascaniImportedNamespaceAwareLocalScopeProvider extends XImportSectionNamespaceScopeProvider {
 
 	public static final QualifiedName PASCANI_LANG = QualifiedName.create("pascani", "lang");
+	public static final QualifiedName PASCANI_LANG_EVENTS = QualifiedName.create("pascani", "lang", "events");
+	public static final QualifiedName PASCANI_LANG_UTIL = QualifiedName.create("pascani", "lang", "util");
 	public static final QualifiedName PASCANI_LANG_INFRASTRUCTURE = QualifiedName.create("pascani", "lang",
 		"infrastructure");
 
 	override List<ImportNormalizer> getImplicitImports(boolean ignoreCase) {
-		val imports = Lists.<ImportNormalizer>newArrayList(
+		val imports = newArrayList(
 			doCreateImportNormalizer(PASCANI_LANG, true, false),
+			doCreateImportNormalizer(PASCANI_LANG_EVENTS, true, false),
+			doCreateImportNormalizer(PASCANI_LANG_UTIL, true, false),
 			doCreateImportNormalizer(PASCANI_LANG_INFRASTRUCTURE, true, false)
 		)
 
