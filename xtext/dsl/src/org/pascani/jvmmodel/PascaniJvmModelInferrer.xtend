@@ -35,13 +35,10 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XExpression
-import org.eclipse.xtext.xbase.XMemberFeatureCall
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
-import org.ow2.scesame.qoscare.core.scaspec.SCAPort
 import org.pascani.outputconfiguration.OutputConfigurationAdapter
 import org.pascani.outputconfiguration.PascaniOutputConfigurationProvider
 import org.pascani.pascani.Event
@@ -68,7 +65,6 @@ import pascani.lang.infrastructure.BasicNamespace
 import pascani.lang.infrastructure.NamespaceProxy
 import pascani.lang.infrastructure.ProbeProxy
 import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer
-import pascani.lang.util.ComponentManager
 import pascani.lang.util.CronConstant
 import pascani.lang.util.EventObserver
 import pascani.lang.util.JobScheduler
@@ -89,18 +85,12 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	@Inject extension JvmTypesBuilder
 
 	@Inject extension IQualifiedNameProvider
-	
-	val newProbeId = ComponentManager.canonicalName + ".newProbe"
-	val cNewProbe = newProbeId + "(" + SCAComponent.canonicalName + "," + Class.canonicalName + "[])"
-	val pNewProbe = newProbeId + "(" + SCAPort.canonicalName + "," + Class.canonicalName + "[])"
 
 	def dispatch void infer(Monitor monitor, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val monitorImpl = monitor.toClass(monitor.fullyQualifiedName)
-
-		monitorImpl.eAdapters.add(new OutputConfigurationAdapter(
-			PascaniOutputConfigurationProvider::PASCANI_OUTPUT
-		))
-
+		monitorImpl.eAdapters.add(new OutputConfigurationAdapter(PascaniOutputConfigurationProvider::PASCANI_OUTPUT))
+		monitorImpl.eAdapters.add(new OutputConfigurationAdapter(PascaniOutputConfigurationProvider::SCA_OUTPUT))
+		
 		acceptor.accept(monitorImpl) [ m |
 			val blocks = new ArrayList
 			for (e : monitor.body.expressions) {
@@ -112,14 +102,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							^final = !e.isWriteable
 							^static = true
 						]
-						if (e.right instanceof XMemberFeatureCall) {
-							val featureCall = e.right as XMemberFeatureCall
-							val isProbeDeclaration = featureCall.feature.identifier.equals(cNewProbe) ||
-								featureCall.feature.identifier.equals(pNewProbe)
-							if (isProbeDeclaration) {
-								println(featureCall)
-							}
-						}
 					}
 					Event case e.emitter != null && e.emitter.cronExpression != null: {
 						val nestedType = e.createPeriodicClass(monitor)

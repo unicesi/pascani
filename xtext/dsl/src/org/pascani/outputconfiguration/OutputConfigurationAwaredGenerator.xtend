@@ -21,22 +21,33 @@ package org.pascani.outputconfiguration
 import org.eclipse.xtext.xbase.compiler.JvmModelGenerator
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
+import com.google.inject.Inject
+import org.pascani.generator.PascaniGenerator
 
 class OutputConfigurationAwaredGenerator extends JvmModelGenerator {
+	
+	@Inject private PascaniGenerator generator
 
+	/*
+	 * More information on using both IGenerator and IJvmModelInferrer:
+	 * https://www.eclipse.org/forums/index.php/t/486215/
+	 */
 	override void doGenerate(Resource input, IFileSystemAccess fsa) {
 		val _contents = input.getContents()
 		for (obj : _contents) {
-			var String outputConfiguration = null
 			val adapters = obj.eAdapters.filter(OutputConfigurationAdapter)
-
-			if (adapters.size == 1)
-				outputConfiguration = adapters.get(0).getOutputConfigurationName()
-
-			if (outputConfiguration == null)
+			for (adapter : adapters) {
+				var outputConfiguration = adapter.getOutputConfigurationName()
+				if (outputConfiguration == PascaniOutputConfigurationProvider::PASCANI_OUTPUT) {
+					val sfsa = new SingleOutputConfigurationFileSystemAccess(fsa, outputConfiguration)
+					this.internalDoGenerate(obj, sfsa) // PascaniJvmModelInferrer
+				} else if (outputConfiguration == PascaniOutputConfigurationProvider::SCA_OUTPUT) {
+					this.generator.doGenerate(input, fsa)
+				}
+			}
+			if (adapters.isEmpty) {
 				this.internalDoGenerate(obj, fsa)
-			else
-				this.internalDoGenerate(obj, new SingleOutputConfigurationFileSystemAccess(fsa, outputConfiguration))
+			}
 		}
 	}
 
