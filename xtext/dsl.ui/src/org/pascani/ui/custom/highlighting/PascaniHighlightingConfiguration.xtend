@@ -30,27 +30,27 @@ class PascaniHighlightingConfiguration extends XbaseHighlightingConfiguration {
 	public static val String CRON_EXPRESSION_ID = "cron_expression_constant";
 
 	override configure(IHighlightingConfigurationAcceptor acceptor) {
-		acceptor.acceptDefaultHighlighting(RELATIONAL_OP_ID, "Relational operators (and, or)", relationalOpTextStyle());
-		acceptor.acceptDefaultHighlighting(EVENT_TYPE_ID, "Event types", eventTypeTextStyle());
-		acceptor.acceptDefaultHighlighting(CRON_EXPRESSION_ID, "Cron expressions", cronExpressionTextStyle());
+		acceptor.acceptDefaultHighlighting(RELATIONAL_OP_ID, "Relational operators (and, or)", relationalOperator());
+		acceptor.acceptDefaultHighlighting(EVENT_TYPE_ID, "Event types", eventType());
+		acceptor.acceptDefaultHighlighting(CRON_EXPRESSION_ID, "Cron expressions", cronExpression());
 		super.configure(acceptor);
 	}
 
-	def relationalOpTextStyle() {
+	def relationalOperator() {
 		val textStyle = stringTextStyle().copy();
 		textStyle.setStyle(SWT.ITALIC);
 		return textStyle;
 	}
 
-	def eventTypeTextStyle() {
-		val textStyle = stringTextStyle().copy();
-		textStyle.setStyle(SWT.ITALIC);
-		return textStyle;
-	}
-
-	def cronExpressionTextStyle() {
+	def eventType() {
 		val textStyle = defaultTextStyle().copy();
-		textStyle.setColor(new RGB(125, 125, 125));
+		textStyle.setColor(new RGB(100, 100, 100));
+		return textStyle;
+	}
+
+	def cronExpression() {
+		val textStyle = defaultTextStyle().copy();
+		textStyle.setColor(new RGB(100, 100, 100));
 		return textStyle;
 	}
 
