@@ -73,7 +73,7 @@ EventDeclaration returns Event
 	;
 
 EventEmitter
-	:	eventType = EventType 'of' emitter = XExpression (=> specifier = RelationalEventSpecifier)? ('using' probe = XExpression)?
+	:	eventType = EventType 'of' emitter = XExpression (=> specifier = RelationalEventSpecifier)?
 	|	cronExpression = CronExpression
 	;
 	

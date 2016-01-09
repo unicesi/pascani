@@ -51,8 +51,7 @@ class PascaniProposalProvider extends AbstractPascaniProposalProvider {
 		}
 
 		// Filter keywords at certain place
-		if (!grammarAccess.eventEmitterAccess.usingKeyword_0_4_0.equals(keyword) && // using
-		!grammarAccess.eventTypeAccess.exceptionExceptionKeyword_3_0.equals(keyword) && // exception
+		if (!grammarAccess.eventTypeAccess.exceptionExceptionKeyword_3_0.equals(keyword) && // exception
 		!grammarAccess.eventTypeAccess.changeChangeKeyword_2_0.equals(keyword) && // change
 		!grammarAccess.eventTypeAccess.invokeInvokeKeyword_0_0.equals(keyword) && // invoke
 		!grammarAccess.eventTypeAccess.returnReturnKeyword_1_0.equals(keyword) && // return

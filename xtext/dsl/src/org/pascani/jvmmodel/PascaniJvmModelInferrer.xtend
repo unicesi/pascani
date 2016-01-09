@@ -338,10 +338,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			members += e.emitter.toField("emitter" + varSuffix, e.emitter.emitter.inferredType) [
 				initializer = e.emitter.emitter
 			]
-			if (e.emitter.probe != null) {
-				members += e.emitter.probe.toField("probe" + varSuffix, typeRef(ProbeProxy)) [
-					initializer = e.emitter.probe
-				]	
 			}
 			members += e.toField("consumer", typeRef(AbstractConsumer))
 			members += e.toConstructor[
@@ -420,18 +416,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				members += e.emitter.specifier.toMethod("getSpecifier", specifierTypeRef) [
 					annotations += annotationRef(Override)
 					body = '''return new Specifier«varSuffix»();'''
-				]
-
-			}
-			if (e.emitter.probe != null) {
-				members += e.emitter.probe.toMethod("getProbe", typeRef(Probe)) [
-					annotations += annotationRef(Override)
-					body = '''return this.probe«varSuffix»;'''
-				]
-			} else {
-				members += e.toMethod("getProbe", typeRef(Probe)) [
-					annotations += annotationRef(Override)
-					body = '''return null;'''
 				]
 			}
 		]
