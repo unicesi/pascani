@@ -214,16 +214,6 @@ public class FrascatiUtils {
 					clazz);
 			map.put(bindingUri, instance);
 		}
-		try {
-			/*
-			 * Wait for 1 second to be sure that the FScript engine is
-			 * initialized. From: http://goo.gl/my3xck
-			 */
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO log the exception
-			e.printStackTrace();
-		}
 		return instance;
 	}
 
