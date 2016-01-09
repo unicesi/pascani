@@ -30,5 +30,5 @@ Export-Package: org.pascani.pascani.util,
  org.pascani.generator,
  org.pascani.jvmmodel
 Import-Package: org.apache.log4j
-Bundle-ClassPath: library-0.0.1-SNAPSHOT-jar-with-dependencies.jar,
- .
+Bundle-ClassPath: .,
+ library-0.0.1-SNAPSHOT-dependencies.jar
