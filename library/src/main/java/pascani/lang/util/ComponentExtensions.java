@@ -18,87 +18,36 @@
  */
 package pascani.lang.util;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.script.ScriptException;
-
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
-import org.ow2.frascati.mojo.ContributionUtil;
-import org.ow2.frascati.remote.introspection.Deployment;
-import org.ow2.frascati.remote.introspection.FileUtil;
-import org.ow2.frascati.remote.introspection.Reconfiguration;
+import org.ow2.frascati.binding.factory.AbstractBindingFactoryProcessor;
 import org.ow2.frascati.remote.introspection.RemoteScaDomain;
-import org.ow2.frascati.remote.introspection.resources.Component;
-import org.ow2.frascati.remote.introspection.resources.Node;
-import org.ow2.frascati.remote.introspection.resources.Port;
-import org.ow2.frascati.remote.introspection.resources.Property;
 import org.ow2.scesame.qoscare.core.scaspec.FraSCAti2QoSCAre;
 import org.ow2.scesame.qoscare.core.scaspec.SCAComponent;
 import org.ow2.scesame.qoscare.core.scaspec.SCADomain;
-import org.ow2.scesame.qoscare.core.scaspec.SCANamedNode;
 import org.ow2.scesame.qoscare.core.scaspec.SCAPort;
 import org.ow2.scesame.qoscare.core.scaspec.SCAProperty;
 
+import pascani.lang.events.ExceptionEvent;
+import pascani.lang.events.InvokeEvent;
+import pascani.lang.events.ReturnEvent;
+import pascani.lang.events.TimeLapseEvent;
+import pascani.lang.infrastructure.ProbeProxy;
+
 /**
- * This implementation provides utility methods to ease introspection,
- * reconfiguration and deployment of SCA components
+ * Extension methods to ease introspection of SCA components by means of the
+ * FraSCAti middleware.
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class ComponentManager {
-	
-	public static class DeploymentBuilder {
-		private final Collection<File> jars = new ArrayList<File>();
-		private final Collection<String> deployables = new ArrayList<String>();
-		private final String contributionName;
-		
-		public DeploymentBuilder(String contributionName) {
-			this.contributionName = contributionName;
-		}
-		
-		public DeploymentBuilder withJars(String... files) {
-			for(String file : files)
-				jars.add(new File(file));
-			return this;
-		}
-		
-		public DeploymentBuilder withDeployables(String... composites) {
-			for(String composite : composites)
-				deployables.add(composite);
-			return this;
-		}
-		
-		public boolean deploy() {
-			return deploy(DEFAULT_BINDING_URI);
-		}
-		
-		public boolean deploy(URI bindingUri) {
-			Deployment instance = getDeploymentInstance(bindingUri);
-			File workingDir = new File("./target");
-			File contribFile = ContributionUtil.makeContribution(jars, deployables,
-					contributionName, workingDir);
-			String base64 = null;
-			try {
-			    base64 = FileUtil.getStringFromFile(contribFile);
-			} catch (IOException e) {
-				// TODO: log the exception
-			    e.printStackTrace();
-			}
-			return instance.deploy(base64) == 0;
-		}
-	}
+public class ComponentExtensions {
 
 	protected static final Map<URI, RemoteScaDomain> introspection = new HashMap<URI, RemoteScaDomain>();
-	protected static final Map<URI, Reconfiguration> reconfiguration = new HashMap<URI, Reconfiguration>();
-	protected static final Map<URI, Deployment> deployment = new HashMap<URI, Deployment>();
 	protected static URI DEFAULT_BINDING_URI = initializeDefaultUri();
 
 	/**
@@ -183,6 +132,35 @@ public class ComponentManager {
 		return property;
 	}
 
+	/**
+	 * <b>Note</b>: DSL-only intended use
+	 * <p>
+	 * Introduces a new monitor probe, and returns a proxy pointing to it. The
+	 * probe created manages events of type {@link ExceptionEvent}.
+	 * 
+	 * @param uniqueName
+	 *            A unique name representing the monitor probe
+	 * @return a {@link ProbeProxy} instance pointing to an exception probe
+	 */
+	public static ProbeProxy newExceptionProbe(String uniqueName) {
+		return createProbeProxy(uniqueName);
+	}
+
+	/**
+	 * <b>Note</b>: DSL-only intended use
+	 * <p>
+	 * Introduces a new monitor probe, and returns a proxy pointing to it. The
+	 * probe created manages event of type {@link TimeLapseEvent},
+	 * {@link InvokeEvent}, and {@link ReturnEvent}
+	 * 
+	 * @param uniqueName
+	 *            A unique name representing the monitor probe
+	 * @return a {@link ProbeProxy} instance pointing to a performance probe
+	 */
+	public static ProbeProxy newPerformanceProbe(String uniqueName) {
+		return createProbeProxy(uniqueName);
+	}
+
 	private static SCAPort port(Collection<SCAPort> ports, String portName) {
 		SCAPort service = null;
 		for (SCAPort port : ports) {
@@ -194,60 +172,14 @@ public class ComponentManager {
 		return service;
 	}
 
-	/**
-	 * Execute a FraSCAti Script statement in the default FraSCAti runtime
-	 * 
-	 * @param script
-	 *            The script to execute
-	 * @param bindingUri
-	 *            The URI where the FraSCAti runtime is running
-	 * @return The result of evaluating the given script
-	 * @throws ScriptException
-	 *             if something bad happens!
-	 */
-	public static Collection<SCANamedNode> eval(String script)
-			throws ScriptException {
-		return eval(script, DEFAULT_BINDING_URI);
-	}
-
-	/**
-	 * Execute a FraSCAti Script statement in the specified FraSCAti runtime
-	 * 
-	 * @param script
-	 *            The script to execute
-	 * @param bindingUri
-	 *            The URI where the FraSCAti runtime is running
-	 * @return The result of evaluating the given script
-	 * @throws ScriptException
-	 *             if something bad happens!
-	 */
-	public static Collection<SCANamedNode> eval(String script, URI bindingUri)
-			throws ScriptException {
-		List<SCANamedNode> nodes = new ArrayList<SCANamedNode>();
-		for (Node node : getReconfigurationInstance(bindingUri).eval(script)) {
-			if (node instanceof Component)
-				nodes.add(FraSCAti2QoSCAre.convertComponent((Component) node));
-			else if (node instanceof Property)
-				nodes.add(FraSCAti2QoSCAre.convertProperty((Property) node));
-			else if (node instanceof Port)
-				nodes.add(FraSCAti2QoSCAre.convertPort((Port) node));
-		}
-		return nodes;
-	}
-	
-	public static DeploymentBuilder deploy(String contributionName) {
-		return new DeploymentBuilder(contributionName);
-	}
-
-	private static URI initializeDefaultUri() {
-		URI uri = null;
+	private static ProbeProxy createProbeProxy(String routingKey) {
 		try {
-			uri = new URI("http://localhost:8090");
-		} catch (URISyntaxException e) {
+			return new ProbeProxy(routingKey);
+		} catch (Exception e) {
 			// TODO: log the exception
 			e.printStackTrace();
 		}
-		return uri;
+		return null;
 	}
 
 	private static SCADomain getRemoteScaDomain(URI bindingUri) {
@@ -257,16 +189,6 @@ public class ComponentManager {
 				domain.getDomainComposites());
 	}
 
-	private static Reconfiguration getReconfigurationInstance(URI bindingUri) {
-		return getInstance(bindingUri, "reconfig", reconfiguration,
-				Reconfiguration.class);
-	}
-	
-	private static Deployment getDeploymentInstance(URI bindingUri) {
-		return getInstance(bindingUri, "deploy", deployment,
-				Deployment.class);
-	}
-	
 	private static <T> T getInstance(URI bindingUri, String path,
 			Map<URI, T> map, Class<T> clazz) {
 		T instance = map.get(bindingUri);
@@ -276,6 +198,18 @@ public class ComponentManager {
 			map.put(bindingUri, instance);
 		}
 		return instance;
+	}
+
+	private static URI initializeDefaultUri() {
+		URI uri = null;
+		try {
+			uri = new URI(
+					AbstractBindingFactoryProcessor.BINDING_URI_BASE_DEFAULT_VALUE);
+		} catch (URISyntaxException e) {
+			// TODO: log the exception
+			e.printStackTrace();
+		}
+		return uri;
 	}
 
 }
