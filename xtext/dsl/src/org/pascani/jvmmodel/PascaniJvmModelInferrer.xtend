@@ -111,6 +111,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						fields += e.toField(e.name, typeRef(PeriodicEvent)) [
 							^final = true
 							^static = true
+							visibility = JvmVisibility::PUBLIC
 							initializer = '''
 								«IF (e.emitter.cronExpression.constant != null)»
 									new «PeriodicEvent»(«typeRef(CronConstant)».valueOf("«e.emitter.cronExpression.constant.toUpperCase»").expression())
@@ -122,11 +123,13 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 					
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
-						val innerClass = e.createNonPeriodicClass(monitor)
+						val eventTypeRefName = '''pascani.lang.events.«e.emitter.eventType.toString.toLowerCase.toFirstUpper»Event'''
+						val innerClass = e.createNonPeriodicClass(monitor, eventTypeRefName)
 						nestedTypes += innerClass
-						fields += e.toField(e.name, typeRef(NonPeriodicEvent)) [
+						fields += e.toField(e.name, typeRef(NonPeriodicEvent, typeRef(eventTypeRefName))) [
 							^final = true
 							^static = true
+							visibility = JvmVisibility::PUBLIC
 							initializer = '''new «innerClass.simpleName»()'''
 						]
 					}
@@ -142,6 +145,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 									typeRef(EventObserver, typeRef(e.param.parameterType.type.qualifiedName))) [
 									^final = true
 									^static = true
+									visibility = JvmVisibility::PUBLIC
 									initializer = '''new «innerClass.simpleName»()'''
 								]
 						}
@@ -256,6 +260,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 
 	def JvmGenericType createJobClass(Handler handler) {
 		val clazz = createNonPeriodicClass(handler, "")
+		clazz.visibility = JvmVisibility::PUBLIC
 		clazz.superTypes += typeRef(Job)
 		clazz.members += handler.toMethod("execute", typeRef(void)) [
 			exceptions += typeRef(JobExecutionException)
@@ -271,6 +276,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	def JvmGenericType createNonPeriodicClass(Handler handler, String classPrefix) {
 		handler.toClass(classPrefix + handler.name) [
 			^static = true
+			visibility = JvmVisibility::PRIVATE
 			superTypes += typeRef(EventObserver, typeRef(handler.param.parameterType.type.qualifiedName))
 			members += handler.toMethod("update", typeRef(void)) [
 				parameters += handler.toParameter("observable", typeRef(Observable))
@@ -295,17 +301,17 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		]
 	}
 
-	def JvmGenericType createNonPeriodicClass(Event e, Monitor monitor) {
+	def JvmGenericType createNonPeriodicClass(Event e, Monitor monitor, String eventTypeRefName) {
 		e.toClass(monitor.fullyQualifiedName + "_" + e.name) [
 			val varSuffix = System.nanoTime()
 			val specifierTypeRef = typeRef(Function, typeRef(ChangeEvent), typeRef(Boolean))
 			val eventTypeRef = typeRef(Class, wildcardExtends(typeRef(pascani.lang.Event, wildcard())))
-			val eventTypeRefName = '''pascani.lang.events.«e.emitter.eventType.toString.toLowerCase.toFirstUpper»Event'''
 			val isChangeEvent = e.emitter.eventType.equals(EventType.CHANGE)
 			val routingKey = new ArrayList
 			
 			documentation = e.documentation
 			^static = true
+			visibility = JvmVisibility::PRIVATE
 			superTypes += typeRef(NonPeriodicEvent, typeRef(eventTypeRefName))
 			
 			members += e.emitter.toField("type" + varSuffix, eventTypeRef) [
