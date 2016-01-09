@@ -8,11 +8,18 @@ import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
 import org.ow2.scesame.qoscare.core.scaspec.SCAPort
 import org.pascani.pascani.Model
-import pascani.lang.util.ComponentManager
+import pascani.lang.util.ComponentExtensions
+import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import com.google.inject.Inject
 
 class PascaniGenerator implements IGenerator {
 	
-	val newProbeId = ComponentManager.canonicalName + ".newProbe"
+	/**
+	 * convenience API to build and initialize JVM types and their members.
+	 */
+	@Inject extension JvmTypesBuilder
+	
+	val newProbeId = ComponentExtensions.canonicalName + ".newProbe"
 	val cNewProbe = newProbeId + "(" + SCAComponent.canonicalName + "," + Class.canonicalName + "[])"
 	val pNewProbe = newProbeId + "(" + SCAPort.canonicalName + "," + Class.canonicalName + "[])"
 	
