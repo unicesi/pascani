@@ -89,20 +89,26 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		monitorImpl.eAdapters.add(new OutputConfigurationAdapter(PascaniOutputConfigurationProvider::PASCANI_OUTPUT))
 		monitorImpl.eAdapters.add(new OutputConfigurationAdapter(PascaniOutputConfigurationProvider::SCA_OUTPUT))
 		
-		acceptor.accept(monitorImpl) [ m |
-			val blocks = new ArrayList
+		acceptor.accept(monitorImpl) [
+			val nestedTypes = new ArrayList
+			val fields = new ArrayList
+			val constructors = new ArrayList
+			val methods = new ArrayList
+			var nblocks = 0
+			
 			for (e : monitor.body.expressions) {
 				switch (e) {
 					XVariableDeclaration: {
-						m.members += e.toField(e.name, e.type) [
+						fields += e.toField(e.name, e.type) [
 							documentation = e.documentation
 							initializer = e.right
 							^final = !e.isWriteable
 							^static = true
 						]
 					}
+					
 					Event case e.emitter != null && e.emitter.cronExpression != null: {
-						m.members += e.toField(e.name, typeRef(PeriodicEvent)) [
+						fields += e.toField(e.name, typeRef(PeriodicEvent)) [
 							^final = true
 							^static = true
 							initializer = '''
@@ -114,40 +120,49 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							'''
 						]
 					}
+					
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
-						val nestedType = e.createNonPeriodicClass(monitor)
-						m.members += nestedType
-						m.members += e.toField(e.name, typeRef(NonPeriodicEvent)) [
+						val innerClass = e.createNonPeriodicClass(monitor)
+						nestedTypes += innerClass
+						fields += e.toField(e.name, typeRef(NonPeriodicEvent)) [
 							^final = true
 							^static = true
-							initializer = '''new «nestedType.simpleName»()'''
+							initializer = '''new «innerClass.simpleName»()'''
 						]
 					}
+					
 					Handler: {
 						if (e.param.parameterType.type.qualifiedName.equals(IntervalEvent.canonicalName)) {
-							m.members += e.createJobClass
+							nestedTypes += e.createJobClass
 						} else {
-							val nestedType = e.createNonPeriodicClass(monitor.name + "_")
-							m.members += nestedType
-								m.members += e.toField(e.name, typeRef(nestedType)) [
-								^final = true
-								^static = true
-								initializer = '''new «nestedType.simpleName»()'''
-							]
+							val innerClass = e.createNonPeriodicClass(monitor.name + "_")
+							nestedTypes += innerClass
+							fields +=
+								e.toField(e.name,
+									typeRef(EventObserver, typeRef(e.param.parameterType.type.qualifiedName))) [
+									^final = true
+									^static = true
+									initializer = '''new «innerClass.simpleName»()'''
+								]
 						}
 					}
+					
 					XBlockExpression case !e.expressions.isEmpty: {
-						blocks += e
+						methods += monitor.toMethod("applyCustomCode" + nblocks++, typeRef(void)) [
+							visibility = JvmVisibility::PRIVATE
+							body = e
+						]
 					}
 				}
 			}
-			// TODO: handle and log the exception
-			m.members += monitor.toConstructor [
+			// TODO: handle the exception
+			val fblocks = nblocks
+			constructors += monitor.toConstructor [
 				body = '''
 					try {
 						initialize();
-						«IF(blocks.size > 0)»
-							«FOR i : 0..blocks.size - 1»
+						«IF(fblocks > 0)»
+							«FOR i : 0..fblocks - 1»
 								applyCustomCode«i»();
 							«ENDFOR»
 						«ENDIF»
@@ -156,7 +171,8 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 				'''
 			]
-			m.members += monitor.toMethod("initialize", typeRef(void)) [
+			
+			methods += monitor.toMethod("initialize", typeRef(void)) [
 				visibility = JvmVisibility::PRIVATE
 				body = '''
 					«IF monitor.usings != null»
@@ -167,20 +183,19 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				'''
 				exceptions += typeRef(Exception)
 			]
-			for(var i = 0; i < blocks.size; i++) {
-				val ic = i;
-				m.members += monitor.toMethod("applyCustomCode" + ic, typeRef(void)) [
-					visibility = JvmVisibility::PRIVATE
-					body = blocks.get(ic)
-				]
-			}
+			
 			if (monitor.usings != null) {
 				for (namespace : monitor.usings.filter[n|n.name != null]) {
-					m.members += namespace.toField(namespace.name, typeRef(namespace.fullyQualifiedName.toString)) [
+					fields += namespace.toField(namespace.name, typeRef(namespace.fullyQualifiedName.toString)) [
 						^static = true
 					]
 				}
 			}
+			// Add members in an organized way
+			members += fields
+			members += constructors
+			members += methods
+			members += nestedTypes
 		]
 	}
 
@@ -456,17 +471,21 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		boolean isParentNamespace) {
 		val namespaceProxyImpl = namespace.toClass(namespace.fullyQualifiedName) [
 			if (!isPreIndexingPhase) {
+				val fields = new ArrayList
+				val constructors = new ArrayList
+				val methods = new ArrayList
+				val nestedTypes = new ArrayList
 				documentation = namespace.documentation
-
+				
 				for (e : namespace.body.expressions) {
 					switch (e) {
 						Namespace: {
 							val internalClass = createProxy(e, isPreIndexingPhase, acceptor, false)
-							members += internalClass
-							members += e.toField(e.name, typeRef(internalClass)) [
+							nestedTypes += internalClass
+							fields += e.toField(e.name, typeRef(internalClass)) [
 								initializer = '''new «internalClass.simpleName»()'''
 							]
-							members += e.toMethod(e.name, typeRef(internalClass)) [
+							methods += e.toMethod(e.name, typeRef(internalClass)) [
 								body = '''return this.«e.name»;'''
 							]
 						}
@@ -479,12 +498,12 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							val type = e.type // ?: inferredType(e.right)
 							val cast = if(type != null) "(" + type.simpleName + ")"
 
-							members += e.toMethod(e.name, type) [
+							methods += e.toMethod(e.name, type) [
 								body = '''return «cast» getVariable("«name»");'''
 							]
 
 							if (e.isWriteable) {
-								members += e.toMethod(e.name, typeRef(Void.TYPE)) [
+								methods += e.toMethod(e.name, typeRef(Void.TYPE)) [
 									parameters += e.toParameter(e.name, type)
 									body = '''setVariable("«name»", «e.name»);'''
 								]
@@ -493,10 +512,10 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 				}
 
-				// TODO: Handle the exception by logging it
+				// TODO: Handle the exception
 				if (isParentNamespace) {
-					members += namespace.toField(namespace.name + "Proxy", typeRef(NamespaceProxy))
-					members += namespace.toConstructor [
+					fields += namespace.toField(namespace.name + "Proxy", typeRef(NamespaceProxy))
+					constructors += namespace.toConstructor [
 						body = '''
 							try {
 								this.«namespace.name»Proxy = new «NamespaceProxy»("«namespace.fullyQualifiedName»");
@@ -505,16 +524,21 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							}
 						'''
 					]
-					members += namespace.toMethod("getVariable", typeRef(Serializable)) [
+					methods += namespace.toMethod("getVariable", typeRef(Serializable)) [
 						parameters += namespace.toParameter("variable", typeRef(String))
 						body = '''return this.«namespace.name»Proxy.getVariable(variable);'''
 					]
-					members += namespace.toMethod("setVariable", typeRef(void)) [
+					methods += namespace.toMethod("setVariable", typeRef(void)) [
 						parameters += namespace.toParameter("variable", typeRef(String))
 						parameters += namespace.toParameter("value", typeRef(Serializable))
 						body = '''this.«namespace.name»Proxy.setVariable(variable, value);'''
 					]
 				}
+				// Add members in an organized way
+				members += fields
+				members += constructors
+				members += methods
+				members += nestedTypes
 			}
 		]
 
