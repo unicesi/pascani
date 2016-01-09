@@ -11,7 +11,7 @@ import pascani.lang.events.ChangeEvent;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class NonPeriodicEvent extends ManagedEvent {
+public abstract class NonPeriodicEvent<T extends Event<?>> extends ManagedEvent {
 
 	public abstract Class<? extends Event<?>> getType();
 
@@ -26,5 +26,13 @@ public abstract class NonPeriodicEvent extends ManagedEvent {
 	}
 
 	public abstract Probe getProbe();
+	
+	public void subscribe(final EventObserver<T> eventObserver) {
+		addObserver(eventObserver);
+	}
+	
+	public void unsubscribe(final EventObserver<T> eventObserver) {
+		deleteObserver(eventObserver);
+	}
 
 }
