@@ -56,7 +56,6 @@ import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
 import pascani.lang.PascaniRuntime
 import pascani.lang.PascaniRuntime.Context
-import pascani.lang.Probe
 import pascani.lang.events.ChangeEvent
 import pascani.lang.events.IntervalEvent
 import pascani.lang.infrastructure.AbstractConsumer
@@ -378,7 +377,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				body = '''return this.emitter«varSuffix»;'''
 			]
 			
-			members += e.emitter.toMethod("getProbe", typeRef(Probe)) [
+			members += e.emitter.toMethod("getProbe", typeRef(ProbeProxy)) [
 					annotations += annotationRef(Override)
 					body = '''return «IF(isChangeEvent)»null«ELSE»this.probe«varSuffix»«ENDIF»;'''
 			]
