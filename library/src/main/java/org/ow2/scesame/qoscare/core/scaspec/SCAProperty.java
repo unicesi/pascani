@@ -25,6 +25,9 @@ public class SCAProperty extends SCAAttribute {
 
 	/**
 	 * Default constructor
+	 * 
+	 * @param name
+	 *            The name of the property
 	 */
 	public SCAProperty(String name) {
 		this(name, null, null);

@@ -82,6 +82,8 @@ public abstract class AbstractProducer {
 	 * 
 	 * @param event
 	 *            The {@link LocalEventProducer}-produced {@link Event} object
+	 * @throws Exception
+	 *             in case something bad happens!
 	 */
 	protected abstract void publish(Event<?> event) throws Exception;
 

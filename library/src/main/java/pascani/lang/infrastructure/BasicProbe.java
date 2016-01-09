@@ -68,7 +68,7 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 	public BasicProbe(final RpcServer server) {
 		this.server = server;
 		this.events = new HashMap<String, EventSet<Event<?>>>();
-
+		
 		// Start serving RPC requests
 		this.server.setHandler(this);
 		this.server.start();
@@ -97,10 +97,8 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 	@Subscribe public boolean recordEvent(final Event<?> event) {
 		boolean r = false;
 		boolean accept = isAcceptedEvent(event);
-
 		if (accept) {
 			String key = event.getClass().getCanonicalName();
-
 			synchronized (this.events) {
 				if (this.events.get(key) == null)
 					this.events.put(key, new EventSet<Event<?>>());
@@ -108,34 +106,29 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 				r = this.events.get(key).add(event);
 			}
 		}
-
 		return r;
 	}
 
 	protected boolean isAcceptedEvent(final Event<?> event) {
 		boolean accepted = this.acceptedTypes == null;
-
 		if (!accepted) {
 			for (int i = 0; i < this.acceptedTypes.length && !accepted; i++) {
 				accepted = this.acceptedTypes[i].isInstance(event);
 			}
 		}
-
 		return accepted;
 	}
 
 	protected List<String> types(
 			final List<Class<? extends Event<?>>> eventTypes) {
-
+		
 		List<String> types = new ArrayList<String>();
-
 		if (eventTypes == null || eventTypes.isEmpty()) {
 			types.addAll(this.events.keySet());
 		} else {
 			for (Class<? extends Event<?>> t : eventTypes)
 				types.add(t.getCanonicalName());
 		}
-
 		return types;
 	}
 
@@ -148,14 +141,12 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 			final List<Class<? extends Event<?>>> eventTypes) {
 
 		boolean removed = false;
-
 		for (String clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				removed = removed
 						|| this.events.get(clazz).clean(start, end).size() > 1;
 			}
 		}
-
 		return removed;
 	}
 
@@ -168,13 +159,11 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 			final List<Class<? extends Event<?>>> eventTypes) {
 
 		int count = 0;
-
 		for (String clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				count += this.events.get(clazz).filter(start, end).size();
 			}
 		}
-
 		return count;
 	}
 
@@ -187,13 +176,11 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 			final List<Class<? extends Event<?>>> eventTypes) {
 
 		int count = 0;
-
 		for (String clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				count += this.events.get(clazz).clean(start, end).size();
 			}
 		}
-
 		return count;
 	}
 
@@ -206,13 +193,11 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 			final List<Class<? extends Event<?>>> eventTypes) {
 
 		List<Event<?>> fetched = new ArrayList<Event<?>>();
-
 		for (String clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				fetched.addAll(this.events.get(clazz).filter(start, end));
 			}
 		}
-
 		return fetched;
 	}
 
@@ -223,14 +208,13 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 	 */
 	public List<Event<?>> fetchAndClean(final long start, final long end,
 			final List<Class<? extends Event<?>>> eventTypes) {
+		
 		List<Event<?>> fetched = new ArrayList<Event<?>>();
-
 		for (String clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
 				fetched.addAll(this.events.get(clazz).clean(start, end));
 			}
 		}
-
 		return fetched;
 	}
 
@@ -241,8 +225,8 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 	 * infrastructure.RpcRequest)
 	 */
 	public Serializable handle(final RpcRequest request) {
+		
 		Serializable response = null;
-
 		long start = (Long) request.getParameter(0);
 		long end = (Long) request.getParameter(1);
 
@@ -259,9 +243,8 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 		else if (request.operation().equals(RpcOperation.PROBE_FETCH))
 			response = (Serializable) this.fetch(start, end, eventTypes);
 		else if (request.operation().equals(RpcOperation.PROBE_FETCH_AND_CLEAN))
-			response = (Serializable) this
-					.fetchAndClean(start, end, eventTypes);
-
+			response = (Serializable) this.fetchAndClean(start, end, eventTypes);
+		
 		return response;
 	}
 

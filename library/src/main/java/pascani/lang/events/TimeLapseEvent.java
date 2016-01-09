@@ -76,6 +76,8 @@ public class TimeLapseEvent extends Event<Double> {
 	 * 
 	 * @param event
 	 *            A previous instance of {@code this} event
+	 * @param end
+	 *            The final time
 	 */
 	public TimeLapseEvent(final TimeLapseEvent event, final long end) {
 		this(event.transactionId, event.start, end);
@@ -90,6 +92,8 @@ public class TimeLapseEvent extends Event<Double> {
 	 * 
 	 * @see TimeLapseEvent#TimeLapseEvent(TimeLapseEvent, long)
 	 * 
+	 * @param transactionId
+	 *            The transaction of which this event makes part
 	 * @param start
 	 *            The initial time
 	 */

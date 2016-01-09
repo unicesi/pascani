@@ -114,7 +114,7 @@ public abstract class Event<T> implements Comparable<Event<T>>, Serializable {
 	
 	/**
 	 * The result is {@code true} if and only if the argument is not
-	 * {@code null}, is an {@Link Event} object with the same identifier
+	 * {@code null}, is an {@link Event} object with the same identifier
 	 * as {@code this} instance.
 	 */
 	@Override public boolean equals(final Object obj) {

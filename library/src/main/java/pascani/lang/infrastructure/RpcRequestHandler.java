@@ -30,8 +30,8 @@ public interface RpcRequestHandler {
 	/**
 	 * TODO: documentation
 	 * 
-	 * @param request
-	 * @return
+	 * @param request The request
+	 * @return the response to the RPC request
 	 */
 	public Serializable handle(RpcRequest request);
 	

@@ -62,8 +62,8 @@ public interface Probe {
 	 * Counts the number of event objects raised from {@code start} until
 	 * {@code end}, while at the same time removes them.
 	 * 
-	 * @see Probe#count(long, long, Class...)
-	 * @see Probe#cleanData(long, long, Class...)
+	 * @see Probe#count(long, long, List)
+	 * @see Probe#cleanData(long, long, List)
 	 * 
 	 * @param start
 	 *            The initial date of search in epoch format
@@ -96,8 +96,8 @@ public interface Probe {
 	 * Fetches the event objects raised from {@code start} until {@code end},
 	 * while at the same time removes them.
 	 * 
-	 * @see Probe#fetch(long, long, Class...)
-	 * @see Probe#cleanData(long, long, Class...)
+	 * @see Probe#fetch(long, long, List)
+	 * @see Probe#cleanData(long, long, List)
 	 * 
 	 * @param start
 	 *            The initial date of search in epoch format
