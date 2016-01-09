@@ -66,10 +66,10 @@ import pascani.lang.infrastructure.NamespaceProxy
 import pascani.lang.infrastructure.ProbeProxy
 import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer
 import pascani.lang.util.CronConstant
-import pascani.lang.util.EventObserver
 import pascani.lang.util.JobScheduler
-import pascani.lang.util.NonPeriodicEvent
-import pascani.lang.util.PeriodicEvent
+import pascani.lang.util.dsl.EventObserver
+import pascani.lang.util.dsl.NonPeriodicEvent
+import pascani.lang.util.dsl.PeriodicEvent
 
 /**
  * <p>Infers a JVM model from the source model.</p> 

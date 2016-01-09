@@ -28,6 +28,7 @@ class PascaniImportedNamespaceAwareLocalScopeProvider extends XImportSectionName
 	public static final QualifiedName PASCANI_LANG = QualifiedName.create("pascani", "lang");
 	public static final QualifiedName PASCANI_LANG_EVENTS = QualifiedName.create("pascani", "lang", "events");
 	public static final QualifiedName PASCANI_LANG_UTIL = QualifiedName.create("pascani", "lang", "util");
+	public static final QualifiedName PASCANI_LANG_UTIL_DSL = QualifiedName.create("pascani", "lang", "util", "dsl");
 	public static final QualifiedName PASCANI_LANG_INFRASTRUCTURE = QualifiedName.create("pascani", "lang",
 		"infrastructure");
 
@@ -36,6 +37,7 @@ class PascaniImportedNamespaceAwareLocalScopeProvider extends XImportSectionName
 			doCreateImportNormalizer(PASCANI_LANG, true, false),
 			doCreateImportNormalizer(PASCANI_LANG_EVENTS, true, false),
 			doCreateImportNormalizer(PASCANI_LANG_UTIL, true, false),
+			doCreateImportNormalizer(PASCANI_LANG_UTIL_DSL, true, false),
 			doCreateImportNormalizer(PASCANI_LANG_INFRASTRUCTURE, true, false)
 		)
 
