@@ -33,12 +33,6 @@ import org.ow2.scesame.qoscare.core.scaspec.SCADomain;
 import org.ow2.scesame.qoscare.core.scaspec.SCAPort;
 import org.ow2.scesame.qoscare.core.scaspec.SCAProperty;
 
-import pascani.lang.events.ExceptionEvent;
-import pascani.lang.events.InvokeEvent;
-import pascani.lang.events.ReturnEvent;
-import pascani.lang.events.TimeLapseEvent;
-import pascani.lang.infrastructure.ProbeProxy;
-
 /**
  * Extension methods to ease introspection of SCA components by means of the
  * FraSCAti middleware.
@@ -132,35 +126,6 @@ public class ComponentExtensions {
 		return property;
 	}
 
-	/**
-	 * <b>Note</b>: DSL-only intended use
-	 * <p>
-	 * Introduces a new monitor probe, and returns a proxy pointing to it. The
-	 * probe created manages events of type {@link ExceptionEvent}.
-	 * 
-	 * @param uniqueName
-	 *            A unique name representing the monitor probe
-	 * @return a {@link ProbeProxy} instance pointing to an exception probe
-	 */
-	public static ProbeProxy newExceptionProbe(String uniqueName) {
-		return createProbeProxy(uniqueName);
-	}
-
-	/**
-	 * <b>Note</b>: DSL-only intended use
-	 * <p>
-	 * Introduces a new monitor probe, and returns a proxy pointing to it. The
-	 * probe created manages event of type {@link TimeLapseEvent},
-	 * {@link InvokeEvent}, and {@link ReturnEvent}
-	 * 
-	 * @param uniqueName
-	 *            A unique name representing the monitor probe
-	 * @return a {@link ProbeProxy} instance pointing to a performance probe
-	 */
-	public static ProbeProxy newPerformanceProbe(String uniqueName) {
-		return createProbeProxy(uniqueName);
-	}
-
 	private static SCAPort port(Collection<SCAPort> ports, String portName) {
 		SCAPort service = null;
 		for (SCAPort port : ports) {
@@ -170,16 +135,6 @@ public class ComponentExtensions {
 			}
 		}
 		return service;
-	}
-
-	private static ProbeProxy createProbeProxy(String routingKey) {
-		try {
-			return new ProbeProxy(routingKey);
-		} catch (Exception e) {
-			// TODO: log the exception
-			e.printStackTrace();
-		}
-		return null;
 	}
 
 	private static SCADomain getRemoteScaDomain(URI bindingUri) {
