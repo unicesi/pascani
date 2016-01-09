@@ -1,4 +1,4 @@
-package pascani.lang.util;
+package pascani.lang.util.dsl;
 
 import org.quartz.CronExpression;
 

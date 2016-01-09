@@ -1,4 +1,4 @@
-package pascani.lang.util;
+package pascani.lang.util.dsl;
 
 import com.google.common.base.Function;
 

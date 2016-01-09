@@ -25,6 +25,12 @@ import org.ow2.frascati.remote.introspection.resources.Property;
 import org.ow2.scesame.qoscare.core.scaspec.FraSCAti2QoSCAre;
 import org.ow2.scesame.qoscare.core.scaspec.SCANamedNode;
 
+/**
+ * Static methods to ease deployment and reconfiguration of SCA elements by
+ * means of the FraSCAti middleware.
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class FrascatiUtils {
 
 	public static class DeploymentBuilder {
