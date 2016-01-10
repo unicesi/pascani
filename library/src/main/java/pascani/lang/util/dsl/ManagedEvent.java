@@ -20,21 +20,42 @@ package pascani.lang.util.dsl;
 
 import java.util.Observable;
 
+import pascani.lang.util.Resumable;
+
 /**
  * <b>Note</b>: DSL-only intended use
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class ManagedEvent extends Observable {
-	
-	protected volatile boolean paused = false;
-	
+public abstract class ManagedEvent extends Observable implements Resumable {
+
+	private volatile boolean paused = false;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#pause()
+	 */
 	public void pause() {
 		this.paused = true;
 	}
-	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#resume()
+	 */
 	public void resume() {
 		this.paused = false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#isPaused()
+	 */
+	public boolean isPaused() {
+		return this.paused;
 	}
 
 }

@@ -20,12 +20,14 @@ package pascani.lang;
 
 import java.util.List;
 
+import pascani.lang.util.Resumable;
+
 /**
  * Standard probe interface
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public interface Probe {
+public interface Probe extends Resumable {
 
 	/**
 	 * Removes all of the event objects raised from {@code start} until

@@ -57,4 +57,28 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 		deleteObserver(eventObserver);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.dsl.ManagedEvent#pause()
+	 */
+	@Override public synchronized void pause() {
+		if (isPaused())
+			return;
+		getProbe().pause();
+		super.pause();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.dsl.ManagedEvent#resume()
+	 */
+	@Override public synchronized void resume() {
+		if (!isPaused())
+			return;
+		getProbe().resume();
+		super.resume();
+	}
+
 }

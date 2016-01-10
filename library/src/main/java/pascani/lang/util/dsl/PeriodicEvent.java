@@ -33,12 +33,14 @@ import pascani.lang.util.JobScheduler;
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class PeriodicEvent extends ManagedEvent {
-	
+
 	protected CronExpression expression;
 	protected List<Class<? extends Job>> classes;
-	
+	private List<Class<? extends Job>> temporal;
+
 	public PeriodicEvent(String cronExpression) {
 		this.classes = new ArrayList<Class<? extends Job>>();
+		this.temporal = new ArrayList<Class<? extends Job>>();
 		try {
 			this.expression = new CronExpression(cronExpression);
 		} catch (Exception e) {
@@ -46,11 +48,11 @@ public class PeriodicEvent extends ManagedEvent {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public CronExpression getExpression() {
 		return this.expression;
 	}
-	
+
 	public void updateExpression(CronExpression expression) {
 		this.expression = expression;
 		for (Class<? extends Job> clazz : this.classes) {
@@ -58,7 +60,7 @@ public class PeriodicEvent extends ManagedEvent {
 			subscribe(clazz);
 		}
 	}
-	
+
 	public void subscribe(final Class<? extends Job> jobClass) {
 		if (!this.classes.contains(jobClass)) {
 			this.classes.add(jobClass);
@@ -66,7 +68,8 @@ public class PeriodicEvent extends ManagedEvent {
 			data.put("expression", getExpression().getCronExpression());
 			try {
 				JobScheduler.schedule(jobClass,
-						new CronExpression(getExpression().getCronExpression()), data);
+						new CronExpression(getExpression().getCronExpression()),
+						data);
 			} catch (Exception e) {
 				// TODO: handle exception
 				e.printStackTrace();
@@ -83,6 +86,36 @@ public class PeriodicEvent extends ManagedEvent {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.dsl.ManagedEvent#pause()
+	 */
+	@Override public synchronized void pause() {
+		if (isPaused())
+			return;
+		for (Class<? extends Job> clazz : this.classes) {
+			this.temporal.add(clazz);
+			unsubscribe(clazz);
+		}
+		super.pause();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.dsl.ManagedEvent#resume()
+	 */
+	@Override public synchronized void resume() {
+		if (!isPaused())
+			return;
+		for (Class<? extends Job> clazz : this.temporal) {
+			subscribe(clazz);
+		}
+		this.temporal.clear();
+		super.resume();
 	}
 
 }

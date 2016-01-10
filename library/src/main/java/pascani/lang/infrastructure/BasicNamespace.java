@@ -72,6 +72,11 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	 * corresponding current values
 	 */
 	protected final Map<String, Serializable> variables;
+	
+	/**
+	 * The variable representing the current state (stopped or not)
+	 */
+	private volatile boolean paused = false;
 
 	/**
 	 * Creates a basic namespace connected to the RabbitMQ server, identified by
@@ -164,7 +169,8 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	public Serializable handle(RpcRequest request) {
 		Serializable response = null;
 		String variable = (String) request.getParameter(0);
-
+		
+		// Namespace operations
 		if (request.operation().equals(RpcOperation.NAMESPACE_GET_VARIABLE)) {
 			response = getVariable(variable);
 		} else if (request.operation().equals(
@@ -172,6 +178,16 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 
 			Serializable value = request.getParameter(1);
 			response = setVariable(variable, value);
+		}
+		// Common operations
+		else if (request.operation().equals(RpcOperation.PAUSE)) {
+			pause();
+			response = true;
+		} else if (request.operation().equals(RpcOperation.RESUME)) {
+			resume();
+			response = true;
+		} else if (request.operation().equals(RpcOperation.IS_PAUSED)) {
+			response = isPaused();
 		}
 
 		return response;
@@ -196,15 +212,44 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 		if (!this.variables.containsKey(variable))
 			return null;
 
-		synchronized (this.variables) {
-			Serializable previousValue = this.variables.get(variable);
-			ChangeEvent event = new ChangeEvent(UUID.randomUUID(),
-					previousValue, value, variable);
+		if (!isPaused()) {
+			synchronized (this.variables) {
+				Serializable previousValue = this.variables.get(variable);
+				ChangeEvent event = new ChangeEvent(UUID.randomUUID(),
+						previousValue, value, variable);
 
-			this.variables.put(variable, value);
-			this.producer.produce(event);
+				this.variables.put(variable, value);
+				this.producer.produce(event);
+			}
 		}
 		return getVariable(variable);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#pause()
+	 */
+	public void pause() {
+		this.paused = true;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#resume()
+	 */
+	public void resume() {
+		this.paused = false;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#isPaused()
+	 */
+	public boolean isPaused() {
+		return this.paused;
 	}
 	
 	/**

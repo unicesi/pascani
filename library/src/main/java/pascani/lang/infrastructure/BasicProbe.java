@@ -55,7 +55,15 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 	 */
 	private final Map<String, EventSet<Event<?>>> events;
 
+	/**
+	 * An array of {@link Event} subclasses allowed to be accepted by this probe
+	 */
 	protected Class<? extends Event<?>>[] acceptedTypes;
+	
+	/**
+	 * The variable representing the current state (stopped or not)
+	 */
+	private volatile boolean paused = false;
 
 	/**
 	 * Creates an instance of {@link Probe} with an empty set of events, and
@@ -95,18 +103,17 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 	 *            The event to record
 	 */
 	@Subscribe public boolean recordEvent(final Event<?> event) {
-		boolean r = false;
+		boolean recorded = false;
 		boolean accept = isAcceptedEvent(event);
-		if (accept) {
+		if (!this.paused && accept) {
 			String key = event.getClass().getCanonicalName();
 			synchronized (this.events) {
 				if (this.events.get(key) == null)
 					this.events.put(key, new EventSet<Event<?>>());
-
-				r = this.events.get(key).add(event);
+				recorded = this.events.get(key).add(event);
 			}
 		}
-		return r;
+		return recorded;
 	}
 
 	protected boolean isAcceptedEvent(final Event<?> event) {
@@ -225,7 +232,6 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 	 * infrastructure.RpcRequest)
 	 */
 	public Serializable handle(final RpcRequest request) {
-		
 		Serializable response = null;
 		long start = (Long) request.getParameter(0);
 		long end = (Long) request.getParameter(1);
@@ -233,19 +239,58 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 		@SuppressWarnings("unchecked")
 		List<Class<? extends Event<?>>> eventTypes = (List<Class<? extends Event<?>>>) request
 				.getParameter(2);
-
-		if (request.operation().equals(RpcOperation.PROBE_CLEAN))
-			response = this.cleanData(start, end, eventTypes);
-		else if (request.operation().equals(RpcOperation.PROBE_COUNT))
-			response = this.count(start, end, eventTypes);
-		else if (request.operation().equals(RpcOperation.PROBE_COUNT_AND_CLEAN))
-			response = this.countAndClean(start, end, eventTypes);
-		else if (request.operation().equals(RpcOperation.PROBE_FETCH))
-			response = (Serializable) this.fetch(start, end, eventTypes);
-		else if (request.operation().equals(RpcOperation.PROBE_FETCH_AND_CLEAN))
-			response = (Serializable) this.fetchAndClean(start, end, eventTypes);
 		
+		// Probe operations
+		if (request.operation().equals(RpcOperation.PROBE_CLEAN))
+			response = cleanData(start, end, eventTypes);
+		else if (request.operation().equals(RpcOperation.PROBE_COUNT))
+			response = count(start, end, eventTypes);
+		else if (request.operation().equals(RpcOperation.PROBE_COUNT_AND_CLEAN))
+			response = countAndClean(start, end, eventTypes);
+		else if (request.operation().equals(RpcOperation.PROBE_FETCH))
+			response = (Serializable) fetch(start, end, eventTypes);
+		else if (request.operation().equals(RpcOperation.PROBE_FETCH_AND_CLEAN))
+			response = (Serializable) fetchAndClean(start, end, eventTypes);
+		
+		// Common operations
+		else if (request.operation().equals(RpcOperation.PAUSE)) {
+			pause();
+			response = true;
+		} else if (request.operation().equals(RpcOperation.RESUME)) {
+			resume();
+			response = true;
+		} else if (request.operation().equals(RpcOperation.IS_PAUSED)) {
+			response = isPaused();
+		}
+			
 		return response;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#pause()
+	 */
+	public void pause() {
+		this.paused = true;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#resume()
+	 */
+	public void resume() {
+		this.paused = false;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#isPaused()
+	 */
+	public boolean isPaused() {
+		return this.paused;
 	}
 
 	/**

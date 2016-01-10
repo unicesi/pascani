@@ -16,38 +16,36 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package pascani.lang.infrastructure;
+package pascani.lang.util;
 
-import java.io.Serializable;
-
-import pascani.lang.util.Resumable;
+import pascani.lang.Probe;
+import pascani.lang.infrastructure.Monitor;
+import pascani.lang.infrastructure.Namespace;
 
 /**
+ * Utility interface to define resumable behavior in classes within the
+ * monitoring infrastructure, such as instances of {@link Probe},
+ * {@link Namespace} and {@link Monitor}.
+ * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public interface Namespace extends Resumable {
+public interface Resumable {
 
 	/**
-	 * Gets the current value of the specified variable. If the given variable
-	 * name is not found, null is returned.
-	 * 
-	 * @param variable
-	 *            The name of the variable
-	 * @return the current value of the specified variable
+	 * Temporarily stops the regular behavior of this object
 	 */
-	public Serializable getVariable(String variable);
+	public void pause();
 
 	/**
-	 * Updates the current value of the specified variable. If the given
-	 * variable name is not found, null is returned.
-	 * 
-	 * @param variable
-	 *            The name of the variable
-	 * @param value
-	 *            The new value
-	 * @return the current variable's value after updating it. Notice that it
-	 *         may be different than {@code value}
+	 * Resumes the regular behavior of this object
 	 */
-	public Serializable setVariable(String variable, Serializable value);
+	public void resume();
+
+	/**
+	 * 
+	 * @return {@code true} in case this object is in stopped state, or
+	 *         {@code false} in the opposite case.
+	 */
+	public boolean isPaused();
 
 }

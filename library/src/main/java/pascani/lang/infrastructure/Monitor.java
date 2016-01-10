@@ -18,18 +18,17 @@
  */
 package pascani.lang.infrastructure;
 
+import pascani.lang.util.Resumable;
 
 /**
- * <p>
- * Subclasses may have references to several {@link ProbeProxy} instances.
- * </p>
- * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class Monitor {
+public abstract class Monitor implements Resumable {
 
-	public Monitor() {
-		
+	protected volatile boolean paused;
+	
+	public boolean isPaused() {
+		return this.paused;
 	}
 
 }

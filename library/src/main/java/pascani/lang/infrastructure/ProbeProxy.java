@@ -193,6 +193,37 @@ public class ProbeProxy implements Probe {
 		return SerializationUtils.deserialize(response);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#pause()
+	 */
+	public void pause() {
+		RpcRequest request = new RpcRequest(RpcOperation.PAUSE);
+		makeActualCall(request, false); // true should be returned
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#resume()
+	 */
+	public void resume() {
+		RpcRequest request = new RpcRequest(RpcOperation.RESUME);
+		makeActualCall(request, false); // true should be returned
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#isPaused()
+	 */
+	public boolean isPaused() {
+		RpcRequest request = new RpcRequest(RpcOperation.IS_PAUSED);
+		byte[] response = makeActualCall(request, false);
+		return SerializationUtils.deserialize(response);
+	}
+	
 	/**
 	 * @return the routing key to which this proxy points
 	 */

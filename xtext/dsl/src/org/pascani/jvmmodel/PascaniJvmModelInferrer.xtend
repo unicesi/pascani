@@ -55,7 +55,6 @@ import org.quartz.Job
 import org.quartz.JobDataMap
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
-import pascani.lang.PascaniRuntime
 import pascani.lang.PascaniRuntime.Context
 import pascani.lang.events.ChangeEvent
 import pascani.lang.events.IntervalEvent
@@ -92,7 +91,12 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			val fields = new ArrayList
 			val constructors = new ArrayList
 			val methods = new ArrayList
+			
+			// utility variables
 			var nblocks = 0
+			val events = new ArrayList
+			
+			superTypes += typeRef(pascani.lang.infrastructure.Monitor)
 			
 			for (e : monitor.body.expressions) {
 				switch (e) {
@@ -116,6 +120,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 								new «PeriodicEvent»(«appendable.content»)
 							'''
 						]
+						events += e.name
 					}
 					
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
@@ -128,6 +133,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							visibility = JvmVisibility::PUBLIC
 							initializer = '''new «innerClass.simpleName»()'''
 						]
+						events += e.name
 					}
 					
 					Handler: {
@@ -185,6 +191,19 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				exceptions += typeRef(Exception)
 			]
 			
+			// Methods from the super type
+			methods += monitor.toMethod("pause", typeRef(void)) [
+				body = [
+					append(events.join("\n", [e|e + ".pause();"]))
+				]
+			]
+
+			methods += monitor.toMethod("resume", typeRef(void)) [
+				body = [
+					append(events.join("\n", [e|e + ".resume();"]))
+				]
+			]
+			
 			if (monitor.usings != null) {
 				for (namespace : monitor.usings.filter[n|n.name != null]) {
 					fields += namespace.toField(namespace.name, typeRef(namespace.fullyQualifiedName.toString)) [
@@ -192,6 +211,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					]
 				}
 			}
+			
 			// Add members in an organized way
 			members += fields
 			members += constructors
@@ -346,7 +366,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						this.consumer«varSuffix» = new «typeRef(RabbitMQConsumer)»(
 							routingKey, consumerTag, «typeRef(Context)».«Context.MONITOR.toString») {
 							@Override public void delegateEventHandling(final Event<?> event) {
-								if (event.getClass().equals(type«varSuffix»)) {
+								if (!isPaused() && event.getClass().equals(type«varSuffix»)) {
 									«IF (eventTypeRefName.equals(ChangeEvent.canonicalName))»
 										String variable = routingKey + ".«getEmitterFQN(e.emitter.emitter).toList.reverseView.drop(1).join(".")»";
 										if (((«typeRef(ChangeEvent)») event).variable().equals(variable)

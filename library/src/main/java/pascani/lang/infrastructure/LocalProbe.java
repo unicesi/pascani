@@ -205,6 +205,33 @@ public class LocalProbe implements Probe {
 			final List<Class<? extends Event<?>>> eventTypes) {
 		return this.probe.fetchAndClean(start, end, eventTypes);
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#pause()
+	 */
+	public void pause() {
+		this.probe.pause();
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#resume()
+	 */
+	public void resume() {
+		this.probe.resume();
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#isPaused()
+	 */
+	public boolean isPaused() {
+		return this.probe.isPaused();
+	}
 
 	/**
 	 * Shutdowns connections
