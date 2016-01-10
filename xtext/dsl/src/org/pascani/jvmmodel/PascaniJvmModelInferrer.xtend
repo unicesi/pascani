@@ -332,18 +332,19 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				body = '''
 					initialize();
 				'''
-			]	
+			]
+			// TODO: handle the exception	
 			members += e.emitter.toMethod("initialize", typeRef(void)) [
 				visibility = JvmVisibility::PRIVATE
 				body = '''
 					final String routingKey = «routingKey.get(0)»;
-					final String exchange = «IF (e.emitter.eventType.equals(EventType.CHANGE))»"namespaces_exchange"«ELSE»"probes_exchange"«ENDIF»;
+					final String consumerTag = "«monitor.fullyQualifiedName».«e.name»";
 					try {
 						«IF(!isChangeEvent)»
 							this.probe«varSuffix» = new «ProbeProxy»(routingKey);
 						«ENDIF»
 						this.consumer«varSuffix» = new «typeRef(RabbitMQConsumer)»(
-							«typeRef(PascaniRuntime)».getEnvironment().get(exchange), routingKey, «typeRef(Context)».«Context.MONITOR.toString») {
+							routingKey, consumerTag, «typeRef(Context)».«Context.MONITOR.toString») {
 							@Override public void delegateEventHandling(final Event<?> event) {
 								if (event.getClass().equals(type«varSuffix»)) {
 									«IF (eventTypeRefName.equals(ChangeEvent.canonicalName))»
