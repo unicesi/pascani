@@ -74,14 +74,15 @@ public class PeriodicEvent extends ManagedEvent {
 		}
 	}
 
-	public void unsubscribe(final Class<? extends Job> jobClass) {
+	public boolean unsubscribe(final Class<? extends Job> jobClass) {
 		this.classes.remove(jobClass);
 		try {
-			JobScheduler.unschedule(jobClass);
+			return JobScheduler.unschedule(jobClass);
 		} catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
 		}
+		return false;
 	}
 
 }
