@@ -55,8 +55,7 @@ class PascaniProposalProvider extends AbstractPascaniProposalProvider {
 		!grammarAccess.eventTypeAccess.changeChangeKeyword_2_0.equals(keyword) && // change
 		!grammarAccess.eventTypeAccess.invokeInvokeKeyword_0_0.equals(keyword) && // invoke
 		!grammarAccess.eventTypeAccess.returnReturnKeyword_1_0.equals(keyword) && // return
-		!grammarAccess.eventDeclarationAccess.periodicalPeriodicallyKeyword_3_0.equals(keyword) && // periodically
-		!grammarAccess.eventDeclarationAccess.emittedIndicatedOnKeyword_4_0.equals(keyword)) // on
+		!grammarAccess.eventDeclarationAccess.periodicalPeriodicallyKeyword_3_0.equals(keyword)) // periodically
 		{
 			super.completeKeyword(keyword, contentAssistContext, acceptor);
 		}

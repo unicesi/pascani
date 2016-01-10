@@ -87,23 +87,27 @@ class PascaniSemanticHighlightingCalculator extends XbaseHighlightingCalculator 
 		override Void caseCronExpression(CronExpression object) {
 			// Constants
 			val constant = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_Constant());
-			highlightNode(constant, PascaniHighlightingConfiguration.CRON_EXPRESSION_ID);
+			highlightNode(constant, PascaniHighlightingConfiguration.STRING_ID);
 
 			// Expression
+			val leftSymbol = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_Lsymbol())
+			val rightSymbol = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_Rsymbol())
+			
 			val seconds = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_Seconds());
 			val minutes = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_Minutes());
 			val hours = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_Hours());
-			val days = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_DayOfMonth());
-			val months = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_Month());
+			val dayOfMonth = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_DayOfMonth());
+			val month = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_Month());
 			val daysOfWeek = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_DayOfWeek());
 			val year = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_Year());
 
-			highlightNodes(PascaniHighlightingConfiguration.CRON_EXPRESSION_ID, seconds, minutes, hours, days, months,
-				daysOfWeek);
+			highlightNodes(PascaniHighlightingConfiguration.CRON_EXPRESSION_ID, leftSymbol, rightSymbol);
+			highlightNodes(PascaniHighlightingConfiguration.STRING_ID, seconds, minutes, hours, 
+				dayOfMonth, month, daysOfWeek);
 
 			if (year != null)
-				highlightNode(year, PascaniHighlightingConfiguration.CRON_EXPRESSION_ID);
-
+				highlightNode(year, PascaniHighlightingConfiguration.STRING_ID);
+				
 			return null;
 		}
 

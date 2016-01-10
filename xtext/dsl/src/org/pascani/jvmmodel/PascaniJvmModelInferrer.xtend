@@ -31,14 +31,15 @@ import org.eclipse.xtext.common.types.JvmMember
 import org.eclipse.xtext.common.types.JvmOperation
 import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.naming.IQualifiedNameProvider
-import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
+import org.eclipse.xtext.xbase.compiler.output.FakeTreeAppendable
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import org.pascani.compiler.PascaniCompiler
 import org.pascani.outputconfiguration.OutputConfigurationAdapter
 import org.pascani.outputconfiguration.PascaniOutputConfigurationProvider
 import org.pascani.pascani.Event
@@ -63,7 +64,6 @@ import pascani.lang.infrastructure.BasicNamespace
 import pascani.lang.infrastructure.NamespaceProxy
 import pascani.lang.infrastructure.ProbeProxy
 import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer
-import pascani.lang.util.CronConstant
 import pascani.lang.util.dsl.EventObserver
 import pascani.lang.util.dsl.NonPeriodicEvent
 import pascani.lang.util.dsl.PeriodicEvent
@@ -76,12 +76,11 @@ import pascani.lang.util.dsl.PeriodicEvent
  */
 class PascaniJvmModelInferrer extends AbstractModelInferrer {
 
-	/**
-	 * convenience API to build and initialize JVM types and their members.
-	 */
 	@Inject extension JvmTypesBuilder
-
+	
 	@Inject extension IQualifiedNameProvider
+
+	@Inject PascaniCompiler compiler
 
 	def dispatch void infer(Monitor monitor, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		val monitorImpl = monitor.toClass(monitor.fullyQualifiedName)
@@ -107,16 +106,14 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 					
 					Event case e.emitter != null && e.emitter.cronExpression != null: {
+						val appendable = compiler.compileAsJavaExpression(e.emitter.cronExpression,
+							new FakeTreeAppendable(), typeRef(String))
 						fields += e.toField(e.name, typeRef(PeriodicEvent)) [
 							^final = true
 							^static = true
 							visibility = JvmVisibility::PUBLIC
 							initializer = '''
-								«IF (e.emitter.cronExpression.constant != null)»
-									new «PeriodicEvent»(«typeRef(CronConstant)».valueOf("«e.emitter.cronExpression.constant.toUpperCase»").expression())
-								«ELSE»
-									new «PeriodicEvent»("«NodeModelUtils.getNode(e.emitter.cronExpression).text.trim()»")
-								«ENDIF»
+								new «PeriodicEvent»(«appendable.content»)
 							'''
 						]
 					}
@@ -153,6 +150,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					XBlockExpression case !e.expressions.isEmpty: {
 						methods += monitor.toMethod("applyCustomCode" + nblocks++, typeRef(void)) [
 							visibility = JvmVisibility::PRIVATE
+							documentation = e.documentation
 							body = e
 						]
 					}

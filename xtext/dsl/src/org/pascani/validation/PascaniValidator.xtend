@@ -73,12 +73,11 @@ class PascaniValidator extends AbstractPascaniValidator {
 	static val INVALID_PARAMETER_TYPE = "invalidParameterType"
 	static val DUPLICATE_LOCAL_VARIABLE = "duplicateLocalVariable"
 	static val DISCOURAGED_USAGE = "discouragedUsage"
-	static val EXPECTED_ON = "expectedOn"
 	static val EXPECTED_WHITESPACE = "expectedWhitespace"
-	static val UNEXPECTED_EVENT_EMITTER = "unexpectedEventEmitter"
+	static val EXPECTED_PERIODICAL = "expectedPeriodical"
 	static val UNEXPECTED_EVENT_SPECIFIER = "unexpectedEventSpecifier"
 	static val EXPECTED_CRON_CONSTANT = "expectedCronConstant"
-	static val EXPECTED_VARIABLE = "expectedVariable"
+	static val EXPECTED_CRON_EXPRESSION = "expectedCronExpression"
 	static val UNEXPECTED_CRON_NTH = "unexpectedCronNth"
 	static val UNEXPECTED_CRON_INCREMENT = "unexpectedCronIncrement"
 	static val UNEXPECTED_CRON_CONSTANT = "unexpectedCronConstant"
@@ -339,44 +338,18 @@ class PascaniValidator extends AbstractPascaniValidator {
 	}
 	
 	@Check
-	def checkWellFormedEvent(Event event) {
-		if (event.isPeriodical) {
-			switch (event) {
-				case !event.isEmittedIndicated: {
-					error("Syntax error: insert 'on' before the event emitter to complete this event definition",
-						PascaniPackage.Literals.EVENT__EMITTER, EXPECTED_ON)
-				}
-				case event.isEmittedIndicated && event.emitter.cronExpression == null: {
-					error("Periodical events must be emitted by chronological expressions",
-						PascaniPackage.Literals.EVENT__EMITTER, UNEXPECTED_EVENT_EMITTER)
-				}
-				case event.isEmittedIndicated && event.emitter.cronExpression.constant != null: {
-					// TODO: suggest: Remove the periodical and emitter indicators
-					error("Chronological constants are periodical by default", PascaniPackage.Literals.EVENT__EMITTER,
-						UNEXPECTED_EVENT_EMITTER)
-				}
-			}
-		} else {
-			switch (event) {
-				case !event.isEmittedIndicated && event.emitter.cronExpression.constant == null: {
-					error("Periodical events with no emitter must indicate a chronological constant",
-						PascaniPackage.Literals.EVENT__EMITTER, EXPECTED_CRON_CONSTANT)
-				}
-				case !event.isEmittedIndicated && !cronConstants.contains(event.emitter.cronExpression.constant): {
-					error("A chronological constant is expected, instead '" + event.emitter.cronExpression.constant +
-						"' was found", PascaniPackage.Literals.EVENT__EMITTER, EXPECTED_CRON_CONSTANT)
-				}
-				case event.isEmittedIndicated: {
-					if (event.emitter.cronExpression != null) {
-						error("Invalid event type '" + event.emitter.cronExpression.constant + "', valid types are " +
-							PascaniPackage.Literals.EVENT_TYPE.ELiterals.join(", "),
-							PascaniPackage.Literals.EVENT__EMITTER, EXPECTED_VARIABLE)
-					}
-				}
-			}
+	def checkEventIsWellForm(Event event) {
+		if (event.emitter.cronExpression != null && !event.isPeriodical) {
+			error("Chronological events must be raised periodically", PascaniPackage.Literals.EVENT__PERIODICAL,
+				EXPECTED_PERIODICAL)
+		}
+		if (event.isPeriodical && !event.emitter.cronExpression.actualType.isAssignableFrom(CronExpression)) {
+			error("A chronological expression is expected, instead " +
+				event.emitter.cronExpression.actualType.simpleName + " was found",
+				PascaniPackage.Literals.EVENT_EMITTER__EMITTER, EXPECTED_CRON_EXPRESSION);
 		}
 	}
-	
+
 	@Check
 	def checkEventSpecifier(EventSpecifier specifier) {
 		val List<Object> numericalPrimitives = newArrayList('byte', 'short', 'int', 'long', 'float', 'double')
@@ -415,32 +388,31 @@ class PascaniValidator extends AbstractPascaniValidator {
 	}
 
 	@Check
-	def globalValidationsOnCronExp(EventEmitter e) {
-		if (e.cronExpression == null)
-			return;
+	def globalValidationsOnCronExp(CronExpression exp) {
+		if (exp.constant == null) {
+			// Validate spaces: all cron parts must be space-separated
+			if (isValidCronExp(exp)) {
+				val node = NodeModelUtils.getNode(exp)
+				val String[] parts = node.text.trim.split(" ")
+				var expectedSize = if(exp.year == null) 6 else 7
 
-		val exp = e.cronExpression
+				if (parts.length != expectedSize)
+					warning("Chronological sub-expressions must be separated by one space",
+						PascaniPackage.Literals.CRON_EXPRESSION__SECONDS, EXPECTED_WHITESPACE)
+			}
 
-		// Validate spaces: all cron parts must be space-separated
-		if (isChronologicalExp(exp) && isValidCronExp(exp)) {
-			val node = NodeModelUtils.getNode(exp)
-			val String[] parts = node.text.trim.split(" ")
-			var expectedSize = if(exp.year == null) 6 else 7
-
-			if (parts.length != expectedSize)
-				warning("Chronological sub-expressions must be separated by one space",
-					PascaniPackage.Literals.EVENT_EMITTER__CRON_EXPRESSION, EXPECTED_WHITESPACE)
-		}
-
-		// Quartz limitations
-		val dayOfMonth = exp.dayOfMonth
-		val dayOfWeek = exp.dayOfWeek
-
-		if (isChronologicalExp(exp) && isValidCronExp(exp) &&
-			!(isCronElementNoSpecificValue(dayOfMonth) || isCronElementNoSpecificValue(dayOfWeek))) {
-			error("Support for specifying both a day-of-month and a day-of-week value is not complete" +
-				". You must currently use the '?' character in one of these fields",
-				PascaniPackage.Literals.EVENT_EMITTER__CRON_EXPRESSION, UNSUPPORTED_OPERATION)
+			// Quartz limitations
+			if (isValidCronExp(exp) &&
+				!(isCronElementNoSpecificValue(exp.dayOfMonth) || isCronElementNoSpecificValue(exp.dayOfWeek))) {
+				error("Support for specifying both a day-of-month and a day-of-week value is not complete" +
+					". You must currently use the '?' character in one of these fields",
+					PascaniPackage.Literals.CRON_EXPRESSION__DAY_OF_WEEK, UNSUPPORTED_OPERATION)
+			}
+		} else {
+			if (!cronConstants.contains(exp.constant)) {
+				error("A chronological constant is expected, instead '" + exp.constant + "' was found",
+					PascaniPackage.Literals.CRON_EXPRESSION__CONSTANT, EXPECTED_CRON_CONSTANT)
+			}
 		}
 	}
 
@@ -476,10 +448,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 			default:
 				return false
 		}
-	}
-
-	def boolean isChronologicalExp(CronExpression e) {
-		return e.constant == null
 	}
 
 	def isValidCronExp(CronExpression exp) {

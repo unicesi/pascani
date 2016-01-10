@@ -50,7 +50,7 @@ class PascaniHighlightingConfiguration extends XbaseHighlightingConfiguration {
 
 	def cronExpression() {
 		val textStyle = defaultTextStyle().copy();
-		textStyle.setColor(new RGB(100, 100, 100));
+		textStyle.setColor(new RGB(145, 145, 145));
 		return textStyle;
 	}
 

@@ -69,12 +69,12 @@ HandlerDeclaration returns Handler
 	;
 
 EventDeclaration returns Event
-	:	'event' name = ValidID 'raised' (periodical ?= 'periodically')? (emittedIndicated ?= 'on')? emitter = EventEmitter ->';'?
+	:	'event' name = ValidID 'raised' (periodical ?= 'periodically')? 'on' emitter = EventEmitter ->';'?
 	;
 
 EventEmitter
 	:	eventType = EventType 'of' emitter = XExpression (=> specifier = RelationalEventSpecifier)?
-	|	cronExpression = CronExpression
+	|	cronExpression = XExpression
 	;
 	
 enum EventType
@@ -122,18 +122,21 @@ enum CronConstant
 	|	monthly
 	|	annually
 	|	yearly
-//	|	reboot
 	;
 
 CronExpression
-	:	seconds 	= CronElement
-		minutes 	= CronElement
-		hours 		= CronElement
-		dayOfMonth 	= CronElement
-		month 		= CronElement
-		dayOfWeek 	= CronElement
-		(year 		= CronElement)?
-	| 	constant = ID
+	:	lsymbol = '«'
+			seconds 	= CronElement
+			minutes 	= CronElement
+			hours 		= CronElement
+			dayOfMonth 	= CronElement
+			month 		= CronElement
+			dayOfWeek 	= CronElement
+			(year 		= CronElement)?
+		rsymbol = '»'
+	| 	lsymbol = '«' 
+			constant = ID 
+		rsymbol = '»'
 	;
 
 CronElement
@@ -167,3 +170,14 @@ TerminalCronElement
 IntLiteral
 	:	INT
 	;
+
+XLiteral returns XExpression:
+	XCollectionLiteral |
+	XClosure |
+	XBooleanLiteral |
+	XNumberLiteral |
+	XNullLiteral |
+	XStringLiteral |
+	XTypeLiteral |
+	CronExpression
+;

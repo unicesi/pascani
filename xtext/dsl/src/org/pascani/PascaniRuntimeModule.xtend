@@ -32,6 +32,10 @@ import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
 import org.pascani.scoping.PascaniImplicitlyImportedFeatures
 import org.pascani.scoping.PascaniImportedNamespaceAwareLocalScopeProvider
 import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
+import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
+import org.pascani.typesystem.PascaniTypeComputer
+import org.eclipse.xtext.xbase.compiler.XbaseCompiler
+import org.pascani.compiler.PascaniCompiler
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -67,5 +71,13 @@ class PascaniRuntimeModule extends AbstractPascaniRuntimeModule {
 	override Class<? extends IGenerator> bindIGenerator() {
 		return OutputConfigurationAwaredGenerator;
 	}
+	
+	def Class<? extends ITypeComputer> bindITypeComputer() {
+		return PascaniTypeComputer
+	}
 
+	def Class<? extends XbaseCompiler> bindXbaseCompiler() {
+		return PascaniCompiler
+	}
+	
 }
