@@ -57,17 +57,6 @@ public abstract class AbstractConsumer implements Resumable {
 	private volatile boolean paused = false;
 
 	/**
-	 * Starts consuming elements from the queue in a new {@link Thread}
-	 */
-	public AbstractConsumer() {
-		new Thread() {
-			public void run() {
-				startConsuming();
-			}
-		}.start();
-	}
-
-	/**
 	 * Delegates the event handling to an interested component; this may be
 	 * done, for instance, by using an {@link EventBus} object.
 	 * 
@@ -75,6 +64,14 @@ public abstract class AbstractConsumer implements Resumable {
 	 *            The event to be handled
 	 */
 	public abstract void delegateEventHandling(Event<?> event);
+	
+	/**
+	 * Shutdowns connections
+	 * 
+	 * @throws Exception
+	 *             If something bad happens!
+	 */
+	public abstract void shutdown() throws Exception;
 
 	/**
 	 * Delegates the event handling to an interested component, applying some
@@ -87,14 +84,17 @@ public abstract class AbstractConsumer implements Resumable {
 		if (!isPaused())
 			delegateEventHandling(event);
 	}
-
+	
 	/**
-	 * Shutdowns connections
-	 * 
-	 * @throws Exception
-	 *             If something bad happens!
+	 * Starts consuming elements from the queue in a new {@link Thread}
 	 */
-	public abstract void shutdown() throws Exception;
+	public void start() {
+		new Thread() {
+			public void run() {
+				startConsuming();
+			}
+		}.start();
+	}
 
 	/*
 	 * (non-Javadoc)

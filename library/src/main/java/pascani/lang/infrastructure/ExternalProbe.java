@@ -70,6 +70,7 @@ public class ExternalProbe extends LocalProbe {
 
 		this.consumer = new RabbitMQConsumer(super.endPoint, routingKey,
 				routingKey, context);
+		this.consumer.start();
 	}
 
 }
