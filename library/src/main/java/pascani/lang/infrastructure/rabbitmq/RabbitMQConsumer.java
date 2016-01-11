@@ -71,11 +71,11 @@ public class RabbitMQConsumer extends AbstractConsumer implements Consumer {
 	 *            The consumer tag for this consumer (a unique name)
 	 * @param context
 	 *            The context in which this consumer is used
-	 * @throws Exception 
+	 * @throws Exception
+	 *             if something bad happens! @see {@link EndPoint#EndPoint()}
 	 */
-	public RabbitMQConsumer(final String queue,
-			final String tag, final PascaniRuntime.Context context)
-			throws Exception {
+	public RabbitMQConsumer(final String queue, final String tag,
+			final PascaniRuntime.Context context) throws Exception {
 		this(new EndPoint(), queue, tag, context);
 	}
 	
@@ -104,6 +104,28 @@ public class RabbitMQConsumer extends AbstractConsumer implements Consumer {
 		this.queueName = queue;
 		this.consumerTag = tag;
 		this.eventProducer = new LocalEventProducer<Event<?>>(context);
+	}
+	
+	/**
+	 * Creates a RabbitMQ message consumer consuming from an exchange. To do
+	 * this, an anonymous non-durable queue is declared and bound to the
+	 * exchange.
+	 * 
+	 * @param exchange
+	 *            The exchange from which messages are consumed
+	 * @param routingKey
+	 *            The routing key of interest
+	 * @param tag
+	 *            The consumer tag for this consumer
+	 * @param context
+	 *            The context in which this consumer is used
+	 * @throws Exception
+	 *             if something bad happens! @see {@link EndPoint#EndPoint()}
+	 */
+	public RabbitMQConsumer(final String exchange,
+			final String routingKey, final String tag,
+			final PascaniRuntime.Context context) throws Exception {
+		this(new EndPoint(), exchange, routingKey, tag, context);
 	}
 
 	/**
