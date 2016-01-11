@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 import com.google.common.eventbus.EventBus;
 
 import pascani.lang.Event;
+import pascani.lang.util.Resumable;
 
 /**
  * Abstract implementation of a message queue consumer, containing only methods
@@ -38,7 +39,7 @@ import pascani.lang.Event;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class AbstractConsumer extends Thread {
+public abstract class AbstractConsumer implements Resumable {
 
 	/**
 	 * The logger
@@ -51,6 +52,22 @@ public abstract class AbstractConsumer extends Thread {
 	protected abstract void startConsuming();
 
 	/**
+	 * The variable representing the current state (stopped or not)
+	 */
+	private volatile boolean paused = false;
+
+	/**
+	 * Starts consuming elements from the queue in a new {@link Thread}
+	 */
+	public AbstractConsumer() {
+		new Thread() {
+			public void run() {
+				startConsuming();
+			}
+		}.start();
+	}
+
+	/**
 	 * Delegates the event handling to an interested component; this may be
 	 * done, for instance, by using an {@link EventBus} object.
 	 * 
@@ -58,7 +75,19 @@ public abstract class AbstractConsumer extends Thread {
 	 *            The event to be handled
 	 */
 	public abstract void delegateEventHandling(Event<?> event);
-	
+
+	/**
+	 * Delegates the event handling to an interested component, applying some
+	 * validations first.
+	 * 
+	 * @param event
+	 *            The event to be handled
+	 */
+	protected final void internalDelegateHandling(Event<?> event) {
+		if (!isPaused())
+			delegateEventHandling(event);
+	}
+
 	/**
 	 * Shutdowns connections
 	 * 
@@ -67,8 +96,31 @@ public abstract class AbstractConsumer extends Thread {
 	 */
 	public abstract void shutdown() throws Exception;
 
-	@Override public final void run() {
-		startConsuming();
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#pause()
+	 */
+	public void pause() {
+		this.paused = true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#resume()
+	 */
+	public void resume() {
+		this.paused = false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#isPaused()
+	 */
+	public boolean isPaused() {
+		return this.paused;
 	}
 
 }

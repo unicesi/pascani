@@ -179,7 +179,7 @@ public class RabbitMQConsumer extends AbstractConsumer implements Consumer {
 			final byte[] body) throws IOException {
 
 		Event<?> event = (Event<?>) SerializationUtils.deserialize(body);
-		delegateEventHandling(event);
+		internalDelegateHandling(event);
 
 		// Acknowledge the received message after it has been handled
 		this.endPoint.channel().basicAck(envelope.getDeliveryTag(), false);
