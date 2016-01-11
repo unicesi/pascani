@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Pascani Eclipse IDE plugin
+Bundle-Vendor: Universidad Icesi
+Bundle-Version: 0.0.1.qualifier
+Bundle-SymbolicName: org.pascani.dsl.ide;singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.pascani.dsl,
+ org.eclipse.xtext.ide,
+ org.eclipse.xtext.xbase.ide
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: org.pascani.dsl.ide.contentassist.antlr.internal,
+ org.pascani.dsl.ide.contentassist.antlr
+

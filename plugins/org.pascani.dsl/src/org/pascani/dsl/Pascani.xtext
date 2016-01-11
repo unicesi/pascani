@@ -1,0 +1,183 @@
+/*
+ * Copyright © 2015 Universidad Icesi
+ * 
+ * This file is part of the Pascani DSL.
+ * 
+ * The Pascani DSL is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ * 
+ * The Pascani DSL is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ * for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with The Pascani DSL. If not, see <http://www.gnu.org/licenses/>.
+ */
+grammar org.pascani.dsl.Pascani with org.eclipse.xtext.xbase.Xbase
+
+import "http://www.eclipse.org/xtext/common/JavaVMTypes" as types
+import "http://www.eclipse.org/xtext/xbase/Xbase"
+
+generate pascani "http://www.pascani.org/dsl/Pascani"
+
+Model
+    :	('package' name = QualifiedName ->';'?)? 
+    	imports = XImportSection?
+    	typeDeclaration = TypeDeclaration?
+    ;
+
+TypeDeclaration
+	:	MonitorDeclaration 
+    |	NamespaceDeclaration
+    ;
+    
+MonitorDeclaration returns Monitor
+	:	'monitor' name = ValidID 
+		('using' usings += [Namespace | QualifiedName] (',' usings += [Namespace | QualifiedName])*)?  
+		body = MonitorBlockExpression
+	;
+	
+MonitorBlockExpression returns XBlockExpression
+	:	{XBlockExpression} '{' (expressions += InternalMonitorDeclaration ';'?)* '}'
+	;
+
+InternalMonitorDeclaration returns XExpression
+	:	XVariableDeclaration
+	|	XBlockExpression
+	|	EventDeclaration
+	|	HandlerDeclaration
+	;
+	
+NamespaceDeclaration returns Namespace
+	:	'namespace' name = ValidID body = NamespaceBlockExpression
+	;
+
+NamespaceBlockExpression returns XBlockExpression
+	:	{XBlockExpression} '{' (expressions += InternalNamespaceDeclaration ';'?)* '}'
+	;
+
+InternalNamespaceDeclaration returns XExpression
+	:	XVariableDeclaration
+	|	NamespaceDeclaration
+	;
+
+HandlerDeclaration returns Handler
+	:	'handler' name = ValidID '(' param = FullJvmFormalParameter ')' body = XBlockExpression
+	;
+
+EventDeclaration returns Event
+	:	'event' name = ValidID 'raised' (periodical ?= 'periodically')? 'on' emitter = EventEmitter ->';'?
+	;
+
+EventEmitter
+	:	eventType = EventType 'of' emitter = XExpression (=> specifier = RelationalEventSpecifier)?
+	|	cronExpression = XExpression
+	;
+	
+enum EventType
+	:	invoke
+	|	return
+	|	change
+	|	exception
+	;
+
+RelationalEventSpecifier returns EventSpecifier
+	:	EventSpecifier ({RelationalEventSpecifier.left = current} operator = RelationalOperator right = EventSpecifier)*
+	;
+
+enum RelationalOperator
+	:	and
+	|	or
+	;
+
+EventSpecifier
+	:	(below ?= 'below' | above ?= 'above' | equal ?= 'equal' 'to') value = XExpression (percentage ?= '%%')?
+	|	'(' RelationalEventSpecifier ')'
+	;
+
+/*
+ * This enumeration is added only for content assist purposes.
+ * 
+ * Equivalences:
+ * 
+ * 	:	reboot		// Run at startup - Not supported
+ *	|	yearly		// 0 0 0 1 1 *
+ *	|	annually	// Equal to @yearly
+ *	|	monthly		// 0 0 0 1 * *
+ *	|	weekly		// 0 0 0 * * 0
+ *	|	daily		// 0 0 0 * * *
+ *	|	hourly		// 0 0 * * * *
+ *	|	minutely	// 0 * * * * *
+ *	|	secondly	// * * * * * *
+ */
+enum CronConstant
+	:	secondly
+	|	minutely
+	|	hourly
+	|	daily
+	|	weekly
+	|	monthly
+	|	annually
+	|	yearly
+	;
+
+CronExpression
+	:	lsymbol = '«'
+			seconds 	= CronElement
+			minutes 	= CronElement
+			hours 		= CronElement
+			dayOfMonth 	= CronElement
+			month 		= CronElement
+			dayOfWeek 	= CronElement
+			(year 		= CronElement)?
+		rsymbol = '»'
+	| 	lsymbol = '«' 
+			constant = ID 
+		rsymbol = '»'
+	;
+
+CronElement
+   :    CronElementList | IncrementCronElement | NthCronElement
+   ;
+
+/*
+ * Options L and W of the Quartz scheduler are only supported
+ * in cases were they are found alone (by means of rule ValidID).
+ */ 
+CronElementList
+   :    elements += RangeCronElement (',' elements += RangeCronElement)*
+   ;
+
+IncrementCronElement
+	:	start = TerminalCronElement ('-' end = TerminalCronElement)? '/' increment = TerminalCronElement
+	;
+
+RangeCronElement
+   :    TerminalCronElement ({RangeCronElement.start = current} '-' end = TerminalCronElement)?
+   ;
+
+NthCronElement
+	:	element = TerminalCronElement '#' nth = TerminalCronElement
+	;
+
+TerminalCronElement
+   :    expression = (IntLiteral | ValidID | '*' | '?')
+   ;
+
+IntLiteral
+	:	INT
+	;
+
+XLiteral returns XExpression:
+	XCollectionLiteral |
+	XClosure |
+	XBooleanLiteral |
+	XNumberLiteral |
+	XNullLiteral |
+	XStringLiteral |
+	XTypeLiteral |
+	CronExpression
+;

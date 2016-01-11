@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Pascani Runtime Library
+Bundle-SymbolicName: org.pascani.dsl.lib
+Bundle-Version: 0.0.1.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.pascani.dsl.lib;version="0.0.1",
+ org.pascani.dsl.lib.events;version="0.0.1",
+ org.pascani.dsl.lib.infrastructure;version="0.0.1",
+ org.pascani.dsl.lib.infrastructure.rabbitmq;version="0.0.1",
+ org.pascani.dsl.lib.util;version="0.0.1",
+ org.pascani.dsl.lib.util.dsl;version="0.0.1",
+ org.ow2.scesame.qoscare.core.scaspec;version="0.0.1"
+Require-Bundle: com.google.guava;bundle-version="[18.0.0]";visibility:=reexport
+Bundle-Vendor: Universidad Icesi

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+ Copyright © 2015 Universidad Icesi
+ 
+ This file is part of the Pascani library.
+ 
+ The Pascani library is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or (at your
+ option) any later version.
+ 
+ The Pascani library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+ for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public License
+ along with The Pascani library. If not, see http://www.gnu.org/licenses/
+-->
+<templates>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.kw_package" deleted="false" description="Package declaration" enabled="true" id="package" name="Package">package ${name};</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.kw_monitor" deleted="false" description="New monitor declaration" enabled="true" id="monitor" name="Monitor">monitor ${Name} {
+	${cursor}
+}</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.kw_namespace" deleted="false" description="New namespace declaration" enabled="true" id="namespace" name="Namespace">namespace ${Name} {
+	${cursor}
+}</template>
+	<template context="org.pascani.dsl.Pascani.kw_handler" deleted="false" description="New handler declaration" enabled="true" id="handler" name="Handler">handler ${name}(${EventType} e) {
+	${cursor}
+}</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.kw_event" deleted="false" description="New event declaration" enabled="true" id="event" name="Event">event ${name} raised ${emitter};</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.kw_above" deleted="false" description="Above value specifier" enabled="true" id="above" name="Above">above ${value}${cursor}</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.kw_below" deleted="false" description="Below value specifier" enabled="true" id="below" name="Below">below ${value}${cursor}</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.kw_equal" deleted="false" description="Equal to value specifier" enabled="true" id="equal" name="Equal">equal to ${value}${cursor}</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.kw_using" deleted="false" description="Probe reference" enabled="true" id="using_probe" name="Using probe">using ${probe}${cursor}</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.EventEmitter" deleted="false" description="Event declaration based on variable emitter" enabled="true" id="variable_emitter" name="Variable emitter">on ${:Enum('EventType')} of ${emitter} using ${probe}</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.EventEmitter" deleted="false" description="Event declaration based on cron expression" enabled="true" id="chronological_expression_emitter" name="Chronological expression emitter">periodically on ${seconds} ${minutes} ${hours} ${dayOfMonth} ${month} ${dayOfWeek} ${years}</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.EventEmitter" deleted="false" description="Event declaration based on cron constant" enabled="true" id="chronological_constant_emitter" name="Chronological constant emitter">${:Enum('CronConstant')}</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.CronElement" deleted="false" description="Cron increment specifier" enabled="true" id="chronological_increment" name="Cron increment">${initial}/${increment}${cursor}</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.CronElement" deleted="false" description="Cron list specifier" enabled="true" id="chronological_list" name="Cron list">${value1},${value2}${cursor}</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.CronElement" deleted="false" description="Cron range specifier" enabled="true" id="chronological_range" name="Cron range">${start}-${end}${cursor}</template>
+	<template autoinsert="true" context="org.pascani.dsl.Pascani.CronElement" deleted="false" description="Cron nth expression specifier" enabled="true" id="chronological_nth" name="Cron nth">${value}#${nth}${cursor}</template>
+	
+	<!-- Common xtend templates -->
+	<template autoinsert="true" context="org.eclipse.xtext.xbase.Xbase.kw_val" deleted="false" description="Private constant declaration" enabled="true" id="constant_declaration" name="Constant">val ${type} ${name} = ${initializer};${cursor}</template>
+	<template autoinsert="true" context="org.eclipse.xtext.xbase.Xbase.kw_var" deleted="false" description="Private variable declaration" enabled="true" id="variable_declaration" name="Variable">var ${type} ${name} = ${initializer};${cursor}</template>
+	<template autoinsert="true" context="org.eclipse.xtext.xbase.Xbase.XExpression" deleted="false" description="Prints out throught standard output" enabled="true" id="syso" name="syso">System.out.println(${cursor});</template>
+	<template autoinsert="true" context="org.eclipse.xtext.xbase.Xbase.XExpression" deleted="false" description="Prints out throught standard error" enabled="true" id="syser" name="syser">System.err.println(${cursor});</template>
+</templates>
