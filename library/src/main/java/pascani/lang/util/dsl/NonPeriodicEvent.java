@@ -22,6 +22,7 @@ import com.google.common.base.Function;
 
 import pascani.lang.Event;
 import pascani.lang.events.ChangeEvent;
+import pascani.lang.infrastructure.AbstractConsumer;
 import pascani.lang.infrastructure.ProbeProxy;
 
 /**
@@ -40,6 +41,12 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 	 * @return A proxy pointing to the monitor probe producing this event
 	 */
 	public abstract ProbeProxy getProbe();
+	
+	/**
+	 * @return An event consumer consuming from the probes_exchange with the
+	 *         routing key assigned to this event
+	 */
+	public abstract AbstractConsumer getConsumer();
 
 	public Function<ChangeEvent, Boolean> getSpecifier() {
 		return new Function<ChangeEvent, Boolean>() {
@@ -65,6 +72,7 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 	@Override public synchronized void pause() {
 		if (isPaused())
 			return;
+		getConsumer().pause();
 		getProbe().pause();
 		super.pause();
 	}
@@ -77,6 +85,7 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 	@Override public synchronized void resume() {
 		if (!isPaused())
 			return;
+		getConsumer().resume();
 		getProbe().resume();
 		super.resume();
 	}

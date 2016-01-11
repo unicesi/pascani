@@ -366,7 +366,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						this.consumer«varSuffix» = new «typeRef(RabbitMQConsumer)»(
 							routingKey, consumerTag, «typeRef(Context)».«Context.MONITOR.toString») {
 							@Override public void delegateEventHandling(final Event<?> event) {
-								if (!isPaused() && event.getClass().equals(type«varSuffix»)) {
+								if (event.getClass().equals(type«varSuffix»)) {
 									«IF (eventTypeRefName.equals(ChangeEvent.canonicalName))»
 										String variable = routingKey + ".«getEmitterFQN(e.emitter.emitter).toList.reverseView.drop(1).join(".")»";
 										if (((«typeRef(ChangeEvent)») event).variable().equals(variable)
@@ -399,6 +399,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			members += e.emitter.toMethod("getProbe", typeRef(ProbeProxy)) [
 					annotations += annotationRef(Override)
 					body = '''return «IF(isChangeEvent)»null«ELSE»this.probe«varSuffix»«ENDIF»;'''
+			]
+			
+			members += e.emitter.toMethod("getConsumer", typeRef(AbstractConsumer)) [
+					annotations += annotationRef(Override)
+					body = '''return this.consumer«varSuffix»;'''
 			]
 
 			if (e.emitter.specifier != null) {
