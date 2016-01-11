@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 
 import pascani.lang.Event;
 import pascani.lang.util.LocalEventProducer;
+import pascani.lang.util.Resumable;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -42,7 +43,7 @@ import com.google.common.eventbus.Subscribe;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class AbstractProducer {
+public abstract class AbstractProducer implements Resumable {
 
 	/**
 	 * The list of event classes configured to be produced
@@ -53,6 +54,11 @@ public abstract class AbstractProducer {
 	 * The logger
 	 */
 	protected final Logger logger = LogManager.getLogger(getClass());
+	
+	/**
+	 * The variable representing the current state (stopped or not)
+	 */
+	private volatile boolean paused = false;
 
 	/**
 	 * Listens for {@link Event}s produced by {@link LocalEventProducer}
@@ -62,7 +68,7 @@ public abstract class AbstractProducer {
 	 *            The {@link LocalEventProducer}-produced {@link Event} object
 	 */
 	@Subscribe public final void produce(Event<?> event) {
-		if (isAcceptedEvent(event)) {
+		if (!isPaused() && isAcceptedEvent(event)) {
 			try {
 				publish(event);
 			} catch (Exception e) {
@@ -124,6 +130,33 @@ public abstract class AbstractProducer {
 		}
 
 		return accepted;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#pause()
+	 */
+	public void pause() {
+		this.paused = true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#resume()
+	 */
+	public void resume() {
+		this.paused = false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#isPaused()
+	 */
+	public boolean isPaused() {
+		return this.paused;
 	}
 
 }
