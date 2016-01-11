@@ -62,7 +62,6 @@ import pascani.lang.infrastructure.AbstractConsumer
 import pascani.lang.infrastructure.BasicNamespace
 import pascani.lang.infrastructure.NamespaceProxy
 import pascani.lang.infrastructure.ProbeProxy
-import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer
 import pascani.lang.util.dsl.EventObserver
 import pascani.lang.util.dsl.NonPeriodicEvent
 import pascani.lang.util.dsl.PeriodicEvent
@@ -357,30 +356,18 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			members += e.emitter.toMethod("initialize", typeRef(void)) [
 				visibility = JvmVisibility::PRIVATE
 				body = '''
+					final «typeRef(Context)» context = «typeRef(Context)».«Context.MONITOR.toString»;
 					final String routingKey = «routingKey.get(0)»;
 					final String consumerTag = "«monitor.fullyQualifiedName».«e.name»";
+					«IF (isChangeEvent)»
+						final String variable = routingKey + ".«getEmitterFQN(e.emitter.emitter).toList.reverseView.drop(1).join(".")»";
+					«ENDIF»
 					try {
-						«IF(!isChangeEvent)»
-							this.probe«varSuffix» = new «ProbeProxy»(routingKey);
+						«IF (!isChangeEvent)»
+							this.probe«varSuffix» = new «typeRef(ProbeProxy)»(routingKey);
 						«ENDIF»
-						this.consumer«varSuffix» = new «typeRef(RabbitMQConsumer)»(
-							routingKey, consumerTag, «typeRef(Context)».«Context.MONITOR.toString») {
-							@Override public void delegateEventHandling(final Event<?> event) {
-								if (event.getClass().equals(type«varSuffix»)) {
-									«IF (eventTypeRefName.equals(ChangeEvent.canonicalName))»
-										String variable = routingKey + ".«getEmitterFQN(e.emitter.emitter).toList.reverseView.drop(1).join(".")»";
-										if (((«typeRef(ChangeEvent)») event).variable().equals(variable)
-											&& getSpecifier().apply((«typeRef(ChangeEvent)») event)) {
-											setChanged();
-											notifyObservers(event);
-										}
-									«ELSE»
-										setChanged();
-										notifyObservers(event);
-									«ENDIF»
-								}
-							}
-						};
+						this.consumer«varSuffix» = initializeConsumer(context, routingKey, consumerTag«IF (isChangeEvent)», variable«ENDIF»);
+						this.consumer«varSuffix».start();
 					} catch(Exception e) {
 						e.printStackTrace();
 					}

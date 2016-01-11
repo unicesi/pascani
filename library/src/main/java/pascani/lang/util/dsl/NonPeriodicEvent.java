@@ -21,9 +21,12 @@ package pascani.lang.util.dsl;
 import com.google.common.base.Function;
 
 import pascani.lang.Event;
+import pascani.lang.PascaniRuntime;
+import pascani.lang.PascaniRuntime.Context;
 import pascani.lang.events.ChangeEvent;
 import pascani.lang.infrastructure.AbstractConsumer;
 import pascani.lang.infrastructure.ProbeProxy;
+import pascani.lang.infrastructure.rabbitmq.RabbitMQConsumer;
 
 /**
  * <b>Note</b>: DSL-only intended use
@@ -62,6 +65,36 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 
 	public void unsubscribe(final EventObserver<T> eventObserver) {
 		deleteObserver(eventObserver);
+	}
+	
+	protected AbstractConsumer initializeConsumer(final Context context,
+			final String routingKey, String consumerTag) throws Exception {
+		return initializeConsumer(context, routingKey, consumerTag, null);
+	}
+
+	protected AbstractConsumer initializeConsumer(final Context context,
+			final String routingKey, final String consumerTag,
+			final String variableName) throws Exception {
+		String exchange = getType().equals(ChangeEvent.class)
+				? PascaniRuntime.getEnvironment().get("namespaces_exchange")
+				: PascaniRuntime.getEnvironment().get("probes_exchange");
+		return new RabbitMQConsumer(exchange, routingKey, consumerTag,
+				context) {
+			@Override public void delegateEventHandling(final Event<?> event) {
+				if (event.getClass().equals(getType())) {
+					boolean notify = true;
+					if (getType().equals(ChangeEvent.class)) {
+						ChangeEvent changeEvent = (ChangeEvent) event;
+						notify = changeEvent.variable().equals(variableName)
+								&& getSpecifier().apply(changeEvent);
+					}
+					if (notify) {
+						setChanged();
+						notifyObservers(event);
+					}
+				}
+			}
+		};
 	}
 
 	/*
