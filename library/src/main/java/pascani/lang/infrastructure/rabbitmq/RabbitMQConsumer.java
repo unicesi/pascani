@@ -142,9 +142,13 @@ public class RabbitMQConsumer extends AbstractConsumer implements Consumer {
 		this.eventProducer = new LocalEventProducer<Event<?>>(context);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.infrastructure.AbstractConsumer#startConsuming()
+	 */
 	@Override protected void startConsuming() {
 		Channel channel = this.endPoint.channel();
-
 		try {
 			// start consuming (non auto-acknowledged) messages
 			channel.basicConsume(this.queueName, false, this.consumerTag, this);
@@ -153,10 +157,23 @@ public class RabbitMQConsumer extends AbstractConsumer implements Consumer {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.infrastructure.AbstractConsumer#delegateEventHandling(
+	 * pascani.lang.Event)
+	 */
 	@Override public void delegateEventHandling(final Event<?> event) {
 		this.eventProducer.post(event);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.rabbitmq.client.Consumer#handleDelivery(java.lang.String,
+	 * com.rabbitmq.client.Envelope, com.rabbitmq.client.AMQP.BasicProperties,
+	 * byte[])
+	 */
 	public void handleDelivery(final String consumerTag,
 			final Envelope envelope, final BasicProperties props,
 			final byte[] body) throws IOException {
@@ -168,32 +185,63 @@ public class RabbitMQConsumer extends AbstractConsumer implements Consumer {
 		this.endPoint.channel().basicAck(envelope.getDeliveryTag(), false);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.rabbitmq.client.Consumer#handleConsumeOk(java.lang.String)
+	 */
 	public void handleConsumeOk(final String consumerTag) {
 		logger.info("The RabbitMQ consumer " + consumerTag
 				+ " has started successfully");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.rabbitmq.client.Consumer#handleCancelOk(java.lang.String)
+	 */
 	public void handleCancelOk(final String consumerTag) {
 		logger.info("The RabbitMQ consumer " + consumerTag
 				+ " has been canceled");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.rabbitmq.client.Consumer#handleCancel(java.lang.String)
+	 */
 	public void handleCancel(final String consumerTag) throws IOException {
 		logger.warn("The RabbitMQ consumer " + consumerTag
 				+ " has been canceled by unknown reasons");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.rabbitmq.client.Consumer#handleShutdownSignal(java.lang.String,
+	 * com.rabbitmq.client.ShutdownSignalException)
+	 */
 	public void handleShutdownSignal(final String consumerTag,
 			ShutdownSignalException sig) {
 		logger.info("A channel or the connection of the RabbitMQ consumer "
 				+ consumerTag + " has been shut down");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.rabbitmq.client.Consumer#handleRecoverOk(java.lang.String)
+	 */
 	public void handleRecoverOk(final String consumerTag) {
 		logger.info("The connection for the RabbitMQ consumer " + consumerTag
 				+ " has been recovered successfully");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.infrastructure.AbstractConsumer#shutdown()
+	 */
 	@Override public void shutdown() throws IOException, TimeoutException {
 		this.endPoint.close();
 	}
