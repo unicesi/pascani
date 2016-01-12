@@ -35,13 +35,12 @@ import org.jboss.forge.roaster.model.source.ParameterSource;
 import org.jboss.forge.roaster.model.util.Types;
 import org.pascani.dsl.lib.PascaniRuntime;
 import org.pascani.dsl.lib.PascaniRuntime.Context;
+import org.pascani.dsl.lib.compiler.templates.NetworkLatencyTemplates;
 import org.pascani.dsl.lib.compiler.util.NameProposal;
 import org.pascani.dsl.lib.events.NetworkLatencyEvent;
 import org.pascani.dsl.lib.infrastructure.AbstractProducer;
 import org.pascani.dsl.lib.infrastructure.ExternalProbe;
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQProducer;
-
-import org.pascani.dsl.lib.compiler.templates.NetworkLatencyTemplates;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;

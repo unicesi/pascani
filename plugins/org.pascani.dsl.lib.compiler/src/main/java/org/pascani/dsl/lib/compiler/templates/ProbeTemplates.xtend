@@ -20,9 +20,9 @@ package org.pascani.dsl.lib.compiler.templates
 
 import com.google.common.collect.Lists
 import java.util.List
-import org.pascani.dsl.lib.compiler.util.NameProposal
 import org.pascani.dsl.lib.Event
 import org.pascani.dsl.lib.PascaniRuntime
+import org.pascani.dsl.lib.compiler.util.NameProposal
 import org.pascani.dsl.lib.events.ExceptionEvent
 import org.pascani.dsl.lib.events.InvokeEvent
 import org.pascani.dsl.lib.events.ReturnEvent

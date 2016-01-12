@@ -21,8 +21,8 @@ package org.pascani.dsl.lib.compiler.templates
 import com.google.common.base.Joiner
 import java.util.Collection
 import java.util.List
-import org.pascani.dsl.lib.compiler.util.NameProposal
 import org.pascani.dsl.lib.PascaniRuntime.Context
+import org.pascani.dsl.lib.compiler.util.NameProposal
 import org.pascani.dsl.lib.events.NetworkLatencyEvent
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQProducer
 

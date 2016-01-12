@@ -31,14 +31,13 @@ import org.ow2.frascati.tinfi.api.IntentHandler;
 import org.ow2.frascati.tinfi.api.IntentJoinPoint;
 import org.pascani.dsl.lib.Event;
 import org.pascani.dsl.lib.PascaniRuntime;
+import org.pascani.dsl.lib.compiler.templates.ProbeTemplates;
 import org.pascani.dsl.lib.compiler.util.NameProposal;
 import org.pascani.dsl.lib.events.ExceptionEvent;
 import org.pascani.dsl.lib.events.InvokeEvent;
 import org.pascani.dsl.lib.events.ReturnEvent;
 import org.pascani.dsl.lib.events.TimeLapseEvent;
 import org.pascani.dsl.lib.util.LocalEventProducer;
-
-import org.pascani.dsl.lib.compiler.templates.ProbeTemplates;
 
 /**
  * This class generates the necessary source code to automatically raise

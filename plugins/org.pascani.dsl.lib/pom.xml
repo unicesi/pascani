@@ -25,7 +25,7 @@
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>../../maven/org.pascani.tycho.parent</relativePath>
 	</parent>
-	<packaging>bundle</packaging>
+	<packaging>eclipse-plugin</packaging>
 	
 	<artifactId>org.pascani.dsl.lib</artifactId>
 	<name>Pascani Runtime Library</name>
@@ -110,44 +110,20 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Export-Package>
-							org.pascani.dsl.lib,
-							org.pascani.dsl.lib.events,
-							org.pascani.dsl.lib.infrastructure,
-							org.pascani.dsl.lib.infrastructure.rabbitmq,
-							org.pascani.dsl.lib.util,
-							org.pascani.dsl.lib.util.dsl,
-							org.ow2.scesame.qoscare.core.scaspec
-						</Export-Package>
-						<Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-						<!--
-						<Private-Package></Private-Package>
-						<Bundle-Activator></Bundle-Activator>
-						-->
-					</instructions>
-				</configuration>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>bundle-manifest</id>
-						<phase>process-classes</phase>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
 						<goals>
-							<goal>manifest</goal>
+							<goal>copy-dependencies</goal>
 						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/dependencies</outputDirectory>
+						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-					</archive>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -28,15 +28,9 @@
 	<packaging>eclipse-plugin</packaging>
 	
 	<artifactId>org.pascani.dsl.lib.compiler</artifactId>
-	<name>Pascani compiler library</name>
-	<description>Class library containing the classes and utilities implementing the translation model</description>
+	<name>Pascani Compiler Library</name>
 	
 	<dependencies>
-		<dependency>
-			<groupId>org.pascani</groupId>
-			<artifactId>org.pascani.dsl.lib</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
 		<dependency>
 			<groupId>org.jboss.forge.roaster</groupId>
 			<artifactId>roaster-api</artifactId>
@@ -72,6 +66,11 @@
 			<artifactId>sca-api</artifactId>
 			<version>1.1.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.pascani</groupId>
+			<artifactId>org.pascani.dsl.lib</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -93,48 +92,19 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
+				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<configuration>
-			            	<additionalparam>-Xdoclint:none</additionalparam>
-			            </configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<executions>
-					<execution>
+						<id>copy-dependencies</id>
 						<phase>package</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>copy-dependencies</goal>
 						</goals>
+						<configuration>
+							<outputDirectory>${basedir}/dependencies</outputDirectory>
+						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<finalName>${project.artifactId}-${project.version}-dependencies</finalName>
-        			<appendAssemblyId>false</appendAssemblyId>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

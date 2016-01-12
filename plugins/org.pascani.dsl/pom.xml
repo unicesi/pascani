@@ -127,6 +127,7 @@
 						</fileset>
 						<fileset>
 							<directory>${basedir}/../org.pascani.dsl.web/src-gen/</directory>
+							<!-- <directory>${basedir}/../../web/org.pascani.dsl.web/src-gen/</directory> -->
 							<includes>
 								<include>**/*</include>
 							</includes>
@@ -169,10 +170,12 @@
 		</pluginManagement>
 	</build>
 	<dependencies>
+		<!-- This is required only for allowing the org.pascani.dsl to
+			be used as a Maven jar with the xtext-maven-plugin  -->
 		<dependency>
-			<groupId>org.pascani</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>org.pascani.dsl.lib</artifactId>
-			<version>[${project.version}]</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>

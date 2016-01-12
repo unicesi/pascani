@@ -24,8 +24,6 @@ package org.ow2.scesame.qoscare.core.scaspec;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.ow2.scesame.qoscare.core.scaspec.SCANamedNode;
-
 /**
  * This class is a REST resource used to represent an SCA component/composite.
  */

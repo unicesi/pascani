@@ -25,14 +25,13 @@ import org.jboss.forge.roaster.Roaster;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
 import org.jboss.forge.roaster.model.source.MethodSource;
 import org.pascani.dsl.lib.Event;
-import org.pascani.dsl.lib.Probe;
 import org.pascani.dsl.lib.PascaniRuntime.Context;
+import org.pascani.dsl.lib.Probe;
+import org.pascani.dsl.lib.compiler.templates.InterceptorBasedProbeTemplates;
+import org.pascani.dsl.lib.compiler.templates.ProbeTemplates;
 import org.pascani.dsl.lib.compiler.util.NameProposal;
 import org.pascani.dsl.lib.events.ExceptionEvent;
 import org.pascani.dsl.lib.infrastructure.LocalProbe;
-
-import org.pascani.dsl.lib.compiler.templates.InterceptorBasedProbeTemplates;
-import org.pascani.dsl.lib.compiler.templates.ProbeTemplates;
 
 /**
  * 
