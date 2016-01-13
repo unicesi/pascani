@@ -23,7 +23,7 @@
 		<groupId>org.pascani</groupId>
 		<artifactId>org.pascani.tycho.parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath>../../maven/org.pascani.tycho.parent</relativePath>
+		<relativePath>../../maven/org.pascani.tycho.parent/pom.xml</relativePath>
 	</parent>
 	
 	<artifactId>org.pascani.dsl.lib.compiler</artifactId>
