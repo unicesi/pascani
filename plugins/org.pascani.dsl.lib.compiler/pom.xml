@@ -25,7 +25,6 @@
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>../../maven/org.pascani.tycho.parent</relativePath>
 	</parent>
-	<packaging>eclipse-plugin</packaging>
 	
 	<artifactId>org.pascani.dsl.lib.compiler</artifactId>
 	<name>Pascani Compiler Library</name>
@@ -67,9 +66,9 @@
 			<version>1.1.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.pascani</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>org.pascani.dsl.lib</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 	<build>
@@ -92,6 +91,51 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+			            	<additionalparam>-Xdoclint:none</additionalparam>
+			            </configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<finalName>${project.artifactId}-${project.version}-dependencies</finalName>
+        			<appendAssemblyId>false</appendAssemblyId>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
@@ -101,7 +145,7 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${basedir}/dependencies</outputDirectory>
+							<outputDirectory>${project.build.directory}/dependencies</outputDirectory>
 						</configuration>
 					</execution>
 				</executions>

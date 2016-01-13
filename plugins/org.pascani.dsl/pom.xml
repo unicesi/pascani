@@ -170,8 +170,6 @@
 		</pluginManagement>
 	</build>
 	<dependencies>
-		<!-- This is required only for allowing the org.pascani.dsl to
-			be used as a Maven jar with the xtext-maven-plugin  -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>org.pascani.dsl.lib</artifactId>
