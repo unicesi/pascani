@@ -106,6 +106,17 @@
     		<version>1.4</version>
 		</dependency>
 	</dependencies>
+	<profiles>
+		<profile>
+			<id>doclint-java8-disable</id>
+			<activation>
+				<jdk>[1.8,)</jdk>
+			</activation>
+			<properties>
+				<javadoc.opts>-Xdoclint:none</javadoc.opts>
+			</properties>
+		</profile>
+	</profiles>
 	<build>
 		<plugins>
 			<plugin>
@@ -130,8 +141,8 @@
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-			            	<additionalparam>-Xdoclint:none</additionalparam>
-			            </configuration>
+            				<additionalparam>${javadoc.opts}</additionalparam>
+          				</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -153,7 +164,7 @@
         			<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
 			</plugin>
-			<plugin>
+			<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
@@ -168,7 +179,7 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
+			</plugin>-->
 		</plugins>
 	</build>
 </project>
