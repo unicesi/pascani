@@ -88,6 +88,7 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 	 * @param acceptedTypes
 	 *            The array of classes implementing {@link Event}
 	 */
+	@SuppressWarnings("unchecked")
 	public void acceptOnly(final Class<? extends Event<?>>... acceptedTypes) {
 		this.acceptedTypes = acceptedTypes;
 	}
