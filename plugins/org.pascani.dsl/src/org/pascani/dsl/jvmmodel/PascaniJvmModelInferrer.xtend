@@ -194,12 +194,18 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			methods += monitor.toMethod("pause", typeRef(void)) [
 				body = [
 					append(events.join("\n", [e|e + ".pause();"]))
+					if (!events.isEmpty)
+						append("\n");
+					append("super.pause();")
 				]
 			]
 
 			methods += monitor.toMethod("resume", typeRef(void)) [
 				body = [
 					append(events.join("\n", [e|e + ".resume();"]))
+					if (!events.isEmpty)
+						append("\n");
+					append("super.resume();")
 				]
 			]
 			

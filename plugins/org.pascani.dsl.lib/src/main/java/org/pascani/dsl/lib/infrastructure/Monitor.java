@@ -25,8 +25,31 @@ import org.pascani.dsl.lib.util.Resumable;
  */
 public abstract class Monitor implements Resumable {
 
-	protected volatile boolean paused;
+	private volatile boolean paused = false;
 	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.pascani.dsl.lib.util.Resumable#pause()
+	 */
+	public void pause() {
+		this.paused = true;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.pascani.dsl.lib.util.Resumable#resume()
+	 */
+	public void resume() {
+		this.paused = false;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.pascani.dsl.lib.util.Resumable#isPaused()
+	 */
 	public boolean isPaused() {
 		return this.paused;
 	}
