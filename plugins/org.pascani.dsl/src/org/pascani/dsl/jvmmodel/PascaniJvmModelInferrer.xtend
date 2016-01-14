@@ -40,6 +40,16 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.pascani.dsl.compiler.PascaniCompiler
+import org.pascani.dsl.lib.PascaniRuntime.Context
+import org.pascani.dsl.lib.events.ChangeEvent
+import org.pascani.dsl.lib.events.IntervalEvent
+import org.pascani.dsl.lib.infrastructure.AbstractConsumer
+import org.pascani.dsl.lib.infrastructure.BasicNamespace
+import org.pascani.dsl.lib.infrastructure.NamespaceProxy
+import org.pascani.dsl.lib.infrastructure.ProbeProxy
+import org.pascani.dsl.lib.util.dsl.EventObserver
+import org.pascani.dsl.lib.util.dsl.NonPeriodicEvent
+import org.pascani.dsl.lib.util.dsl.PeriodicEvent
 import org.pascani.dsl.outputconfiguration.OutputConfigurationAdapter
 import org.pascani.dsl.outputconfiguration.PascaniOutputConfigurationProvider
 import org.pascani.dsl.pascani.Event
@@ -55,16 +65,6 @@ import org.quartz.Job
 import org.quartz.JobDataMap
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
-import org.pascani.dsl.lib.PascaniRuntime.Context
-import org.pascani.dsl.lib.events.ChangeEvent
-import org.pascani.dsl.lib.events.IntervalEvent
-import org.pascani.dsl.lib.infrastructure.AbstractConsumer
-import org.pascani.dsl.lib.infrastructure.BasicNamespace
-import org.pascani.dsl.lib.infrastructure.NamespaceProxy
-import org.pascani.dsl.lib.infrastructure.ProbeProxy
-import org.pascani.dsl.lib.util.dsl.EventObserver
-import org.pascani.dsl.lib.util.dsl.NonPeriodicEvent
-import org.pascani.dsl.lib.util.dsl.PeriodicEvent
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -327,7 +327,15 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 
 	def JvmGenericType createNonPeriodicClass(Event e, Monitor monitor, String eventTypeRefName) {
 		e.toClass(monitor.fullyQualifiedName + "_" + e.name) [
-			val varSuffix = System.nanoTime()
+			val suffix = System.nanoTime
+			val names = #{
+				"probe" -> "probe" + suffix, 
+				"type" -> "type" + suffix, 
+				"emitter" -> "emitter" + suffix,
+				"consumer" -> "consumer" + suffix,
+				"Specifier" -> "Specifier_" + e.name,
+				"changeEvent" -> "changeEvent" + suffix
+			}
 			val specifierTypeRef = typeRef(Function, typeRef(ChangeEvent), typeRef(Boolean))
 			val eventTypeRef = typeRef(Class, wildcardExtends(typeRef(org.pascani.dsl.lib.Event, wildcard())))
 			val isChangeEvent = e.emitter.eventType.equals(EventType.CHANGE)
@@ -338,21 +346,21 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			visibility = JvmVisibility::PRIVATE
 			superTypes += typeRef(NonPeriodicEvent, typeRef(eventTypeRefName))
 			
-			members += e.emitter.toField("type" + varSuffix, eventTypeRef) [
+			members += e.emitter.toField(names.get("type"), eventTypeRef) [
 				initializer = '''«typeRef(eventTypeRefName)».class'''
 			]
 			
-			members += e.emitter.toField("emitter" + varSuffix, e.emitter.emitter.inferredType) [
+			members += e.emitter.toField(names.get("emitter"), e.emitter.emitter.inferredType) [
 				initializer = e.emitter.emitter
 			]
 			
-			members += e.toField("consumer" + varSuffix, typeRef(AbstractConsumer))
+			members += e.toField(names.get("consumer"), typeRef(AbstractConsumer))
 
 			if (isChangeEvent) {
 				routingKey += monitor.name + "." + getEmitterFQN(e.emitter.emitter).last + ".getClass().getCanonicalName()"
 			} else {
 				routingKey += "\"" + monitor.fullyQualifiedName + "." + e.name + "\""
-				members += e.emitter.toField("probe" + varSuffix, typeRef(ProbeProxy))
+				members += e.emitter.toField(names.get("probe"), typeRef(ProbeProxy))
 			}
 			
 			members += e.toConstructor[
@@ -372,10 +380,10 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					«ENDIF»
 					try {
 						«IF (!isChangeEvent)»
-							this.probe«varSuffix» = new «typeRef(ProbeProxy)»(routingKey);
+							this.«names.get("probe")» = new «typeRef(ProbeProxy)»(routingKey);
 						«ENDIF»
-						this.consumer«varSuffix» = initializeConsumer(context, routingKey, consumerTag«IF (isChangeEvent)», variable«ENDIF»);
-						this.consumer«varSuffix».start();
+						this.«names.get("consumer")» = initializeConsumer(context, routingKey, consumerTag«IF (isChangeEvent)», variable«ENDIF»);
+						this.«names.get("consumer")».start();
 					} catch(Exception e) {
 						e.printStackTrace();
 					}
@@ -383,41 +391,41 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			]
 			members += e.emitter.toMethod("getType", eventTypeRef) [
 				annotations += annotationRef(Override)
-				body = '''return this.type«varSuffix»;'''
+				body = '''return this.«names.get("type")»;'''
 			]
 			
 			members += e.emitter.toMethod("getEmitter", typeRef(Object)) [
 				annotations += annotationRef(Override)
-				body = '''return this.emitter«varSuffix»;'''
+				body = '''return this.«names.get("emitter")»;'''
 			]
 			
 			members += e.emitter.toMethod("getProbe", typeRef(ProbeProxy)) [
 					annotations += annotationRef(Override)
-					body = '''return «IF(isChangeEvent)»null«ELSE»this.probe«varSuffix»«ENDIF»;'''
+					body = '''return «IF(isChangeEvent)»null«ELSE»this.«names.get("probe")»«ENDIF»;'''
 			]
 			
 			members += e.emitter.toMethod("getConsumer", typeRef(AbstractConsumer)) [
 					annotations += annotationRef(Override)
-					body = '''return this.consumer«varSuffix»;'''
+					body = '''return this.«names.get("consumer")»;'''
 			]
 
 			if (e.emitter.specifier != null) {
-				members += e.emitter.specifier.toClass("Specifier" + varSuffix) [
+				members += e.emitter.specifier.toClass(names.get("Specifier")) [
 					val fields = new ArrayList<JvmMember>
 					val code = new ArrayList
 					
 					if (e.emitter.specifier instanceof RelationalEventSpecifier)
-						code.add(parseSpecifier("changeEvent" + varSuffix,
+						code.add(parseSpecifier(names.get("changeEvent"),
 								e.emitter.specifier as RelationalEventSpecifier, fields))
 					else
-						code.add(parseSpecifier("changeEvent" + varSuffix, e.emitter.specifier, fields))
+						code.add(parseSpecifier(names.get("changeEvent"), e.emitter.specifier, fields))
 
 					superTypes += specifierTypeRef
 					
 					members += fields
 					
 					members += e.emitter.specifier.toMethod("apply", typeRef(Boolean)) [
-						parameters += e.emitter.specifier.toParameter("changeEvent" + varSuffix, typeRef(ChangeEvent))
+						parameters += e.emitter.specifier.toParameter(names.get("changeEvent"), typeRef(ChangeEvent))
 						body = '''return «code.get(0)»;'''
 					]
 					
@@ -429,7 +437,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				
 				members += e.emitter.specifier.toMethod("getSpecifier", specifierTypeRef) [
 					annotations += annotationRef(Override)
-					body = '''return new Specifier«varSuffix»();'''
+					body = '''return new «names.get("Specifier")»();'''
 				]
 			}
 		]
