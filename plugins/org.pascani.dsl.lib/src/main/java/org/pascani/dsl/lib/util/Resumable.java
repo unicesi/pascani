@@ -21,6 +21,7 @@ package org.pascani.dsl.lib.util;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 import org.osoa.sca.annotations.Service;
 import org.pascani.dsl.lib.Probe;
@@ -35,20 +36,21 @@ import org.pascani.dsl.lib.infrastructure.Namespace;
  * @author Miguel Jiménez - Initial contribution and API
  */
 @Service
+@Path("/resumable")
 public interface Resumable {
 
 	/**
 	 * Temporarily stops the regular behavior of this object
 	 */
 	@POST
-	@Path("/pause")
+	@Path("/pause/")
 	public void pause();
 
 	/**
 	 * Resumes the regular behavior of this object
 	 */
 	@POST
-	@Path("/resume")
+	@Path("/resume/")
 	public void resume();
 
 	/**
@@ -57,8 +59,8 @@ public interface Resumable {
 	 *         {@code false} in the opposite case.
 	 */
 	@POST
-	@Path("/paused")
-	@Produces("text/plain")
+	@Path("/paused/")
+	@Produces({MediaType.TEXT_PLAIN})
 	public boolean isPaused();
 
 }

@@ -33,7 +33,7 @@
 	<component name="probe">
 		<service name="resumable">
 			<interface.java interface="org.pascani.dsl.lib.util.Resumable" />
-			<frascati:binding.rest uri="http://localhost:1935/resumable"/>
+			<frascati:binding.rest uri="http://localhost:1935"/>
 		</service>
 		<implementation.java class="org.pascani.dsl.lib.util.sca.ReturnProbeImpl" />
 	</component>
