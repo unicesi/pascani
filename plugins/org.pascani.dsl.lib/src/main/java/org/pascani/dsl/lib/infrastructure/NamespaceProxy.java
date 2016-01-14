@@ -25,6 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.pascani.dsl.lib.PascaniRuntime;
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQRpcClient;
+import org.pascani.dsl.lib.util.SerializationUtils6;
 
 public class NamespaceProxy implements Namespace {
 
@@ -96,7 +97,7 @@ public class NamespaceProxy implements Namespace {
 				RpcOperation.NAMESPACE_GET_VARIABLE, variable);
 
 		byte[] response = makeActualCall(request, null);
-		return SerializationUtils.deserialize(response);
+		return (Serializable) SerializationUtils6.deserialize(response);
 	}
 
 	/*
@@ -141,7 +142,7 @@ public class NamespaceProxy implements Namespace {
 	public boolean isPaused() {
 		RpcRequest request = new RpcRequest(RpcOperation.PAUSE);
 		byte[] response = makeActualCall(request, false);
-		return SerializationUtils.deserialize(response);
+		return (Boolean) SerializationUtils6.deserialize(response);
 	}
 
 	/**

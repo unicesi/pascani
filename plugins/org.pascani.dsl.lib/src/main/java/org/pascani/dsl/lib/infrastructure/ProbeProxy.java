@@ -29,6 +29,7 @@ import org.pascani.dsl.lib.Event;
 import org.pascani.dsl.lib.PascaniRuntime;
 import org.pascani.dsl.lib.Probe;
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQRpcClient;
+import org.pascani.dsl.lib.util.SerializationUtils6;
 
 /**
  * An implementation of {@link Probe} that makes communication transparent for
@@ -113,7 +114,7 @@ public class ProbeProxy implements Probe {
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_CLEAN, start,
 				end, new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, false);
-		return SerializationUtils.deserialize(response);
+		return (Boolean) SerializationUtils6.deserialize(response);
 	}
 
 	public int count(final long start, final long end) {
@@ -131,7 +132,7 @@ public class ProbeProxy implements Probe {
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_COUNT, start,
 				end, new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, 0);
-		return SerializationUtils.deserialize(response);
+		return (Integer) SerializationUtils6.deserialize(response);
 	}
 
 	public int countAndClean(final long start, final long end) {
@@ -151,7 +152,7 @@ public class ProbeProxy implements Probe {
 				start, end,
 				new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, 0);
-		return SerializationUtils.deserialize(response);
+		return (Integer) SerializationUtils6.deserialize(response);
 	}
 
 	public List<Event<?>> fetch(final long start, final long end) {
@@ -163,13 +164,14 @@ public class ProbeProxy implements Probe {
 	 * 
 	 * @see pascani.lang.Probe#fetch(long, long, java.util.List)
 	 */
+	@SuppressWarnings("unchecked")
 	public List<Event<?>> fetch(final long start, final long end,
 			final List<Class<? extends Event<?>>> eventTypes) {
 
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_FETCH, start,
 				end, new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, new ArrayList<Event<?>>());
-		return SerializationUtils.deserialize(response);
+		return (List<Event<?>>) SerializationUtils6.deserialize(response);
 	}
 
 	public List<Event<?>> fetchAndClean(final long start, final long end) {
@@ -182,6 +184,7 @@ public class ProbeProxy implements Probe {
 	 * 
 	 * @see pascani.lang.Probe#fetchAndClean(long, long, java.util.List)
 	 */
+	@SuppressWarnings("unchecked")
 	public List<Event<?>> fetchAndClean(final long start, final long end,
 			final List<Class<? extends Event<?>>> eventTypes) {
 
@@ -189,7 +192,7 @@ public class ProbeProxy implements Probe {
 				start, end,
 				new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, new ArrayList<Event<?>>());
-		return SerializationUtils.deserialize(response);
+		return (List<Event<?>>) SerializationUtils6.deserialize(response);
 	}
 	
 	/*
@@ -220,7 +223,7 @@ public class ProbeProxy implements Probe {
 	public boolean isPaused() {
 		RpcRequest request = new RpcRequest(RpcOperation.IS_PAUSED);
 		byte[] response = makeActualCall(request, false);
-		return SerializationUtils.deserialize(response);
+		return (Boolean) SerializationUtils6.deserialize(response);
 	}
 	
 	/**

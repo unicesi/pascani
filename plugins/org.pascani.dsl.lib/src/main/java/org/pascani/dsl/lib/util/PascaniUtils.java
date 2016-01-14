@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.script.ScriptException;
 
+import org.pascani.dsl.lib.Probe;
 import org.pascani.dsl.lib.events.ExceptionEvent;
 import org.pascani.dsl.lib.events.InvokeEvent;
 import org.pascani.dsl.lib.events.ReturnEvent;
@@ -37,34 +38,50 @@ import com.google.common.io.Resources;
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class PascaniUtils {
-	
+
 	public static boolean contributionDeployed = false;
-	
+
 	/**
-	 * Introduces a new monitor probe, and returns a proxy pointing to it. The
-	 * probe created manages events of type {@link ExceptionEvent}.
+	 * Introduces a new SCA intent, and returns a proxy pointing to the
+	 * corresponding {@link Probe}. The probe created manages events of type
+	 * {@link TimeLapseEvent}, {@link InvokeEvent}, {@link ExceptionEvent},
+	 * {@link ReturnEvent}.
 	 * 
 	 * @param target
 	 *            A FPath selector
-	 * @return a {@link ProbeProxy} instance pointing to an exception probe
-	 * @throws ScriptException
-	 *             if something bad happens. See
-	 *             {@link FrascatiUtils#eval(String)}
+	 * @return a {@link ProbeProxy} instance pointing to the introduced
+	 *         {@link Probe} or {@code null} if something bad happens while
+	 *         deploying the SCA contribution or evaluating the FScript
+	 *         commands.
 	 */
-	public static ProbeProxy probe(String target) throws ScriptException {
+	public static ProbeProxy probe(String target) {
 		if (!contributionDeployed) {
-			File zipfile = new File(Resources.getResource("probes.zip").getFile());
-			contributionDeployed = FrascatiUtils.deploy("probes")
+			File zipfile = new File(
+					Resources.getResource("intents.zip").getFile());
+			contributionDeployed = FrascatiUtils.deploy("intents")
 					.withContribution(zipfile).deploy();
 		}
-		if (contributionDeployed) {
+		boolean fscriptOk = false;
+		try {
+			// TODO: register these commands as one procedure in the FraSCAti
+			// runtime
 			eval("target = " + target + (target.endsWith(";") ? "" : ";"));
-			eval("intent = $domain/scachild::probe;");
+			eval("intent = $domain/scachild::pascani-all-events-intent;");
 			eval("add-scaintent($target, $intent);");
-			return createProbeProxy(target);
-		} else {
-			return null;
+			eval("routingKey = $intent/scaproperty::routingKey;");
+			eval("resetProbe = $intent/scaproperty::resetProbe;");
+			eval("set-value($routingKey, " + target + ")");
+			eval("set-value($resetProbe, true)");
+			fscriptOk = true;
+		} catch (ScriptException e) {
+			// TODO: handle the exception
+			e.printStackTrace();
 		}
+
+		if (contributionDeployed && fscriptOk)
+			return createProbeProxy(target);
+		else
+			return null;
 	}
 
 	/**
@@ -99,7 +116,7 @@ public class PascaniUtils {
 		 */
 		return null;
 	}
-	
+
 	private static ProbeProxy createProbeProxy(String routingKey) {
 		try {
 			return new ProbeProxy(routingKey);

@@ -29,6 +29,11 @@
 	<artifactId>org.pascani.dsl.lib</artifactId>
 	<name>Pascani Runtime Library</name>
 	
+	<properties>
+		<maven.compiler.source>1.6</maven.compiler.source>
+  		<maven.compiler.target>1.6</maven.compiler.target>
+	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -128,6 +133,15 @@
 	</profiles>
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
