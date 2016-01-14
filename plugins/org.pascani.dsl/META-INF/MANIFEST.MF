@@ -32,5 +32,5 @@ Export-Package: org.pascani.dsl.pascani.util,
  org.pascani.dsl.pascani.util
 Import-Package: org.apache.log4j
 Bundle-ClassPath: .,
- org.pascani.dsl.lib-0.0.1-SNAPSHOT-dependencies.jar;visibility:=reexport,
- org.pascani.dsl.lib.compiler-0.0.1-SNAPSHOT.jar;visibility:=reexport
+ org.pascani.dsl.lib-0.0.1-SNAPSHOT-dependencies.jar,
+ org.pascani.dsl.lib.compiler-0.0.1-SNAPSHOT.jar

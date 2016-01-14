@@ -99,6 +99,15 @@
 			<groupId>org.ow2.frascati</groupId>
 			<artifactId>frascati-introspection-impl</artifactId>
 			<version>1.4</version>
+			<exclusions>
+				<!-- Avoids problem when running org.pascani.dsl.web (org.eclipse.emf.ecore.util.Switch's 
+					signer information does not match signer information of other classes in 
+					the same package) -->
+				<exclusion>
+					<groupId>org.eclipse.emf</groupId>
+					<artifactId>ecore</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.frascati.mojo</groupId>
