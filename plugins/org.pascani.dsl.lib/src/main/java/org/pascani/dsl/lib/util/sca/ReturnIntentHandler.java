@@ -16,46 +16,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.lib.util.dsl;
+package org.pascani.dsl.lib.util.sca;
 
-import java.util.Observable;
+import java.util.UUID;
 
-import org.pascani.dsl.lib.util.Resumable;
+import org.ow2.frascati.tinfi.api.IntentJoinPoint;
+import org.pascani.dsl.lib.events.ReturnEvent;
 
 /**
- * <b>Note</b>: DSL-only intended use
- * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class ManagedEvent extends Observable implements Resumable {
+public class ReturnIntentHandler extends AbstractIntentHandler {
 
-	private volatile boolean paused = false;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see pascani.lang.util.Resumable#pause()
-	 */
-	public void pause() {
-		this.paused = true;
+	public ReturnIntentHandler() {
+		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see pascani.lang.util.Resumable#resume()
-	 */
-	public void resume() {
-		this.paused = false;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see pascani.lang.util.Resumable#isPaused()
-	 */
-	public boolean isPaused() {
-		return this.paused;
+	public Object invoke(IntentJoinPoint ijp) throws Throwable {
+		UUID transactionId = UUID.randomUUID();
+		Object _return = ijp.proceed();
+		ReturnEvent returnEvent = new ReturnEvent(transactionId,
+				ijp.getMethod().getDeclaringClass(), ijp.getMethod().getName(),
+				ijp.getMethod().getParameterTypes(), _return);
+		super.producer.post(returnEvent);
+		return _return;
 	}
 
 }

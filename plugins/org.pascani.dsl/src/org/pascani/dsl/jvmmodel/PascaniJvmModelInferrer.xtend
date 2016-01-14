@@ -47,9 +47,9 @@ import org.pascani.dsl.lib.infrastructure.AbstractConsumer
 import org.pascani.dsl.lib.infrastructure.BasicNamespace
 import org.pascani.dsl.lib.infrastructure.NamespaceProxy
 import org.pascani.dsl.lib.infrastructure.ProbeProxy
-import org.pascani.dsl.lib.util.dsl.EventObserver
-import org.pascani.dsl.lib.util.dsl.NonPeriodicEvent
-import org.pascani.dsl.lib.util.dsl.PeriodicEvent
+import org.pascani.dsl.lib.util.events.EventObserver
+import org.pascani.dsl.lib.util.events.NonPeriodicEvent
+import org.pascani.dsl.lib.util.events.PeriodicEvent
 import org.pascani.dsl.outputconfiguration.OutputConfigurationAdapter
 import org.pascani.dsl.outputconfiguration.PascaniOutputConfigurationProvider
 import org.pascani.dsl.pascani.Event

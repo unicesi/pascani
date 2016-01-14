@@ -16,9 +16,14 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.lib.util.dsl;
+package org.pascani.dsl.lib.util;
 
+import static org.pascani.dsl.lib.util.FrascatiUtils.eval;
+
+import java.io.File;
 import java.util.Map;
+
+import javax.script.ScriptException;
 
 import org.pascani.dsl.lib.events.ExceptionEvent;
 import org.pascani.dsl.lib.events.InvokeEvent;
@@ -26,23 +31,40 @@ import org.pascani.dsl.lib.events.ReturnEvent;
 import org.pascani.dsl.lib.events.TimeLapseEvent;
 import org.pascani.dsl.lib.infrastructure.ProbeProxy;
 
+import com.google.common.io.Resources;
+
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class PascaniUtils {
 	
+	public static boolean contributionDeployed = false;
+	
 	/**
-	 * <b>Note</b>: DSL-only intended use
-	 * <p>
 	 * Introduces a new monitor probe, and returns a proxy pointing to it. The
 	 * probe created manages events of type {@link ExceptionEvent}.
 	 * 
-	 * @param uniqueName
-	 *            A unique name representing the monitor probe
+	 * @param target
+	 *            A FPath selector
 	 * @return a {@link ProbeProxy} instance pointing to an exception probe
+	 * @throws ScriptException
+	 *             if something bad happens. See
+	 *             {@link FrascatiUtils#eval(String)}
 	 */
-	public static ProbeProxy newExceptionProbe(String uniqueName) {
-		return createProbeProxy(uniqueName);
+	public static ProbeProxy probe(String target) throws ScriptException {
+		if (!contributionDeployed) {
+			File zipfile = new File(Resources.getResource("probes.zip").getFile());
+			contributionDeployed = FrascatiUtils.deploy("probes")
+					.withContribution(zipfile).deploy();
+		}
+		if (contributionDeployed) {
+			eval("target = " + target + (target.endsWith(";") ? "" : ";"));
+			eval("intent = $domain/scachild::probe;");
+			eval("add-scaintent($target, $intent);");
+			return createProbeProxy(target);
+		} else {
+			return null;
+		}
 	}
 
 	/**

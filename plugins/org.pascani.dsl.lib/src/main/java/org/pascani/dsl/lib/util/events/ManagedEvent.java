@@ -16,19 +16,46 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.lib.util.dsl;
+package org.pascani.dsl.lib.util.events;
 
-import java.util.Observer;
+import java.util.Observable;
 
-import org.pascani.dsl.lib.Event;
+import org.pascani.dsl.lib.util.Resumable;
 
 /**
  * <b>Note</b>: DSL-only intended use
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class EventObserver<T extends Event<?>> implements Observer {
-	
-	public abstract void execute(T e);
-	
+public abstract class ManagedEvent extends Observable implements Resumable {
+
+	private volatile boolean paused = false;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#pause()
+	 */
+	public void pause() {
+		this.paused = true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#resume()
+	 */
+	public void resume() {
+		this.paused = false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see pascani.lang.util.Resumable#isPaused()
+	 */
+	public boolean isPaused() {
+		return this.paused;
+	}
+
 }
