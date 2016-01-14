@@ -55,6 +55,8 @@ public class FrascatiUtils {
 		private final Collection<File> jars = new ArrayList<File>();
 		private final Collection<String> deployables = new ArrayList<String>();
 		private final String contributionName;
+		private File contribution;
+		private String base64;
 
 		public DeploymentBuilder(String contributionName) {
 			this.contributionName = contributionName;
@@ -71,6 +73,16 @@ public class FrascatiUtils {
 				deployables.add(composite);
 			return this;
 		}
+		
+		public DeploymentBuilder withContribution(File zipFile) {
+			this.contribution = zipFile;
+			return this;
+		}
+		
+		public DeploymentBuilder withContribution(String base64) {
+			this.base64 = base64;
+			return this;
+		}
 
 		public boolean deploy() {
 			return deploy(DEFAULT_BINDING_URI);
@@ -78,15 +90,18 @@ public class FrascatiUtils {
 
 		public boolean deploy(URI bindingUri) {
 			Deployment instance = getDeploymentInstance(bindingUri);
-			File workingDir = new File("./target");
-			File contribFile = ContributionUtil.makeContribution(jars,
-					deployables, contributionName, workingDir);
-			String base64 = null;
-			try {
-				base64 = FileUtil.getStringFromFile(contribFile);
-			} catch (IOException e) {
-				// TODO: log the exception
-				e.printStackTrace();
+			if (this.contribution == null && this.base64 == null) {
+				File workingDir = new File("./target");
+				this.contribution = ContributionUtil.makeContribution(jars,
+						deployables, contributionName, workingDir);
+			}
+			if (this.base64 == null) {
+				try {
+					this.base64 = FileUtil.getStringFromFile(this.contribution);
+				} catch (IOException e) {
+					// TODO: log the exception
+					e.printStackTrace();
+				}
 			}
 			return instance.deploy(base64) == 0;
 		}
