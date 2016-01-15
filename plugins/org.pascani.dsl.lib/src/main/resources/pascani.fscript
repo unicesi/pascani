@@ -1,0 +1,43 @@
+action add-probe(parent, target, intentName, routingKey, startProbe, startProducer) {
+	pascani = $domain/scachild::"org.pascani.PaSCAni";
+	
+	-- 1. Add the intent as a child of the parent component
+	intent = $pascani/scachild::$intentName;
+	add-scachild($parent, $intent);
+
+	-- 2. Change the name of the component to be the routing key
+	set-name($parent/scachild::$intentName, $routingKey);
+	intent = $parent/scachild::$routingKey;
+
+	-- 3. Add the REST binding to the Resumable interface, and then add the SCA intent
+	add-scaintent($target, $intent);
+	
+	-- 4. Configure the routing key, start the probe and the producer (if needed)
+	if ($startProbe) {
+		reset-probe($parent, $routingKey);
+	}
+
+	if ($startProducer) {
+		reset-producer($parent, $routingKey);
+	}
+}
+
+action reset-probe(parent, routingKey) {
+	intent = $parent/scachild::$routingKey;
+	routingKeyProp = $intent/scachild::probe/scaproperty::routingKey;
+	resetProbeProp = $intent/scachild::probe/scaproperty::resetProbe;
+
+	-- Sets the routing key and the resets the probe
+	set-value($routingKeyProp, $routingKey);
+	set-value($resetProbeProp, true);
+}
+
+action reset-producer(parent, routingKey) {
+	intent = $parent/scachild::$routingKey;
+	routingKeyProp = $intent/scachild::probe/scaproperty::routingKey;
+	resetProducerProp = $intent/scachild::probe/scaproperty::resetProducer;
+
+	-- Sets the routing key and the resets the producer
+	set-value($routingKeyProp, $routingKey);
+	set-value($resetProducerProp, true);
+}
