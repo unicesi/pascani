@@ -51,7 +51,6 @@ public abstract class AbstractProbeImpl implements Resumable {
 
 	private volatile boolean paused = false;
 
-	@SuppressWarnings("unchecked")
 	public AbstractProbeImpl(final Class<? extends Event<?>>... acceptedTypes) {
 		this.acceptedTypes = acceptedTypes;
 		this.exchange = PascaniRuntime.getEnvironment().get("probes_exchange");

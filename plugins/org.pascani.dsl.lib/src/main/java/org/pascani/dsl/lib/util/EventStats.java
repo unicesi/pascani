@@ -40,7 +40,6 @@ public final class EventStats {
 		this.events = events;
 	}
 
-	@SuppressWarnings("unchecked")
 	public EventStats(Event<? extends Number>... events) {
 		this(Lists.newArrayList(events));
 	}
