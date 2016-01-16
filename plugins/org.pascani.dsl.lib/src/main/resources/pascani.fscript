@@ -1,43 +1,50 @@
-action add-probe(parent, target, intentName, routingKey, startProbe, startProducer) {
-	pascani = $domain/scachild::"org.pascani.PaSCAni";
-	
-	-- 1. Add the intent as a child of the parent component
-	intent = $pascani/scachild::$intentName;
-	add-scachild($parent, $intent);
-
-	-- 2. Change the name of the component to be the routing key
-	set-name($parent/scachild::$intentName, $routingKey);
-	intent = $parent/scachild::$routingKey;
-
-	-- 3. Add the REST binding to the Resumable interface, and then add the SCA intent
-	add-scaintent($target, $intent);
-	
-	-- 4. Configure the routing key, start the probe and the producer (if needed)
-	if ($startProbe) {
-		reset-probe($parent, $routingKey);
-	}
-
-	if ($startProducer) {
-		reset-producer($parent, $routingKey);
-	}
+function pascani-element-exists(selector) {
+	return size($selector) > 0;
 }
 
-action reset-probe(parent, routingKey) {
-	intent = $parent/scachild::$routingKey;
-	routingKeyProp = $intent/scachild::probe/scaproperty::routingKey;
-	resetProbeProp = $intent/scachild::probe/scaproperty::resetProbe;
+action pascani-add-intent(parent, target, intentName, routingKey) {
+	-- 1. Create a new instance of the intent composite
+	clone = sca-new($intentName);
+	
+	-- 2. Add the intent instance as a child of the target's parent
+	add-scachild($parent, $clone);
+	intent = $parent/scachild::$intentName;
 
-	-- Sets the routing key and the resets the probe
+	-- 3. Change the name of the intent component to be the routing key
+	set-name($intent, $routingKey);
+	intent = $parent/scachild::$routingKey;
+	
+	-- 4. Sets the routing key
+	routingKeyProp = $intent/scachild::probe/scaproperty::routingKey;
 	set-value($routingKeyProp, $routingKey);
+
+	-- 5. Add the REST binding to the Resumable interface, and then add the SCA intent
+	add-scaintent($target, $intent);
+	
+	-- 6. Clean things up
+	sca-remove($intentName); 
+	set-state($intent, "STARTED");
+	set-state($parent, "STARTED");
+}
+
+action pascani-remove-intent(parent, target, routingKey) {
+	intent = $parent/scachild::$routingKey;
+	remove-scaintent($target, $intent);
+	set-state($intent, "STOPPED");
+	set-state($parent, "STOPPED");
+	-- TODO: remove all SCA services? (intent)
+	remove-scachild($parent, $intent);
+	set-state($parent, "STARTED");
+}
+
+action pascani-reset-probe(parent, routingKey) {
+	intent = $parent/scachild::$routingKey;
+	resetProbeProp = $intent/scachild::probe/scaproperty::resetProbe;
 	set-value($resetProbeProp, true);
 }
 
-action reset-producer(parent, routingKey) {
+action pascani-reset-producer(parent, routingKey) {
 	intent = $parent/scachild::$routingKey;
-	routingKeyProp = $intent/scachild::probe/scaproperty::routingKey;
 	resetProducerProp = $intent/scachild::probe/scaproperty::resetProducer;
-
-	-- Sets the routing key and the resets the producer
-	set-value($routingKeyProp, $routingKey);
 	set-value($resetProducerProp, true);
 }
