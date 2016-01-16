@@ -36,10 +36,10 @@ public abstract class AbstractProbeImpl implements Resumable {
 	protected String routingKey = null;
 
 	@Property
-	protected boolean resetProbe = false;
+	protected Boolean resetProbe = false;
 
 	@Property
-	protected boolean resetProducer = false;
+	protected Boolean resetProducer = false;
 
 	protected String exchange;
 
@@ -126,14 +126,14 @@ public abstract class AbstractProbeImpl implements Resumable {
 		this.routingKey = routingKey;
 	}
 
-	public void setResetProbe(final boolean resetProbe) {
+	public void setResetProbe(final Boolean resetProbe) {
 		this.resetProbe = resetProbe;
 		if (this.resetProbe) {
 			resetProbe();
 		}
 	}
 
-	public void setResetProducer(final boolean resetProducer) {
+	public void setResetProducer(final Boolean resetProducer) {
 		this.resetProducer = resetProducer;
 		if (this.resetProducer) {
 			resetProducer();
