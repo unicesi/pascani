@@ -28,11 +28,15 @@ action pascani-add-intent(parent, target, intentName, routingKey) {
 }
 
 action pascani-remove-intent(parent, target, routingKey) {
+	-- 1. Remove the SCA intent
 	intent = $parent/scachild::$routingKey;
 	remove-scaintent($target, $intent);
+	
 	set-state($intent, "STOPPED");
 	set-state($parent, "STOPPED");
 	-- TODO: remove all SCA services? (intent)
+	
+	-- 2. Remove the intent component from the target's parent
 	remove-scachild($parent, $intent);
 	set-state($parent, "STARTED");
 }
