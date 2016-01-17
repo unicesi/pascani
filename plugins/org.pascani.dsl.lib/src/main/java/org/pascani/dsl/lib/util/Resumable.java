@@ -18,7 +18,8 @@
  */
 package org.pascani.dsl.lib.util;
 
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -42,14 +43,14 @@ public interface Resumable {
 	/**
 	 * Temporarily stops the regular behavior of this object
 	 */
-	@POST
+	@PUT
 	@Path("/pause/")
 	public void pause();
 
 	/**
 	 * Resumes the regular behavior of this object
 	 */
-	@POST
+	@PUT
 	@Path("/resume/")
 	public void resume();
 
@@ -58,7 +59,7 @@ public interface Resumable {
 	 * @return {@code true} in case this object is in stopped state, or
 	 *         {@code false} in the opposite case.
 	 */
-	@POST
+	@GET
 	@Path("/paused/")
 	@Produces({MediaType.TEXT_PLAIN})
 	public boolean isPaused();
