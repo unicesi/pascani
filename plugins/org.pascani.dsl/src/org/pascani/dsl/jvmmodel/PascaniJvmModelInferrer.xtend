@@ -68,6 +68,7 @@ import org.quartz.Job
 import org.quartz.JobDataMap
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
+import org.osoa.sca.annotations.Scope
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -171,7 +172,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			// utility variables
 			var nblocks = 0
 			val events = new ArrayList
-			
+
+			/*
+			 * More information on the Scope annotation: http://mail-archive.ow2.org/frascati/2011-02/msg00001.html
+			 */
+			annotations += annotationRef(Scope, "COMPOSITE")
 			superTypes += typeRef(org.pascani.dsl.lib.infrastructure.Monitor)
 			
 			for (e : monitor.body.expressions) {
@@ -529,6 +534,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		val namespaceImpl = namespace.toClass(namespace.fullyQualifiedName + "Namespace") [
 			if (!isPreIndexingPhase) {
 				val List<XVariableDeclaration> declarations = getVariableDeclarations(namespace)
+				
+				/*
+				 * More information on the Scope annotation: http://mail-archive.ow2.org/frascati/2011-02/msg00001.html
+				 */
+				annotations += annotationRef(Scope, "COMPOSITE")
 				superTypes += typeRef(BasicNamespace)
 
 				for (decl : declarations) {
