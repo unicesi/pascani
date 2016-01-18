@@ -29,7 +29,9 @@ import java.util.UUID
 import org.eclipse.xtext.common.types.JvmGenericType
 import org.eclipse.xtext.common.types.JvmMember
 import org.eclipse.xtext.common.types.JvmOperation
+import org.eclipse.xtext.common.types.JvmTypeReference
 import org.eclipse.xtext.common.types.JvmVisibility
+import org.eclipse.xtext.common.types.TypesFactory
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
 import org.eclipse.xtext.xbase.XBlockExpression
@@ -50,6 +52,7 @@ import org.pascani.dsl.lib.infrastructure.ProbeProxy
 import org.pascani.dsl.lib.util.events.EventObserver
 import org.pascani.dsl.lib.util.events.NonPeriodicEvent
 import org.pascani.dsl.lib.util.events.PeriodicEvent
+import org.pascani.dsl.lib.util.sca.MonitorEventsService
 import org.pascani.dsl.outputconfiguration.OutputConfigurationAdapter
 import org.pascani.dsl.outputconfiguration.PascaniOutputConfigurationProvider
 import org.pascani.dsl.pascani.Event
@@ -65,7 +68,6 @@ import org.quartz.Job
 import org.quartz.JobDataMap
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
-import org.eclipse.xtext.common.types.JvmTypeReference
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -78,10 +80,84 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	@Inject extension JvmTypesBuilder
 	
 	@Inject extension IQualifiedNameProvider
-
+	
 	@Inject PascaniCompiler compiler
 
 	def dispatch void infer(Monitor monitor, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
+		monitor.createClass(isPreIndexingPhase, acceptor)
+		monitor.createEventsInterface(isPreIndexingPhase, acceptor)
+	}
+
+	def dispatch void infer(Namespace namespace, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
+		namespace.createProxy(isPreIndexingPhase, acceptor, true)
+		namespace.createClass(isPreIndexingPhase, acceptor)
+	}
+	
+	def void createEventsInterface(Monitor monitor, boolean isPreIndexingPhase, IJvmDeclaredTypeAcceptor acceptor) {
+		val interfaceName = monitor.fullyQualifiedName + "EventsService"
+		val ^interface = monitor.toInterface(interfaceName) [
+			if (!isPreIndexingPhase) {
+				superTypes += typeRef(MonitorEventsService)
+				val nestedType = monitor.toClass("Internal") [
+					val T = TypesFactory.eINSTANCE.createJvmTypeParameter => [
+						name = "T"
+					]
+				 	typeParameters += T
+					members += monitor.toField("eventName", typeRef(String)) [
+						^final = true
+					]
+					members += monitor.toConstructor [
+						parameters += monitor.toParameter("eventName", typeRef(String))
+						body = '''this.eventName = eventName;'''
+					]
+					members += monitor.toMethod("toString", typeRef(String)) [
+						annotations += annotationRef(Override)
+						body = '''return this.eventName;'''
+					]
+				]
+				
+				members += nestedType
+
+				for (event : monitor.body.expressions.filter(Event)) {
+					val fieldType = typeRef(nestedType, event.emitter.eventType.toEventType)
+					members += monitor.toField(event.name, fieldType) [
+						visibility = JvmVisibility::PUBLIC
+						initializer = '''new «fieldType»("«event.name»")'''
+					]
+				}
+				members += monitor.toMethod("subscribe", typeRef(void)) [
+					val eventType = TypesFactory.eINSTANCE.createJvmTypeParameter => [
+						name = "E"
+						constraints += TypesFactory.eINSTANCE.createJvmUpperBound => [
+							typeReference = typeRef(org.pascani.dsl.lib.Event, wildcard)
+						]
+					]
+					^abstract = true
+					typeParameters += eventType
+					parameters += monitor.toParameter("event", typeRef(nestedType, typeRef(eventType)))
+					parameters += monitor.toParameter("observer", typeRef(EventObserver, typeRef(eventType)))
+				]
+				members += monitor.toMethod("subscribe", typeRef(void)) [
+					^abstract = true
+					parameters += monitor.toParameter("event", typeRef(nestedType, typeRef(IntervalEvent)))
+					parameters += monitor.toParameter("observer", typeRef(Class, wildcardExtends(typeRef(Job))))
+				]
+				members += monitor.toMethod("updateCronExpression", typeRef(void)) [
+					^abstract = true
+					parameters += monitor.toParameter("event", typeRef(nestedType, typeRef(IntervalEvent)))
+					parameters += monitor.toParameter("cronExpression", typeRef(String))
+				]
+			}
+		]
+		^interface.eAdapters.add(new OutputConfigurationAdapter(PascaniOutputConfigurationProvider::PASCANI_OUTPUT))
+		acceptor.accept(^interface)
+	}
+	
+	def JvmTypeReference toEventType(EventType type) {
+		return typeRef("org.pascani.dsl.lib.events." + type.toString.toLowerCase.toFirstUpper + "Event")
+	}
+	
+	def void createClass(Monitor monitor, boolean isPreIndexingPhase, IJvmDeclaredTypeAcceptor acceptor) {
 		val monitorImpl = monitor.toClass(monitor.fullyQualifiedName)
 		monitorImpl.eAdapters.add(new OutputConfigurationAdapter(PascaniOutputConfigurationProvider::PASCANI_OUTPUT))
 		monitorImpl.eAdapters.add(new OutputConfigurationAdapter(PascaniOutputConfigurationProvider::SCA_OUTPUT))
@@ -226,11 +302,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			members += methods
 			members += nestedTypes
 		]
-	}
-
-	def dispatch void infer(Namespace namespace, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
-		namespace.createProxy(isPreIndexingPhase, acceptor, true)
-		namespace.createClass(isPreIndexingPhase, acceptor)
 	}
 
 	def String parseSpecifier(String changeEvent, RelationalEventSpecifier specifier, List<JvmMember> members) {

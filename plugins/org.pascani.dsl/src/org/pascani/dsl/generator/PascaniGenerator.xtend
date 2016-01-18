@@ -29,9 +29,16 @@ class PascaniGenerator implements IGenerator {
 						Monitor: {
 							val component = new SCAComponent(declaration.name)
 							val child = new SCAComponent("monitor", declaration.fullyQualifiedName.lastSegment)
+							
+							// Resumable service
 							val resumable = new SCAPort("resumable")
 							resumable.implement = new SCAInterface("resumable", Resumable.canonicalName)
-							child.services += resumable
+							
+							// Events service
+							val events = new SCAPort("events")
+							events.implement = new SCAInterface("events", declaration.fullyQualifiedName + "EventsService")
+							
+							child.services += #[resumable, events]
 							component.children += child
 
 							val contents = ScaCompositeTemplates.parseComponent(component)
