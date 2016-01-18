@@ -65,6 +65,7 @@ import org.quartz.Job
 import org.quartz.JobDataMap
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
+import org.eclipse.xtext.common.types.JvmTypeReference
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -123,10 +124,10 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 					
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
-						val eventTypeRefName = '''org.pascani.dsl.lib.events.«e.emitter.eventType.toString.toLowerCase.toFirstUpper»Event'''
-						val innerClass = e.createNonPeriodicClass(monitor, eventTypeRefName)
+						val eventTypeRef = e.emitter.eventType.toEventType
+						val innerClass = e.createNonPeriodicClass(monitor, eventTypeRef)
 						nestedTypes += innerClass
-						fields += e.toField(e.name, typeRef(NonPeriodicEvent, typeRef(eventTypeRefName))) [
+						fields += e.toField(e.name, typeRef(NonPeriodicEvent, eventTypeRef)) [
 							^final = true
 							^static = true
 							visibility = JvmVisibility::PUBLIC
@@ -325,7 +326,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		]
 	}
 
-	def JvmGenericType createNonPeriodicClass(Event e, Monitor monitor, String eventTypeRefName) {
+	def JvmGenericType createNonPeriodicClass(Event e, Monitor monitor, JvmTypeReference eventTypeRef) {
 		e.toClass(monitor.fullyQualifiedName + "_" + e.name) [
 			val suffix = System.nanoTime
 			val names = #{
@@ -337,17 +338,17 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				"changeEvent" -> "changeEvent" + suffix
 			}
 			val specifierTypeRef = typeRef(Function, typeRef(ChangeEvent), typeRef(Boolean))
-			val eventTypeRef = typeRef(Class, wildcardExtends(typeRef(org.pascani.dsl.lib.Event, wildcard())))
+			val eventClassRef = typeRef(Class, wildcardExtends(typeRef(org.pascani.dsl.lib.Event, wildcard())))
 			val isChangeEvent = e.emitter.eventType.equals(EventType.CHANGE)
 			val routingKey = new ArrayList
 			
 			documentation = e.documentation
 			^static = true
 			visibility = JvmVisibility::PRIVATE
-			superTypes += typeRef(NonPeriodicEvent, typeRef(eventTypeRefName))
+			superTypes += typeRef(NonPeriodicEvent, eventTypeRef)
 			
-			members += e.emitter.toField(names.get("type"), eventTypeRef) [
-				initializer = '''«typeRef(eventTypeRefName)».class'''
+			members += e.emitter.toField(names.get("type"), typeRef(Class, eventTypeRef)) [
+				initializer = '''«eventTypeRef».class'''
 			]
 			
 			members += e.emitter.toField(names.get("emitter"), e.emitter.emitter.inferredType) [
@@ -389,7 +390,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 				'''
 			]
-			members += e.emitter.toMethod("getType", eventTypeRef) [
+			members += e.emitter.toMethod("getType", eventClassRef) [
 				annotations += annotationRef(Override)
 				body = '''return this.«names.get("type")»;'''
 			]
