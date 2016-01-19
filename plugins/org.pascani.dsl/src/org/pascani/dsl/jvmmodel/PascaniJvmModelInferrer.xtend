@@ -559,9 +559,8 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				]
 			}
 		]
-		namespaceImpl.eAdapters.add(new OutputConfigurationAdapter(
-			PascaniOutputConfigurationProvider::PASCANI_OUTPUT
-		))
+		namespaceImpl.eAdapters.add(new OutputConfigurationAdapter(PascaniOutputConfigurationProvider::PASCANI_OUTPUT))
+		namespaceImpl.eAdapters.add(new OutputConfigurationAdapter(PascaniOutputConfigurationProvider::SCA_OUTPUT))
 		acceptor.accept(namespaceImpl)
 		return namespaceImpl
 	}

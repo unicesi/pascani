@@ -47,7 +47,13 @@ class PascaniGenerator implements IGenerator {
 						}
 						
 						Namespace: {
+							val component = new SCAComponent(declaration.name)
+							val child = new SCAComponent("namespace", declaration.fullyQualifiedName.segments.join("."))
+							component.children += child
 							
+							val contents = ScaCompositeTemplates.parseComponent(component)
+							fsa.generateFile(declaration.fullyQualifiedName.segments.join(File.separator) + ".composite",
+								PascaniOutputConfigurationProvider::SCA_OUTPUT, contents)
 						}
 					}
 				}
