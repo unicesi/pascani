@@ -28,7 +28,7 @@ class PascaniGenerator implements IGenerator {
 					switch (declaration) {
 						Monitor: {
 							val component = new SCAComponent(declaration.name)
-							val child = new SCAComponent("monitor", declaration.fullyQualifiedName.lastSegment)
+							val child = new SCAComponent("monitor", declaration.fullyQualifiedName.segments.join("."))
 							
 							// Resumable service
 							val resumable = new SCAPort("resumable")
