@@ -23,9 +23,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
 import org.osoa.sca.annotations.Service;
-import org.pascani.dsl.lib.Event;
-import org.pascani.dsl.lib.util.events.EventObserver;
-import org.quartz.Job;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -34,26 +31,7 @@ import org.quartz.Job;
 @Path("/events")
 public interface MonitorEventsService {
 
-	/**
-	 * Subscribes the given observer to the specified event
-	 * 
-	 * @param eventName
-	 *            The name of the event
-	 * @param eventObserver
-	 *            An instance of {@link EventObserver}
-	 */
-	public <T extends Event<?>> void subscribe(String eventName,
-			EventObserver<T> eventObserver);
-
-	/**
-	 * Subscribes the given {@link Job} class to the specified periodic event
-	 * 
-	 * @param eventName
-	 *            The name of the periodic event
-	 * @param jobClass
-	 *            A class to handle the occurrence of the periodic event
-	 */
-	public void subscribe(String eventName, Class<? extends Job> jobClass);
+	public void subscribe(String monitorName, String eventName);
 
 	/**
 	 * Updates the chronological expression of a periodic event

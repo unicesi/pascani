@@ -15,6 +15,7 @@ import org.pascani.dsl.lib.util.Resumable
 import org.pascani.dsl.outputconfiguration.PascaniOutputConfigurationProvider
 import org.pascani.dsl.lib.compiler.templates.ScaCompositeTemplates
 import java.io.File
+import org.pascani.dsl.lib.util.sca.MonitorEventsService
 
 class PascaniGenerator implements IGenerator {
 	
@@ -36,7 +37,7 @@ class PascaniGenerator implements IGenerator {
 							
 							// Events service
 							val events = new SCAPort("events")
-							events.implement = new SCAInterface("events", declaration.fullyQualifiedName + "EventsService")
+							events.implement = new SCAInterface("events", MonitorEventsService.canonicalName)
 							
 							child.services += #[resumable, events]
 							component.children += child
