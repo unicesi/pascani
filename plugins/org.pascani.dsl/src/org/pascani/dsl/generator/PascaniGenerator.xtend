@@ -16,15 +16,23 @@ import org.pascani.dsl.outputconfiguration.PascaniOutputConfigurationProvider
 import org.pascani.dsl.lib.compiler.templates.ScaCompositeTemplates
 import java.io.File
 import org.pascani.dsl.lib.util.sca.MonitorEventsService
+import org.ow2.scesame.qoscare.core.scaspec.SCABinding
+import org.ow2.scesame.qoscare.core.scaspec.SCAAttribute
 
 class PascaniGenerator implements IGenerator {
 	
 	@Inject extension IQualifiedNameProvider
 	
+	/**
+	 * The port from which service ports are assigned
+	 */
+	static val port = newArrayList(9000)
+	
 	override doGenerate(Resource resource, IFileSystemAccess fsa) {
-		resource.allContents.forEach [element|
+		resource.allContents.forEach [ element |
 			switch (element) {
 				Model: {
+					var _port = port.get(0)
 					val declaration = element.typeDeclaration
 					switch (declaration) {
 						Monitor: {
@@ -34,10 +42,16 @@ class PascaniGenerator implements IGenerator {
 							// Resumable service
 							val resumable = new SCAPort("resumable")
 							resumable.implement = new SCAInterface("resumable", Resumable.canonicalName)
+							resumable.bindings +=
+								new SCABinding(SCABinding.Kind.REST,
+									newArrayList(new SCAAttribute("uri", "http://localhost:" + _port++)))
 							
 							// Events service
 							val events = new SCAPort("events")
 							events.implement = new SCAInterface("events", MonitorEventsService.canonicalName)
+							events.bindings +=
+								new SCABinding(SCABinding.Kind.REST,
+									newArrayList(new SCAAttribute("uri", "http://localhost:" + _port++)))
 							
 							child.services += #[resumable, events]
 							component.children += child
@@ -57,6 +71,7 @@ class PascaniGenerator implements IGenerator {
 								PascaniOutputConfigurationProvider::SCA_OUTPUT, contents)
 						}
 					}
+					port.set(0, _port)
 				}
 			}
 		]
