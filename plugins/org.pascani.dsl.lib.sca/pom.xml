@@ -79,6 +79,11 @@
     		<artifactId>frascati-contribution-plugin</artifactId>
     		<version>${frascatiVersion}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.ow2.frascati</groupId>
+			<artifactId>frascati-explorer-core</artifactId>
+			<version>${frascatiVersion}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
