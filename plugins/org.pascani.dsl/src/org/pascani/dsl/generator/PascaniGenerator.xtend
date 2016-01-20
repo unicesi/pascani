@@ -64,6 +64,15 @@ class PascaniGenerator implements IGenerator {
 						Namespace: {
 							val component = new SCAComponent(declaration.name)
 							val child = new SCAComponent("namespace", declaration.fullyQualifiedName.segments.join("."))
+							
+							// Resumable service
+							val resumable = new SCAPort("resumable")
+							resumable.implement = new SCAInterface("resumable", Resumable.canonicalName)
+							resumable.bindings +=
+								new SCABinding(SCABinding.Kind.REST,
+									newArrayList(new SCAAttribute("uri", "http://localhost:" + _port++)))
+							
+							child.services += resumable
 							component.children += child
 							
 							val contents = ScaCompositeTemplates.parseComponent(component)
