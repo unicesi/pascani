@@ -18,15 +18,35 @@
  */
 package org.pascani.dsl.lib.infrastructure;
 
+import java.security.InvalidParameterException;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.pascani.dsl.lib.util.Resumable;
+import org.pascani.dsl.lib.util.events.PeriodicEvent;
+import org.pascani.dsl.lib.util.sca.MonitorEventsService;
+import org.quartz.CronExpression;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class Monitor implements Resumable {
+public abstract class Monitor implements Resumable, MonitorEventsService {
 
+	/**
+	 * The variable representing the current state (stopped or not)
+	 */
 	private volatile boolean paused = false;
 	
+	/**
+	 * The map containing the declared periodic events
+	 */
+	protected final Map<String, PeriodicEvent> periodicEvents;
+	
+	public Monitor() {
+		this.periodicEvents = new HashMap<String, PeriodicEvent>();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -35,7 +55,7 @@ public abstract class Monitor implements Resumable {
 	public void pause() {
 		this.paused = true;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -44,7 +64,7 @@ public abstract class Monitor implements Resumable {
 	public void resume() {
 		this.paused = false;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -52,6 +72,21 @@ public abstract class Monitor implements Resumable {
 	 */
 	public boolean isPaused() {
 		return this.paused;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.pascani.dsl.lib.util.sca.MonitorEventsService#updateCronExpression(
+	 * java.lang.String, java.lang.String)
+	 */
+	public void updateCronExpression(String eventName, String cronExpression)
+			throws ParseException {
+		PeriodicEvent event = this.periodicEvents.get(eventName);
+		if (event == null)
+			throw new InvalidParameterException("The specified event does not exists");
+		event.updateExpression(new CronExpression(cronExpression));
 	}
 
 }
