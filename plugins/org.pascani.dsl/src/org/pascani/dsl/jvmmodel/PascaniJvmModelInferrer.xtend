@@ -40,7 +40,6 @@ import org.eclipse.xtext.xbase.compiler.output.FakeTreeAppendable
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import org.osoa.sca.annotations.Reference
 import org.osoa.sca.annotations.Scope
 import org.pascani.dsl.compiler.PascaniCompiler
 import org.pascani.dsl.lib.PascaniRuntime.Context
@@ -50,6 +49,7 @@ import org.pascani.dsl.lib.infrastructure.AbstractConsumer
 import org.pascani.dsl.lib.infrastructure.BasicNamespace
 import org.pascani.dsl.lib.infrastructure.NamespaceProxy
 import org.pascani.dsl.lib.infrastructure.ProbeProxy
+import org.pascani.dsl.lib.util.PascaniUtils
 import org.pascani.dsl.lib.util.events.EventObserver
 import org.pascani.dsl.lib.util.events.NonPeriodicEvent
 import org.pascani.dsl.lib.util.events.PeriodicEvent
@@ -115,6 +115,22 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			annotations += annotationRef(Scope, "COMPOSITE")
 			superTypes += typeRef(org.pascani.dsl.lib.infrastructure.Monitor)
 			
+			if (monitor.eventImports != null) {
+				for (^import : monitor.eventImports.importDeclarations) {
+					for (event : ^import.events) {
+						val eventTypeRef = event.emitter.eventType.toEventType
+						val innerClass = event.createNonPeriodicClass(^import.monitor, eventTypeRef, true)
+						nestedTypes += innerClass
+						fields += event.toField(event.name, typeRef(NonPeriodicEvent, eventTypeRef)) [
+							^final = true
+							^static = true
+							initializer = '''new «innerClass.simpleName»()'''
+						]
+						events += event
+					}
+				}
+			}
+			
 			for (e : monitor.body.expressions) {
 				switch (e) {
 					XVariableDeclaration: {
@@ -141,7 +157,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
 						val eventTypeRef = e.emitter.eventType.toEventType
-						val innerClass = e.createNonPeriodicClass(monitor, eventTypeRef)
+						val innerClass = e.createNonPeriodicClass(monitor, eventTypeRef, false)
 						nestedTypes += innerClass
 						fields += e.toField(e.name, typeRef(NonPeriodicEvent, eventTypeRef)) [
 							^final = true
@@ -338,7 +354,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		]
 	}
 
-	def JvmGenericType createNonPeriodicClass(Event e, Monitor monitor, JvmTypeReference eventTypeRef) {
+	def JvmGenericType createNonPeriodicClass(Event e, Monitor monitor, JvmTypeReference eventTypeRef, boolean isProxy) {
 		e.toClass(monitor.fullyQualifiedName + "_" + e.name) [
 			val suffix = System.nanoTime
 			val names = #{
@@ -363,9 +379,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				initializer = '''«eventTypeRef».class'''
 			]
 			
-			members += e.emitter.toField(names.get("emitter"), e.emitter.emitter.inferredType) [
-				initializer = e.emitter.emitter
-			]
+			if (!isProxy) {
+				members += e.emitter.toField(names.get("emitter"), e.emitter.emitter.inferredType) [
+					initializer = e.emitter.emitter
+				]
+			}
 			
 			members += e.toField(names.get("consumer"), typeRef(AbstractConsumer))
 
@@ -393,7 +411,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					«ENDIF»
 					try {
 						«IF (!isChangeEvent)»
-							this.«names.get("probe")» = new «typeRef(ProbeProxy)»(routingKey);
+							«IF(!isProxy)»
+								this.«names.get("probe")» = «typeRef(PascaniUtils)».newProbe("", routingKey);
+							«ELSE»
+								this.«names.get("probe")» = new «typeRef(ProbeProxy)»(routingKey);
+							«ENDIF»
 						«ENDIF»
 						this.«names.get("consumer")» = initializeConsumer(context, routingKey, consumerTag«IF (isChangeEvent)», variable«ENDIF»);
 						this.«names.get("consumer")».start();
