@@ -35,7 +35,15 @@ import com.google.common.base.Function;
  */
 public abstract class NonPeriodicEvent<T extends Event<?>>
 		extends ManagedEvent {
+	
+	/**
+	 * Indicates whether this event was defined in an external monitor
+	 */
+	protected boolean isProxyEvent = false;
 
+	/**
+	 * @return The {@link Class} object corresponding to the event type
+	 */
 	public abstract Class<? extends Event<?>> getType();
 
 	/**
@@ -104,7 +112,8 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 		if (isPaused())
 			return;
 		getConsumer().pause();
-		getProbe().pause();
+		if (!isProxyEvent)
+			getProbe().pause();
 		super.pause();
 	}
 
@@ -117,7 +126,8 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 		if (!isPaused())
 			return;
 		getConsumer().resume();
-		getProbe().resume();
+		if (!isProxyEvent)
+			getProbe().resume();
 		super.resume();
 	}
 
