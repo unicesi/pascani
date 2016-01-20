@@ -27,7 +27,7 @@
 		<service name="service">
 			<interface.java interface="org.ow2.frascati.tinfi.api.IntentHandler" />
 		</service>
-		<implementation.java class="org.pascani.dsl.lib.util.sca.ExceptionIntentHandler" />
+		<implementation.java class="org.pascani.dsl.lib.sca.intents.ExceptionIntentHandler" />
 	</component>
 
 	<component name="probe">
@@ -35,7 +35,7 @@
 			<interface.java interface="org.pascani.dsl.lib.util.Resumable" />
 			<frascati:binding.rest uri="http://localhost:1932"/>
 		</service>
-		<implementation.java class="org.pascani.dsl.lib.util.sca.ExceptionProbeImpl" />
+		<implementation.java class="org.pascani.dsl.lib.sca.probes.ExceptionProbeImpl" />
 	</component>
 
 </composite>
