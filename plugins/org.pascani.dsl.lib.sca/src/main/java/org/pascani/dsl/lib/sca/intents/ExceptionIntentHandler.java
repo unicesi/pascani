@@ -16,32 +16,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.lib.util.sca;
+package org.pascani.dsl.lib.sca.intents;
 
 import java.util.UUID;
 
 import org.ow2.frascati.tinfi.api.IntentJoinPoint;
 import org.pascani.dsl.lib.events.ExceptionEvent;
-import org.pascani.dsl.lib.events.InvokeEvent;
-import org.pascani.dsl.lib.events.ReturnEvent;
-import org.pascani.dsl.lib.events.TimeLapseEvent;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class AllEventsIntentHandler extends AbstractIntentHandler {
+public class ExceptionIntentHandler extends AbstractIntentHandler {
 
-	public AllEventsIntentHandler() {
+	public ExceptionIntentHandler() {
 		super();
 	}
 
 	public Object invoke(IntentJoinPoint ijp) throws Throwable {
 		UUID transactionId = UUID.randomUUID();
-		InvokeEvent invokeEvent = new InvokeEvent(transactionId,
-				ijp.getMethod().getDeclaringClass(), ijp.getMethod().getName(),
-				ijp.getMethod().getParameterTypes(), ijp.getArguments());
-		super.producer.post(invokeEvent);
-		long start = System.nanoTime();
 		Object _return = null;
 		try {
 			_return = ijp.proceed();
@@ -53,13 +45,6 @@ public class AllEventsIntentHandler extends AbstractIntentHandler {
 			super.producer.post(exceptionEvent);
 			throw new Throwable(cause);
 		}
-		long end = System.nanoTime();
-		TimeLapseEvent timeLapseEvent = new TimeLapseEvent(transactionId, start, end);
-		super.producer.post(timeLapseEvent);
-		ReturnEvent returnEvent = new ReturnEvent(transactionId,
-				ijp.getMethod().getDeclaringClass(), ijp.getMethod().getName(),
-				ijp.getMethod().getParameterTypes(), _return);
-		super.producer.post(returnEvent);
 		return _return;
 	}
 

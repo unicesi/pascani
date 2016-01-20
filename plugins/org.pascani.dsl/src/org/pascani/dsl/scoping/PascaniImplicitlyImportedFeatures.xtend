@@ -1,9 +1,9 @@
 package org.pascani.dsl.scoping
 
 import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
-import org.pascani.dsl.lib.util.ComponentExtensions
-import org.pascani.dsl.lib.util.FrascatiUtils
-import org.pascani.dsl.lib.util.PascaniUtils
+import org.pascani.dsl.lib.sca.ComponentExtensions
+import org.pascani.dsl.lib.sca.FrascatiUtils
+import org.pascani.dsl.lib.sca.PascaniUtils
 
 class PascaniImplicitlyImportedFeatures extends ImplicitlyImportedFeatures {
 	

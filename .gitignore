@@ -18,6 +18,8 @@ plugins/org.pascani.dsl.ide/xtend-gen
 
 plugins/org.pascani.dsl.lib/target
 
+plugins/org.pascani.dsl.lib.sca/target
+
 plugins/org.pascani.dsl.lib.compiler/target
 plugins/org.pascani.dsl.lib.compiler/src-gen
 plugins/org.pascani.dsl.lib.compiler/xtend-gen

@@ -26,9 +26,9 @@
 		<relativePath>../../maven/org.pascani.tycho.parent/pom.xml</relativePath>
 	</parent>
 	
-	<artifactId>org.pascani.dsl.lib</artifactId>
-	<name>Pascani Runtime Library</name>
-	
+	<artifactId>org.pascani.dsl.lib.sca</artifactId>
+	<name>Pascani SCA Library</name>
+
 	<properties>
 		<maven.compiler.source>1.6</maven.compiler.source>
   		<maven.compiler.target>1.6</maven.compiler.target>
@@ -36,59 +36,15 @@
 	
 	<dependencies>
 		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>18.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math3</artifactId>
-			<version>3.5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-api</artifactId>
-			<version>2.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>2.3</version>
-		</dependency>
-		<dependency>
-			<groupId>aopalliance</groupId>
-			<artifactId>aopalliance</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.rabbitmq</groupId>
-			<artifactId>amqp-client</artifactId>
-			<version>3.5.4</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.quartz-scheduler</groupId>
-		    <artifactId>quartz</artifactId>
-		    <version>2.2.1</version>
-		    <exclusions>
-		    	<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-				</exclusion>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>org.pascani.dsl.lib</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
 				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-core</artifactId>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
 				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-		    <groupId>org.quartz-scheduler</groupId>
-		    <artifactId>quartz-jobs</artifactId>
-		    <version>2.2.1</version>
+		    </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
@@ -96,11 +52,50 @@
 			<version>2.4.0</version>
 		</dependency>
 		<dependency>
+			<groupId>org.ow2.frascati</groupId>
+			<artifactId>frascati-introspection-api</artifactId>
+			<version>${frascatiVersion}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+		    </exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.frascati</groupId>
+			<artifactId>frascati-introspection-impl</artifactId>
+			<version>${frascatiVersion}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+		    </exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.ow2.frascati.tinfi</groupId>
+			<artifactId>frascati-tinfi-runtime-api</artifactId>
+			<version>1.4.5</version>
+		</dependency>
+		<dependency>
 			<groupId>org.codehaus.fabric3.spec</groupId>
 			<artifactId>sca-api</artifactId>
 			<version>1.1.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.ow2.frascati.mojo</groupId>
+    		<artifactId>frascati-contribution-plugin</artifactId>
+    		<version>${frascatiVersion}</version>
+    		<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+		    </exclusions>
+		</dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -157,22 +152,6 @@
         			<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
 			</plugin>
-			<!--<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>copy-dependencies</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/dependencies</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>-->
 		</plugins>
 	</build>
 </project>

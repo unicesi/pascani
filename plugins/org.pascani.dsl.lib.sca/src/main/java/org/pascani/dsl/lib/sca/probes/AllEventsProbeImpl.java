@@ -16,18 +16,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.lib.util.sca;
+package org.pascani.dsl.lib.sca.probes;
 
+import org.pascani.dsl.lib.events.ExceptionEvent;
+import org.pascani.dsl.lib.events.InvokeEvent;
+import org.pascani.dsl.lib.events.ReturnEvent;
 import org.pascani.dsl.lib.events.TimeLapseEvent;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class PerformanceProbeImpl extends AbstractProbeImpl {
-	
+public class AllEventsProbeImpl extends AbstractProbeImpl {
+
 	@SuppressWarnings("unchecked")
-	public PerformanceProbeImpl() {
-		super(TimeLapseEvent.class);
+	public AllEventsProbeImpl() {
+		super(InvokeEvent.class, TimeLapseEvent.class, ExceptionEvent.class,
+				ReturnEvent.class);
 	}
 
 }

@@ -16,18 +16,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.lib.util.sca;
+package org.pascani.dsl.lib.sca.intents;
 
-import org.pascani.dsl.lib.events.ExceptionEvent;
+import java.util.UUID;
+
+import org.ow2.frascati.tinfi.api.IntentJoinPoint;
+import org.pascani.dsl.lib.events.InvokeEvent;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class ExceptionProbeImpl extends AbstractProbeImpl {
-	
-	@SuppressWarnings("unchecked")
-	public ExceptionProbeImpl() {
-		super(ExceptionEvent.class);
+public class InvokeIntentHandler extends AbstractIntentHandler {
+
+	public InvokeIntentHandler() {
+		super();
+	}
+
+	public Object invoke(IntentJoinPoint ijp) throws Throwable {
+		UUID transactionId = UUID.randomUUID();
+		InvokeEvent invokeEvent = new InvokeEvent(transactionId,
+				ijp.getMethod().getDeclaringClass(), ijp.getMethod().getName(),
+				ijp.getMethod().getParameterTypes(), ijp.getArguments());
+		super.producer.post(invokeEvent);
+		Object _return = ijp.proceed();
+		return _return;
 	}
 
 }

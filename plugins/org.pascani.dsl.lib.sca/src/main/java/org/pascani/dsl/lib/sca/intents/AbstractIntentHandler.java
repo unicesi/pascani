@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.lib.util.sca;
+package org.pascani.dsl.lib.sca.intents;
 
 import org.osoa.sca.annotations.Scope;
 import org.ow2.frascati.tinfi.api.IntentHandler;

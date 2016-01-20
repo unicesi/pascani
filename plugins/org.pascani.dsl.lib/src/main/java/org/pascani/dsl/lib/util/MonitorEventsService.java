@@ -16,30 +16,34 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.lib.util.sca;
+package org.pascani.dsl.lib.util;
 
-import java.util.UUID;
+import java.text.ParseException;
 
-import org.ow2.frascati.tinfi.api.IntentJoinPoint;
-import org.pascani.dsl.lib.events.InvokeEvent;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+
+import org.osoa.sca.annotations.Service;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class InvokeIntentHandler extends AbstractIntentHandler {
+@Service
+@Path("/events")
+public interface MonitorEventsService {
 
-	public InvokeIntentHandler() {
-		super();
-	}
-
-	public Object invoke(IntentJoinPoint ijp) throws Throwable {
-		UUID transactionId = UUID.randomUUID();
-		InvokeEvent invokeEvent = new InvokeEvent(transactionId,
-				ijp.getMethod().getDeclaringClass(), ijp.getMethod().getName(),
-				ijp.getMethod().getParameterTypes(), ijp.getArguments());
-		super.producer.post(invokeEvent);
-		Object _return = ijp.proceed();
-		return _return;
-	}
+	/**
+	 * Updates the chronological expression of a periodic event
+	 * 
+	 * @param eventName
+	 *            The name of the periodic event
+	 * @param cronExpression
+	 *            The new chronological expression
+	 */
+	@PUT @Path("{event}/expression/{expression}") 
+	public void updateCronExpression(
+			@PathParam("event") String eventName,
+			@PathParam("expression") String cronExpression) throws ParseException;
 
 }

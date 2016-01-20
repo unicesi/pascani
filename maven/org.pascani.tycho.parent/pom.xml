@@ -27,6 +27,7 @@
 	<properties>
 		<tycho-version>0.24.0</tycho-version>
 		<xtextVersion>2.9.0</xtextVersion>
+		<frascatiVersion>1.4</frascatiVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
@@ -37,6 +38,7 @@
 		<module>../../plugins/org.pascani.dsl.ide</module>
 		<module>../../plugins/org.pascani.dsl.lib</module>
 		<module>../../plugins/org.pascani.dsl.lib.compiler</module>
+		<module>../../plugins/org.pascani.dsl.lib.sca</module>
 		<module>../../plugins/org.pascani.dsl.ui</module>
 		<module>../../plugins/org.pascani.dsl.web</module>
 	</modules>
@@ -73,6 +75,17 @@
 		<system>Github</system>
 		<url>https://github.com/unicesi/pascani/issues</url>
 	</issueManagement>
+	<profiles>
+		<profile>
+			<id>doclint-java8-disable</id>
+			<activation>
+				<jdk>[1.8,)</jdk>
+			</activation>
+			<properties>
+				<javadoc.opts>-Xdoclint:none</javadoc.opts>
+			</properties>
+		</profile>
+	</profiles>
 	<build>
 		<plugins>
 			<plugin>

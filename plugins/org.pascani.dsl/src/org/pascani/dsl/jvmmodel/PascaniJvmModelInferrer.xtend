@@ -49,7 +49,7 @@ import org.pascani.dsl.lib.infrastructure.AbstractConsumer
 import org.pascani.dsl.lib.infrastructure.BasicNamespace
 import org.pascani.dsl.lib.infrastructure.NamespaceProxy
 import org.pascani.dsl.lib.infrastructure.ProbeProxy
-import org.pascani.dsl.lib.util.PascaniUtils
+import org.pascani.dsl.lib.sca.PascaniUtils
 import org.pascani.dsl.lib.util.events.EventObserver
 import org.pascani.dsl.lib.util.events.NonPeriodicEvent
 import org.pascani.dsl.lib.util.events.PeriodicEvent

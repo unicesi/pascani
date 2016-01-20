@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.lib.util;
+package org.pascani.dsl.lib.sca;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +31,6 @@ import java.util.Map;
 import javax.script.ScriptException;
 
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
-import org.ow2.frascati.binding.factory.AbstractBindingFactoryProcessor;
 import org.ow2.frascati.mojo.ContributionUtil;
 import org.ow2.frascati.remote.introspection.Deployment;
 import org.ow2.frascati.remote.introspection.FileUtil;
@@ -227,8 +226,8 @@ public class FrascatiUtils {
 	private static URI initializeDefaultUri() {
 		URI uri = null;
 		try {
-			uri = new URI(
-					AbstractBindingFactoryProcessor.BINDING_URI_BASE_DEFAULT_VALUE);
+			// From: AbstractBindingFactoryProcessor.BINDING_URI_BASE_DEFAULT_VALUE
+			uri = new URI("http://localhost:8090");
 		} catch (URISyntaxException e) {
 			// TODO: log the exception
 			e.printStackTrace();

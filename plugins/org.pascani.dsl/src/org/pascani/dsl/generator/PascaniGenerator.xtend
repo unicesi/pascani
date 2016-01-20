@@ -15,7 +15,7 @@ import org.pascani.dsl.lib.util.Resumable
 import org.pascani.dsl.outputconfiguration.PascaniOutputConfigurationProvider
 import org.pascani.dsl.lib.compiler.templates.ScaCompositeTemplates
 import java.io.File
-import org.pascani.dsl.lib.util.sca.MonitorEventsService
+import org.pascani.dsl.lib.util.MonitorEventsService
 import org.ow2.scesame.qoscare.core.scaspec.SCABinding
 import org.ow2.scesame.qoscare.core.scaspec.SCAAttribute
 

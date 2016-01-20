@@ -16,18 +16,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.lib.util.sca;
+package org.pascani.dsl.lib.sca.probes;
 
-import org.pascani.dsl.lib.events.ReturnEvent;
+import org.pascani.dsl.lib.events.ExceptionEvent;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class ReturnProbeImpl extends AbstractProbeImpl {
+public class ExceptionProbeImpl extends AbstractProbeImpl {
 	
 	@SuppressWarnings("unchecked")
-	public ReturnProbeImpl() {
-		super(ReturnEvent.class);
+	public ExceptionProbeImpl() {
+		super(ExceptionEvent.class);
 	}
 
 }

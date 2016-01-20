@@ -23,9 +23,9 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.pascani.dsl.lib.util.MonitorEventsService;
 import org.pascani.dsl.lib.util.Resumable;
 import org.pascani.dsl.lib.util.events.PeriodicEvent;
-import org.pascani.dsl.lib.util.sca.MonitorEventsService;
 import org.quartz.CronExpression;
 
 /**

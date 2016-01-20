@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.lib.util;
+package org.pascani.dsl.lib.sca;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
-import org.ow2.frascati.binding.factory.AbstractBindingFactoryProcessor;
 import org.ow2.frascati.remote.introspection.RemoteScaDomain;
 import org.ow2.scesame.qoscare.core.scaspec.FraSCAti2QoSCAre;
 import org.ow2.scesame.qoscare.core.scaspec.SCAComponent;
@@ -158,8 +157,8 @@ public class ComponentExtensions {
 	private static URI initializeDefaultUri() {
 		URI uri = null;
 		try {
-			uri = new URI(
-					AbstractBindingFactoryProcessor.BINDING_URI_BASE_DEFAULT_VALUE);
+			// From: AbstractBindingFactoryProcessor.BINDING_URI_BASE_DEFAULT_VALUE
+			uri = new URI("http://localhost:8090");
 		} catch (URISyntaxException e) {
 			// TODO: log the exception
 			e.printStackTrace();

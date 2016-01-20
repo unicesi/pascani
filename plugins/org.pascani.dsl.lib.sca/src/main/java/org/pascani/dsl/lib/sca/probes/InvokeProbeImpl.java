@@ -16,34 +16,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.lib.util.sca;
+package org.pascani.dsl.lib.sca.probes;
 
-import java.text.ParseException;
-
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-
-import org.osoa.sca.annotations.Service;
+import org.pascani.dsl.lib.events.InvokeEvent;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-@Service
-@Path("/events")
-public interface MonitorEventsService {
-
-	/**
-	 * Updates the chronological expression of a periodic event
-	 * 
-	 * @param eventName
-	 *            The name of the periodic event
-	 * @param cronExpression
-	 *            The new chronological expression
-	 */
-	@PUT @Path("{event}/expression/{expression}") 
-	public void updateCronExpression(
-			@PathParam("event") String eventName,
-			@PathParam("expression") String cronExpression) throws ParseException;
+public class InvokeProbeImpl extends AbstractProbeImpl {
+	
+	@SuppressWarnings("unchecked")
+	public InvokeProbeImpl() {
+		super(InvokeEvent.class);
+	}
 
 }
