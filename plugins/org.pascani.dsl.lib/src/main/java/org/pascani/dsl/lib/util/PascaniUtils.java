@@ -18,9 +18,6 @@
  */
 package org.pascani.dsl.lib.util;
 
-import static org.pascani.dsl.lib.util.FrascatiUtils.eval;
-
-import java.io.File;
 import java.util.Map;
 
 import javax.script.ScriptException;
@@ -32,14 +29,10 @@ import org.pascani.dsl.lib.events.ReturnEvent;
 import org.pascani.dsl.lib.events.TimeLapseEvent;
 import org.pascani.dsl.lib.infrastructure.ProbeProxy;
 
-import com.google.common.io.Resources;
-
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class PascaniUtils {
-
-	public static boolean contributionDeployed = false;
 
 	/**
 	 * Introduces a new SCA intent, and returns a proxy pointing to the
@@ -47,6 +40,10 @@ public class PascaniUtils {
 	 * {@link TimeLapseEvent}, {@link InvokeEvent}, {@link ExceptionEvent},
 	 * {@link ReturnEvent}.
 	 * 
+	 * @param routingKey
+	 *            A unique name (within the
+	 *            {@code org.pascani.dsl.lib.PascaniRuntime.Context#PROBE}
+	 *            context) for the new probe
 	 * @param target
 	 *            A FPath selector
 	 * @return a {@link ProbeProxy} instance pointing to the introduced
@@ -54,34 +51,10 @@ public class PascaniUtils {
 	 *         deploying the SCA contribution or evaluating the FScript
 	 *         commands.
 	 */
-	public static ProbeProxy probe(String target) {
-		if (!contributionDeployed) {
-			File zipfile = new File(
-					Resources.getResource("intents.zip").getFile());
-			contributionDeployed = FrascatiUtils.deploy("intents")
-					.withContribution(zipfile).deploy();
-		}
-		boolean fscriptOk = false;
-		try {
-			// TODO: register these commands as one procedure in the FraSCAti
-			// runtime
-			eval("target = " + target + (target.endsWith(";") ? "" : ";"));
-			eval("intent = $domain/scachild::pascani-all-events-intent;");
-			eval("add-scaintent($target, $intent);");
-			eval("routingKey = $intent/scaproperty::routingKey;");
-			eval("resetProbe = $intent/scaproperty::resetProbe;");
-			eval("set-value($routingKey, " + target + ")");
-			eval("set-value($resetProbe, true)");
-			fscriptOk = true;
-		} catch (ScriptException e) {
-			// TODO: handle the exception
-			e.printStackTrace();
-		}
-
-		if (contributionDeployed && fscriptOk)
-			return createProbeProxy(target);
-		else
-			return null;
+	public static ProbeProxy newProbe(String target, String routingKey)
+			throws ScriptException {
+		// TODO: implement method using the Pascani FScript file
+		return createProbeProxy(routingKey);
 	}
 
 	/**
