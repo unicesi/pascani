@@ -18,6 +18,8 @@
  */
 package org.pascani.dsl.lib.util.sca;
 
+import java.text.ParseException;
+
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -31,8 +33,6 @@ import org.osoa.sca.annotations.Service;
 @Path("/events")
 public interface MonitorEventsService {
 
-	public void subscribe(String monitorName, String eventName);
-
 	/**
 	 * Updates the chronological expression of a periodic event
 	 * 
@@ -41,10 +41,9 @@ public interface MonitorEventsService {
 	 * @param cronExpression
 	 *            The new chronological expression
 	 */
-	@PUT 
-	@Path("{event}/expression/{expression}")
+	@PUT @Path("{event}/expression/{expression}") 
 	public void updateCronExpression(
 			@PathParam("event") String eventName,
-			@PathParam("expression") String cronExpression);
+			@PathParam("expression") String cronExpression) throws ParseException;
 
 }
