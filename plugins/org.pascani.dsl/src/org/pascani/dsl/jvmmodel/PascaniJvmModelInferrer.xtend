@@ -136,7 +136,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 								new «PeriodicEvent»(«appendable.content»)
 							'''
 						]
-						events += e.name
+						events += e
 					}
 					
 					Event case e.emitter != null && e.emitter.cronExpression == null: {
@@ -148,7 +148,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							^static = true
 							initializer = '''new «innerClass.simpleName»()'''
 						]
-						events += e.name
+						events += e
 					}
 					
 					Handler: {
@@ -198,9 +198,12 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				body = '''
 					«IF monitor.usings != null»
 						«FOR namespace : monitor.usings»
-							«namespace.name» = new «namespace.name»();
+							this.«namespace.name» = new «namespace.name»();
 						«ENDFOR»
 					«ENDIF»
+					«FOR event : events.filter[e|e.emitter.cronExpression != null]»
+						super.periodicEvents.put("«event.name»", this.«event.name»);
+					«ENDFOR»
 				'''
 				exceptions += typeRef(Exception)
 			]
@@ -212,7 +215,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					if (isPaused())
 						return;
 					super.pause();
-					«events.join("\n", [e|e + ".pause();"])»
+					«events.map[e|e.name].join("\n", [e|e + ".pause();"])»
 				'''
 			]
 
@@ -222,7 +225,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					if (!isPaused())
 						return;
 					super.resume();
-					«events.join("\n", [e|e + ".resume();"])»
+					«events.map[e|e.name].join("\n", [e|e + ".resume();"])»
 				'''
 			]
 			
