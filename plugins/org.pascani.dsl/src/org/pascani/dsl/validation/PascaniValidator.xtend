@@ -55,6 +55,8 @@ import org.pascani.dsl.pascani.RangeCronElement
 import org.pascani.dsl.pascani.TerminalCronElement
 import org.pascani.dsl.pascani.TypeDeclaration
 import org.pascani.dsl.validation.AbstractPascaniValidator
+import org.pascani.dsl.pascani.ImportEventDeclaration
+import org.pascani.dsl.pascani.ImportEventsSection
 
 /**
  * This class contains custom validation rules. 
@@ -72,6 +74,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 	static val INVALID_FILE_NAME = "invalidFileName"
 	static val INVALID_PACKAGE_NAME = "invalidPackageName"
 	static val INVALID_PARAMETER_TYPE = "invalidParameterType"
+	static val INVALID_SELF_IMPORT = "invalidSelfImport"
 	static val DUPLICATE_LOCAL_VARIABLE = "duplicateLocalVariable"
 	static val DISCOURAGED_USAGE = "discouragedUsage"
 	static val EXPECTED_WHITESPACE = "expectedWhitespace"
@@ -248,19 +251,52 @@ class PascaniValidator extends AbstractPascaniValidator {
 		}
 	}
 
+	/**
+	 * Check monitors' internal event declarations
+	 */
 	@Check
 	def checkEventNameIsUnique(Event event) {
 		val parent = event.eContainer.eContainer as Monitor
-		val duplicates = parent.body.expressions.filter [ e |
+		var duplicates = parent.body.expressions.filter [ e |
 			switch (e) {
 				XVariableDeclaration: e.name.equals(event.name)
 				Event: e.name.equals(event.name) && !e.equals(event)
 				default: false
 			}
 		]
-		if (!duplicates.isEmpty) {
+		val importedEvents = parent.eventImports.importDeclarations.map[d|d.events].flatten.filter [ e |
+			e.name.equals(event.name)
+		]
+		if (!duplicates.isEmpty || !importedEvents.isEmpty) {
 			error("Duplicate local variable " + event.name, PascaniPackage.Literals.EVENT__NAME,
 				DUPLICATE_LOCAL_VARIABLE)
+		}
+	}
+	
+	/**
+	 * Check events inside an import declaration and its siblings
+	 */
+	@Check
+	def checkEventNameIsUnique(ImportEventDeclaration eventDeclaration) {
+		val importSection = eventDeclaration.eContainer as ImportEventsSection
+		val events = importSection.importDeclarations.toList.map[d|d.events].flatten
+		for (event : eventDeclaration.events) {
+			val count = events.filter[e|e.name.equals(event.name)].size
+			if (count > 1) {
+				error("Duplicate local variable " + event.name,
+					PascaniPackage.Literals.IMPORT_EVENT_DECLARATION__EVENTS, DUPLICATE_LOCAL_VARIABLE)
+			}
+		}
+	}
+	
+	@Check
+	def checkImportIsExternal(ImportEventsSection importSection) {
+		val monitor = importSection.eContainer as Monitor
+		for (importDeclaration : importSection.importDeclarations) {
+			if (monitor.fullyQualifiedName.equals(importDeclaration.monitor.fullyQualifiedName)) {
+				error("A monitor cannot import events from itself",
+					PascaniPackage.Literals.IMPORT_EVENTS_SECTION__IMPORT_DECLARATIONS, INVALID_SELF_IMPORT)
+			}
 		}
 	}
 
