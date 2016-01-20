@@ -231,7 +231,7 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 	 * @see pascani.lang.infrastructure.RpcRequestHandler#handle(pascani.lang.
 	 * infrastructure.RpcRequest)
 	 */
-	public Serializable handle(final RpcRequest request) {
+	public synchronized Serializable handle(final RpcRequest request) {
 		Serializable response = null;
 		long start = (Long) request.getParameter(0);
 		long end = (Long) request.getParameter(1);
