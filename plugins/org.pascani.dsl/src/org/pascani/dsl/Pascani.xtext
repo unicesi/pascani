@@ -35,9 +35,18 @@ TypeDeclaration
     ;
     
 MonitorDeclaration returns Monitor
-	:	'monitor' name = ValidID 
+	:	eventImports = ImportEventsSection?
+		'monitor' name = ValidID 
 		('using' usings += [Namespace | QualifiedName] (',' usings += [Namespace | QualifiedName])*)?  
 		body = MonitorBlockExpression
+	;
+
+ImportEventsSection
+	:	importDeclarations += ImportEventDeclaration+
+	;
+	
+ImportEventDeclaration
+	:	'import' events += [Event | ID] (',' events += [Event | ID])* 'from' monitor = [Monitor | QualifiedName]  ->';'?
 	;
 	
 MonitorBlockExpression returns XBlockExpression

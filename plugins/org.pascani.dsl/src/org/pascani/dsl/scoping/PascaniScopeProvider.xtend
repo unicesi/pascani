@@ -21,9 +21,11 @@ package org.pascani.dsl.scoping
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.EcoreUtil2
-import org.pascani.dsl.pascani.Handler
-import org.pascani.dsl.pascani.Monitor
-import org.pascani.dsl.scoping.AbstractPascaniScopeProvider
+import org.eclipse.xtext.scoping.Scopes
+import org.eclipse.xtext.scoping.impl.ImportedNamespaceAwareLocalScopeProvider
+import org.pascani.dsl.pascani.Event
+import org.pascani.dsl.pascani.ImportEventDeclaration
+import org.pascani.dsl.pascani.PascaniPackage
 
 /**
  * This class contains custom scoping description.
@@ -31,16 +33,16 @@ import org.pascani.dsl.scoping.AbstractPascaniScopeProvider
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#scoping
  * on how and when to use it.
  */
-class PascaniScopeProvider extends AbstractPascaniScopeProvider {
+class PascaniScopeProvider extends ImportedNamespaceAwareLocalScopeProvider {
 
-	def scope_Monitor_usings(Monitor context, EReference reference) {
-		val EObject rootElement = EcoreUtil2.getRootContainer(context);
-		return rootElement.getScope(reference)
-	}
-
-	def scope_Handler_body(Handler context, EReference reference) {
-		val EObject rootElement = EcoreUtil2.getRootContainer(context);
-		return rootElement.getScope(reference)
+	override getScope(EObject context, EReference reference) {
+		if (context instanceof ImportEventDeclaration) {
+			if (reference == PascaniPackage.Literals.IMPORT_EVENT_DECLARATION__EVENTS && context.monitor != null) {
+				val candidates = EcoreUtil2.getAllContentsOfType(context.monitor, Event);
+				return Scopes.scopeFor(candidates)
+			}
+		}
+		return super.getScope(context, reference);
 	}
 
 }

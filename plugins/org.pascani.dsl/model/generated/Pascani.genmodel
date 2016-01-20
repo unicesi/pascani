@@ -36,7 +36,15 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Pascani.ecore#//TypeDeclaration/body"/>
     </genClasses>
     <genClasses ecoreClass="Pascani.ecore#//Monitor">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Pascani.ecore#//Monitor/eventImports"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Pascani.ecore#//Monitor/usings"/>
+    </genClasses>
+    <genClasses ecoreClass="Pascani.ecore#//ImportEventsSection">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Pascani.ecore#//ImportEventsSection/importDeclarations"/>
+    </genClasses>
+    <genClasses ecoreClass="Pascani.ecore#//ImportEventDeclaration">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Pascani.ecore#//ImportEventDeclaration/events"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Pascani.ecore#//ImportEventDeclaration/monitor"/>
     </genClasses>
     <genClasses ecoreClass="Pascani.ecore#//Namespace"/>
     <genClasses ecoreClass="Pascani.ecore#//Handler">

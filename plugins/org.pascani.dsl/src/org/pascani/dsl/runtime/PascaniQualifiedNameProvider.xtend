@@ -18,10 +18,19 @@
  */
 package org.pascani.dsl.runtime
 
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.naming.DefaultDeclarativeQualifiedNameProvider
+import org.eclipse.xtext.naming.QualifiedName
+import org.pascani.dsl.pascani.Event
 
 class PascaniQualifiedNameProvider extends DefaultDeclarativeQualifiedNameProvider {
-	/*
-	 * Source: https://christiandietrich.wordpress.com/2011/07/16/iqualifiednameproviders-in-xtext-2-0/
-	 */
+
+	override QualifiedName getFullyQualifiedName(EObject obj) {
+		switch (obj) {
+			// Allow to import events in monitors using simple names instead of fully qualified names
+			Event: return QualifiedName.create(obj.name)
+			default: return super.getFullyQualifiedName(obj)
+		}
+	}
+
 }
