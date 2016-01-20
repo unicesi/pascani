@@ -404,11 +404,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				body = '''return this.«names.get("type")»;'''
 			]
 			
-			members += e.emitter.toMethod("getEmitter", typeRef(Object)) [
-				annotations += annotationRef(Override)
-				body = '''return this.«names.get("emitter")»;'''
-			]
-			
 			members += e.emitter.toMethod("getProbe", typeRef(ProbeProxy)) [
 					annotations += annotationRef(Override)
 					body = '''return «IF(isChangeEvent)»null«ELSE»this.«names.get("probe")»«ENDIF»;'''

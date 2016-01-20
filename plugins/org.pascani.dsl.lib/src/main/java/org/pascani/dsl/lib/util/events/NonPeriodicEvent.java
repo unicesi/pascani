@@ -38,8 +38,6 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 
 	public abstract Class<? extends Event<?>> getType();
 
-	public abstract Object getEmitter();
-
 	/**
 	 * @return A proxy pointing to the monitor probe producing this event
 	 */
