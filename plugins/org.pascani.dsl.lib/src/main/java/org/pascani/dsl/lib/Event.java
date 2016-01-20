@@ -52,7 +52,7 @@ public abstract class Event<T> implements Comparable<Event<T>>, Serializable {
 	protected final long timestamp;
 
 	public Event(final UUID transactionId) {
-		this.timestamp = System.nanoTime();
+		this.timestamp = System.currentTimeMillis();
 		this.identifier = UUID.randomUUID();
 		this.transactionId = transactionId;
 	}
