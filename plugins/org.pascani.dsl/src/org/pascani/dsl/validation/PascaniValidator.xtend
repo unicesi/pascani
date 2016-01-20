@@ -277,14 +277,28 @@ class PascaniValidator extends AbstractPascaniValidator {
 	 * Check events inside an import declaration and its siblings
 	 */
 	@Check
-	def checkEventNameIsUnique(ImportEventDeclaration eventDeclaration) {
-		val importSection = eventDeclaration.eContainer as ImportEventsSection
+	def checkEventInImportDeclaration(ImportEventDeclaration importDeclaration) {
+		// Event name is unique
+		val importSection = importDeclaration.eContainer as ImportEventsSection
 		val events = importSection.importDeclarations.toList.map[d|d.events].flatten
-		for (event : eventDeclaration.events) {
+		for (event : importDeclaration.events) {
 			val count = events.filter[e|e.name.equals(event.name)].size
 			if (count > 1) {
 				error("Duplicate local variable " + event.name,
 					PascaniPackage.Literals.IMPORT_EVENT_DECLARATION__EVENTS, DUPLICATE_LOCAL_VARIABLE)
+			}
+		}
+		// Event type is allowed to be imported
+		for (event : importDeclaration.events) {
+			val type = if (event.emitter.cronExpression != null)
+					"Periodic"
+				else if (event.emitter.eventType.equals(EventType.CHANGE))
+					"Change"
+				else
+					null
+			if (type != null) {
+				error(type + " events are not allowed to be imported",
+					PascaniPackage.Literals.IMPORT_EVENT_DECLARATION__EVENTS, INVALID_PARAMETER_TYPE)
 			}
 		}
 	}
