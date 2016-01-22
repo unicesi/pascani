@@ -175,5 +175,15 @@
 			<artifactId>org.pascani.dsl.lib</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>org.pascani.dsl.lib.compiler</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>org.pascani.dsl.lib.sca</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 </project>
