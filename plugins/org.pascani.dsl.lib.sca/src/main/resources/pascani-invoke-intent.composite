@@ -27,6 +27,9 @@
 		<service name="service">
 			<interface.java interface="org.ow2.frascati.tinfi.api.IntentHandler" />
 		</service>
+		<reference name="handler">
+			<interface.java interface="org.pascani.dsl.lib.sca.EventHandler" />
+		</reference>
 		<implementation.java class="org.pascani.dsl.lib.sca.intents.InvokeIntentHandler" />
 	</component>
 
@@ -34,6 +37,9 @@
 		<service name="resumable">
 			<interface.java interface="org.pascani.dsl.lib.util.Resumable" />
 			<frascati:binding.rest uri="http://localhost:1933"/>
+		</service>
+		<service name="handler">
+			<interface.java interface="org.pascani.dsl.lib.sca.EventHandler" />
 		</service>
 		<implementation.java class="org.pascani.dsl.lib.sca.probes.InvokeProbeImpl" />
 	</component>
