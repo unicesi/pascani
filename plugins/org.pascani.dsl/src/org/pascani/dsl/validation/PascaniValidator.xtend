@@ -34,9 +34,6 @@ import org.eclipse.xtext.xbase.XAssignment
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
-import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
-import org.ow2.scesame.qoscare.core.scaspec.SCAMethod
-import org.ow2.scesame.qoscare.core.scaspec.SCAPort
 import org.pascani.dsl.pascani.CronElement
 import org.pascani.dsl.pascani.CronElementList
 import org.pascani.dsl.pascani.CronExpression
@@ -45,6 +42,8 @@ import org.pascani.dsl.pascani.EventEmitter
 import org.pascani.dsl.pascani.EventSpecifier
 import org.pascani.dsl.pascani.EventType
 import org.pascani.dsl.pascani.Handler
+import org.pascani.dsl.pascani.ImportEventDeclaration
+import org.pascani.dsl.pascani.ImportEventsSection
 import org.pascani.dsl.pascani.IncrementCronElement
 import org.pascani.dsl.pascani.Model
 import org.pascani.dsl.pascani.Monitor
@@ -54,9 +53,6 @@ import org.pascani.dsl.pascani.PascaniPackage
 import org.pascani.dsl.pascani.RangeCronElement
 import org.pascani.dsl.pascani.TerminalCronElement
 import org.pascani.dsl.pascani.TypeDeclaration
-import org.pascani.dsl.validation.AbstractPascaniValidator
-import org.pascani.dsl.pascani.ImportEventDeclaration
-import org.pascani.dsl.pascani.ImportEventsSection
 
 /**
  * This class contains custom validation rules. 
@@ -430,9 +426,8 @@ class PascaniValidator extends AbstractPascaniValidator {
 				error("Only change events are allowed to use value specifiers",
 					PascaniPackage.Literals.EVENT_EMITTER__SPECIFIER, UNEXPECTED_EVENT_SPECIFIER)
 			}
-			if (emitterType.getSuperType(SCAMethod) == null && emitterType.getSuperType(SCAPort) == null &&
-				emitterType.getSuperType(SCAComponent) == null) {
-				error("The emitter type must be subclass either of SCAMethod, SCAPort or SCAComponent",
+			if (emitterType.getSuperType(String) == null) {
+				error("The emitter type must be subclass of String",
 					PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
 			}
 		}
