@@ -21,7 +21,12 @@ action pascani-add-intent(parent, target, intentName, routingKey) {
 	-- 5. Add the REST binding to the Resumable interface, and then add the SCA intent
 	add-scaintent($target, $intent);
 	
-	-- 6. Clean things up
+	-- 6. Wire the event handler service
+	service = $intent/scachild::probe/scaservice::handler;
+	reference = $intent/scachild::primitiveIntentHandler/scareference::handler;
+	add-scawire($reference, $service);
+	
+	-- 7. Clean things up
 	sca-remove($intentName); 
 	set-state($intent, "STARTED");
 	set-state($parent, "STARTED");
