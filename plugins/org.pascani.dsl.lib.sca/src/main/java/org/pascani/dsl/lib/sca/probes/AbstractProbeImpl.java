@@ -19,17 +19,20 @@
 package org.pascani.dsl.lib.sca.probes;
 
 import org.osoa.sca.annotations.Property;
+import org.osoa.sca.annotations.Scope;
 import org.pascani.dsl.lib.Event;
 import org.pascani.dsl.lib.PascaniRuntime;
 import org.pascani.dsl.lib.infrastructure.AbstractProducer;
 import org.pascani.dsl.lib.infrastructure.LocalProbe;
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQProducer;
+import org.pascani.dsl.lib.sca.EventHandler;
 import org.pascani.dsl.lib.util.Resumable;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class AbstractProbeImpl implements Resumable {
+@Scope("COMPOSITE")
+public abstract class AbstractProbeImpl implements EventHandler, Resumable {
 
 	protected String routingKey = null;
 
@@ -50,6 +53,19 @@ public abstract class AbstractProbeImpl implements Resumable {
 	public AbstractProbeImpl(final Class<? extends Event<?>>... acceptedTypes) {
 		this.acceptedTypes = acceptedTypes;
 		this.exchange = PascaniRuntime.getEnvironment().get("probes_exchange");
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.pascani.dsl.lib.sca.EventHandler#handle(org.pascani.dsl.lib.Event)
+	 */
+	public void handle(Event<?> event) {
+		if (this.probe != null)
+			this.probe.recordEvent(event);
+		if (this.producer != null)
+			this.producer.produce(event);
 	}
 
 	private void resetProbe() {
