@@ -28,16 +28,12 @@ import org.pascani.dsl.lib.events.InvokeEvent;
  */
 public class InvokeIntentHandler extends AbstractIntentHandler {
 
-	public InvokeIntentHandler() {
-		super();
-	}
-
 	public Object invoke(IntentJoinPoint ijp) throws Throwable {
 		UUID transactionId = UUID.randomUUID();
 		InvokeEvent invokeEvent = new InvokeEvent(transactionId,
 				ijp.getMethod().getDeclaringClass(), ijp.getMethod().getName(),
 				ijp.getMethod().getParameterTypes(), ijp.getArguments());
-		super.producer.post(invokeEvent);
+		super.handler.handle(invokeEvent);
 		Object _return = ijp.proceed();
 		return _return;
 	}

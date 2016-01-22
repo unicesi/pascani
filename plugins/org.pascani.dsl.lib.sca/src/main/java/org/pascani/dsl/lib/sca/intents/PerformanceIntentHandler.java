@@ -28,17 +28,13 @@ import org.pascani.dsl.lib.events.TimeLapseEvent;
  */
 public class PerformanceIntentHandler extends AbstractIntentHandler {
 
-	public PerformanceIntentHandler() {
-		super();
-	}
-
 	public Object invoke(IntentJoinPoint ijp) throws Throwable {
 		UUID transactionId = UUID.randomUUID();
 		long start = System.nanoTime();
 		Object _return = ijp.proceed();
 		long end = System.nanoTime();
 		TimeLapseEvent timeLapseEvent = new TimeLapseEvent(transactionId, start, end);
-		super.producer.post(timeLapseEvent);
+		super.handler.handle(timeLapseEvent);
 		return _return;
 	}
 

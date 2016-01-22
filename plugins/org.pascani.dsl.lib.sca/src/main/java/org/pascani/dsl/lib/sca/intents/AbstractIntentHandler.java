@@ -18,36 +18,22 @@
  */
 package org.pascani.dsl.lib.sca.intents;
 
-import org.osoa.sca.annotations.Scope;
+import org.osoa.sca.annotations.Reference;
 import org.ow2.frascati.tinfi.api.IntentHandler;
-import org.pascani.dsl.lib.Event;
-import org.pascani.dsl.lib.PascaniRuntime;
-import org.pascani.dsl.lib.Probe;
-import org.pascani.dsl.lib.infrastructure.AbstractProducer;
-import org.pascani.dsl.lib.util.LocalEventProducer;
+import org.pascani.dsl.lib.sca.EventHandler;
 
 /**
  * Abstract implementation of a simple {@link IntentHandler} containing a
- * {@link LocalEventProducer} to produce events related to service executions;
- * these events are handled automatically by {@link Probe}s and
- * {@link AbstractProducer}s.
+ * {@link EventHandler} to handle events related to service executions;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-@Scope("COMPOSITE")
 public abstract class AbstractIntentHandler implements IntentHandler {
-
+	
 	/**
-	 * The events producer in charge of posting events to the Pascani runtime
+	 * The service managing events after they are raised
 	 */
-	protected final LocalEventProducer<Event<?>> producer;
-
-	/**
-	 * Initializes the {@link LocalEventProducer} in the PROBE context
-	 */
-	protected AbstractIntentHandler() {
-		this.producer = new LocalEventProducer<Event<?>>(
-				PascaniRuntime.Context.PROBE);
-	}
+	@Reference
+	protected EventHandler handler;
 
 }

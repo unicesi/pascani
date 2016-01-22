@@ -31,16 +31,12 @@ import org.pascani.dsl.lib.events.TimeLapseEvent;
  */
 public class AllEventsIntentHandler extends AbstractIntentHandler {
 
-	public AllEventsIntentHandler() {
-		super();
-	}
-
 	public Object invoke(IntentJoinPoint ijp) throws Throwable {
 		UUID transactionId = UUID.randomUUID();
 		InvokeEvent invokeEvent = new InvokeEvent(transactionId,
 				ijp.getMethod().getDeclaringClass(), ijp.getMethod().getName(),
 				ijp.getMethod().getParameterTypes(), ijp.getArguments());
-		super.producer.post(invokeEvent);
+		super.handler.handle(invokeEvent);
 		long start = System.nanoTime();
 		Object _return = null;
 		try {
@@ -50,16 +46,16 @@ public class AllEventsIntentHandler extends AbstractIntentHandler {
 					new Exception(cause), ijp.getMethod().getDeclaringClass(),
 					ijp.getMethod().getName(),
 					ijp.getMethod().getParameterTypes(), ijp.getArguments());
-			super.producer.post(exceptionEvent);
+			super.handler.handle(exceptionEvent);
 			throw new Throwable(cause);
 		}
 		long end = System.nanoTime();
 		TimeLapseEvent timeLapseEvent = new TimeLapseEvent(transactionId, start, end);
-		super.producer.post(timeLapseEvent);
+		super.handler.handle(timeLapseEvent);
 		ReturnEvent returnEvent = new ReturnEvent(transactionId,
 				ijp.getMethod().getDeclaringClass(), ijp.getMethod().getName(),
 				ijp.getMethod().getParameterTypes(), _return);
-		super.producer.post(returnEvent);
+		super.handler.handle(returnEvent);
 		return _return;
 	}
 

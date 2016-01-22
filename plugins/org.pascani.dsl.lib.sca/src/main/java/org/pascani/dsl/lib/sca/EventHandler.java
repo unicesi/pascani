@@ -16,26 +16,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani library. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.lib.sca.intents;
+package org.pascani.dsl.lib.sca;
 
-import java.util.UUID;
-
-import org.ow2.frascati.tinfi.api.IntentJoinPoint;
-import org.pascani.dsl.lib.events.ReturnEvent;
+import org.osoa.sca.annotations.Service;
+import org.pascani.dsl.lib.Event;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class ReturnIntentHandler extends AbstractIntentHandler {
-
-	public Object invoke(IntentJoinPoint ijp) throws Throwable {
-		UUID transactionId = UUID.randomUUID();
-		Object _return = ijp.proceed();
-		ReturnEvent returnEvent = new ReturnEvent(transactionId,
-				ijp.getMethod().getDeclaringClass(), ijp.getMethod().getName(),
-				ijp.getMethod().getParameterTypes(), _return);
-		super.handler.handle(returnEvent);
-		return _return;
-	}
+@Service
+public interface EventHandler {
+	
+	public void handle(Event<?> event);
 
 }

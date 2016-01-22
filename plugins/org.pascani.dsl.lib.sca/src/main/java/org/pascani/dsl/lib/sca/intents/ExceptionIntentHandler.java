@@ -28,10 +28,6 @@ import org.pascani.dsl.lib.events.ExceptionEvent;
  */
 public class ExceptionIntentHandler extends AbstractIntentHandler {
 
-	public ExceptionIntentHandler() {
-		super();
-	}
-
 	public Object invoke(IntentJoinPoint ijp) throws Throwable {
 		UUID transactionId = UUID.randomUUID();
 		Object _return = null;
@@ -42,7 +38,7 @@ public class ExceptionIntentHandler extends AbstractIntentHandler {
 					new Exception(cause), ijp.getMethod().getDeclaringClass(),
 					ijp.getMethod().getName(),
 					ijp.getMethod().getParameterTypes(), ijp.getArguments());
-			super.producer.post(exceptionEvent);
+			super.handler.handle(exceptionEvent);
 			throw new Throwable(cause);
 		}
 		return _return;
