@@ -21,7 +21,6 @@ package org.pascani.dsl.lib.sca.probes;
 import org.osoa.sca.annotations.Property;
 import org.pascani.dsl.lib.Event;
 import org.pascani.dsl.lib.PascaniRuntime;
-import org.pascani.dsl.lib.PascaniRuntime.Context;
 import org.pascani.dsl.lib.infrastructure.AbstractProducer;
 import org.pascani.dsl.lib.infrastructure.LocalProbe;
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQProducer;
@@ -58,8 +57,7 @@ public abstract class AbstractProbeImpl implements Resumable {
 			// shutdown in case it is already initialized
 			if (this.probe != null)
 				this.probe.shutdown();
-			this.probe = new LocalProbe(routingKey,
-					PascaniRuntime.Context.PROBE);
+			this.probe = new LocalProbe(routingKey, PascaniRuntime.Context.PROBE);
 			this.probe.acceptOnly(this.acceptedTypes);
 		} catch (Exception e) {
 			// TODO: handle the exception
@@ -72,11 +70,8 @@ public abstract class AbstractProbeImpl implements Resumable {
 			// shutdown in case it is already initialized
 			if (this.producer != null)
 				this.producer.shutdown();
-			this.producer = new RabbitMQProducer(this.exchange,
-					this.routingKey);
+			this.producer = new RabbitMQProducer(this.exchange, this.routingKey);
 			this.producer.acceptOnly(this.acceptedTypes);
-			PascaniRuntime.getRuntimeInstance(Context.PROBE)
-					.registerEventListener(producer);
 		} catch (Exception e) {
 			// TODO: handle the exception
 			e.printStackTrace();
