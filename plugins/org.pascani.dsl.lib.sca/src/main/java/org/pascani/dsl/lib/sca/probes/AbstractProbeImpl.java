@@ -122,22 +122,27 @@ public abstract class AbstractProbeImpl implements Resumable {
 	@Property
 	public void setRoutingKey(final String routingKey) {
 		this.routingKey = routingKey;
+		
+		// This is done only the first time the routing key is set
+		// and in case it was set after updating properties resetProbe/resetProducer
+		if(this.resetProbe && this.probe == null)
+			resetProbe();
+		if(this.resetProducer && this.producer == null)
+			resetProducer();
 	}
 
 	@Property
 	public void setResetProbe(final Boolean resetProbe) {
 		this.resetProbe = resetProbe;
-		if (this.resetProbe) {
+		if (this.resetProbe && this.routingKey != null)
 			resetProbe();
-		}
 	}
 
 	@Property
 	public void setResetProducer(final Boolean resetProducer) {
 		this.resetProducer = resetProducer;
-		if (this.resetProducer) {
+		if (this.resetProducer && this.routingKey != null)
 			resetProducer();
-		}
 	}
 
 }
