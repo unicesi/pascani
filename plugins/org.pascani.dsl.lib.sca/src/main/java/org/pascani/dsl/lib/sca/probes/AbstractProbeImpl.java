@@ -32,13 +32,10 @@ import org.pascani.dsl.lib.util.Resumable;
  */
 public abstract class AbstractProbeImpl implements Resumable {
 
-	@Property
 	protected String routingKey = null;
 
-	@Property
 	protected Boolean resetProbe = false;
 
-	@Property
 	protected Boolean resetProducer = false;
 
 	protected String exchange;
@@ -122,10 +119,12 @@ public abstract class AbstractProbeImpl implements Resumable {
 		return this.routingKey;
 	}
 
+	@Property
 	public void setRoutingKey(final String routingKey) {
 		this.routingKey = routingKey;
 	}
 
+	@Property
 	public void setResetProbe(final Boolean resetProbe) {
 		this.resetProbe = resetProbe;
 		if (this.resetProbe) {
@@ -133,6 +132,7 @@ public abstract class AbstractProbeImpl implements Resumable {
 		}
 	}
 
+	@Property
 	public void setResetProducer(final Boolean resetProducer) {
 		this.resetProducer = resetProducer;
 		if (this.resetProducer) {
