@@ -393,7 +393,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 		if (event.isPeriodical && !event.emitter.cronExpression.actualType.isAssignableFrom(CronExpression)) {
 			error("A chronological expression is expected, instead " +
 				event.emitter.cronExpression.actualType.simpleName + " was found",
-				PascaniPackage.Literals.EVENT_EMITTER__EMITTER, EXPECTED_CRON_EXPRESSION);
+				PascaniPackage.Literals.EVENT__EMITTER, EXPECTED_CRON_EXPRESSION);
 		}
 	}
 
