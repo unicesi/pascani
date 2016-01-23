@@ -36,12 +36,10 @@ import org.eclipse.xtext.xbase.XAbstractFeatureCall
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
-import org.eclipse.xtext.xbase.compiler.output.FakeTreeAppendable
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.osoa.sca.annotations.Scope
-import org.pascani.dsl.compiler.PascaniCompiler
 import org.pascani.dsl.lib.PascaniRuntime.Context
 import org.pascani.dsl.lib.events.ChangeEvent
 import org.pascani.dsl.lib.events.IntervalEvent
@@ -80,8 +78,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	@Inject extension JvmTypesBuilder
 	
 	@Inject extension IQualifiedNameProvider
-	
-	@Inject PascaniCompiler compiler
 
 	def dispatch void infer(Monitor monitor, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		monitor.createClass(isPreIndexingPhase, acceptor)
@@ -143,13 +139,14 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 					
 					Event case e.emitter != null && e.emitter.cronExpression != null: {
-						val appendable = compiler.compileAsJavaExpression(e.emitter.cronExpression,
-							new FakeTreeAppendable(), typeRef(String))
+						methods += e.toMethod("init" + e.name.toFirstUpper, typeRef(String)) [
+							body = e.emitter.cronExpression
+						]
 						fields += e.toField(e.name, typeRef(PeriodicEvent)) [
 							^final = true
 							^static = true
 							initializer = '''
-								new «PeriodicEvent»(«appendable.content»)
+								new «PeriodicEvent»(init«e.name.toFirstUpper»())
 							'''
 						]
 						events += e
