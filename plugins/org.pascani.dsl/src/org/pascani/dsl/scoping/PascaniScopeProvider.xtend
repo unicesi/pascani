@@ -22,7 +22,6 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.scoping.Scopes
-import org.eclipse.xtext.scoping.impl.ImportedNamespaceAwareLocalScopeProvider
 import org.pascani.dsl.pascani.Event
 import org.pascani.dsl.pascani.ImportEventDeclaration
 import org.pascani.dsl.pascani.PascaniPackage
@@ -33,7 +32,7 @@ import org.pascani.dsl.pascani.PascaniPackage
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#scoping
  * on how and when to use it.
  */
-class PascaniScopeProvider extends ImportedNamespaceAwareLocalScopeProvider {
+class PascaniScopeProvider extends PascaniImportedNamespaceAwareLocalScopeProvider {
 
 	override getScope(EObject context, EReference reference) {
 		if (context instanceof ImportEventDeclaration) {

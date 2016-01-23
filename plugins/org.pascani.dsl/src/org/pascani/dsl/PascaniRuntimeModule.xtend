@@ -23,6 +23,7 @@ import com.google.inject.Singleton
 import com.google.inject.name.Names
 import org.eclipse.xtext.generator.IGenerator
 import org.eclipse.xtext.generator.IOutputConfigurationProvider
+import org.eclipse.xtext.linking.LinkingScopeProviderBinding
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.scoping.IScopeProvider
 import org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider
@@ -34,7 +35,6 @@ import org.pascani.dsl.outputconfiguration.OutputConfigurationAwaredGenerator
 import org.pascani.dsl.outputconfiguration.PascaniOutputConfigurationProvider
 import org.pascani.dsl.runtime.PascaniQualifiedNameProvider
 import org.pascani.dsl.scoping.PascaniImplicitlyImportedFeatures
-import org.pascani.dsl.scoping.PascaniImportedNamespaceAwareLocalScopeProvider
 import org.pascani.dsl.scoping.PascaniScopeProvider
 import org.pascani.dsl.typesystem.PascaniTypeComputer
 
@@ -47,7 +47,14 @@ class PascaniRuntimeModule extends AbstractPascaniRuntimeModule {
 		binder
 			.bind(IScopeProvider)
 			.annotatedWith(Names.named(AbstractDeclarativeScopeProvider.NAMED_DELEGATE))
-			.to(PascaniImportedNamespaceAwareLocalScopeProvider)
+			.to(PascaniScopeProvider)
+	}
+	
+	override void configureLinkingIScopeProvider(Binder binder) {
+		binder
+			.bind(IScopeProvider)
+			.annotatedWith(LinkingScopeProviderBinding)
+			.to(PascaniScopeProvider);
 	}
 
 	override Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
