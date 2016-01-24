@@ -18,58 +18,187 @@
  */
 package org.pascani.dsl.lib.sca;
 
+import static org.pascani.dsl.lib.sca.FrascatiUtils.eval;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.script.ScriptException;
 
+import org.apache.commons.lang.NotImplementedException;
+import org.pascani.dsl.lib.Event;
 import org.pascani.dsl.lib.Probe;
 import org.pascani.dsl.lib.events.ExceptionEvent;
 import org.pascani.dsl.lib.events.InvokeEvent;
 import org.pascani.dsl.lib.events.ReturnEvent;
 import org.pascani.dsl.lib.events.TimeLapseEvent;
 import org.pascani.dsl.lib.infrastructure.ProbeProxy;
+import org.pascani.dsl.lib.util.Exceptions;
+
+import com.google.common.io.Resources;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class PascaniUtils {
 
+	private static Map<URI, Boolean> registeredScripts = new HashMap<URI, Boolean>();
+
 	/**
-	 * Introduces a new SCA intent, and returns a proxy pointing to the
-	 * corresponding {@link Probe}. The probe created manages events of type
+	 * Introduces a new SCA intent in the specified FraSCAti runtime, bound to
+	 * the specified target and returns a proxy pointing to the corresponding
+	 * {@link Probe}. The probe created manages events of type
 	 * {@link TimeLapseEvent}, {@link InvokeEvent}, {@link ExceptionEvent},
 	 * {@link ReturnEvent}.
 	 * 
+	 * @param target
+	 *            A FPath selector
 	 * @param routingKey
 	 *            A unique name (within the
 	 *            {@code org.pascani.dsl.lib.PascaniRuntime.Context#PROBE}
 	 *            context) for the new probe
-	 * @param target
-	 *            A FPath selector
+	 * @param intentName
+	 *            The name of the Pascani intent
+	 * @param activateProducer
+	 *            Whether or not the event producer must be activated
+	 * @param bindingUri
+	 *            The URI where the FraSCAti runtime is running
 	 * @return a {@link ProbeProxy} instance pointing to the introduced
 	 *         {@link Probe} or {@code null} if something bad happens while
-	 *         deploying the SCA contribution or evaluating the FScript
-	 *         commands.
+	 *         evaluating the FScript commands.
+	 * @throws IOException
+	 *             If there is a problem loading the Pascani FScript procedures
+	 *             from the resources
+	 * @throws ScriptException
+	 *             If there is a problem executing any of the scripts
 	 */
-	public static ProbeProxy newProbe(String target, String routingKey)
-			throws ScriptException {
-		// TODO: implement method using the Pascani FScript file
-		return createProbeProxy(routingKey);
+	public static ProbeProxy newProbe(String target, String routingKey,
+			String intentName, boolean activateProducer, URI bindingUri)
+					throws IOException, ScriptException {
+		Boolean registered = registeredScripts.get(bindingUri);
+		if (registered == null || !registered) {
+			File fscript = new File(Resources.getResource("pascani.fscript").getFile());
+			List<String> scripts = FrascatiUtils.registerScript(fscript, bindingUri);
+			registeredScripts.put(bindingUri, scripts.size() > 0);
+		}
+		String[] data = target.split("/");
+		String parent = data[0] + "/" + data[1];
+		StringBuilder params = new StringBuilder();
+		params.append(parent + ", ");
+		params.append(target + ", ");
+		params.append("\"" + intentName + "\", ");
+		params.append("\"" + routingKey + "\"");
+		eval("pascani-add-intent(" + params.toString() + ");");
+		eval("pascani-reset-probe(" + parent + ", \"" + routingKey + "\")");
+		if (activateProducer)
+			eval("pascani-reset-producer(" + parent + ", \"" + routingKey + "\")");
+		return Exceptions.sneakyInitializer(ProbeProxy.class, routingKey);
+	}
+	
+	/**
+	 * Introduces a new SCA intent in the default FraSCAti runtime, bound to the
+	 * specified target and returns a proxy pointing to the corresponding
+	 * {@link Probe}. The probe created manages events of type
+	 * {@link TimeLapseEvent}, {@link InvokeEvent}, {@link ExceptionEvent},
+	 * {@link ReturnEvent}.
+	 * 
+	 * @param target
+	 *            A FPath selector
+	 * @param routingKey
+	 *            A unique name (within the
+	 *            {@code org.pascani.dsl.lib.PascaniRuntime.Context#PROBE}
+	 *            context) for the new probe
+	 * @param activateProducer
+	 *            Whether or not the event producer must be activated
+	 * @return a {@link ProbeProxy} instance pointing to the introduced
+	 *         {@link Probe} or {@code null} if something bad happens while
+	 *         evaluating the FScript commands.
+	 * @throws IOException
+	 *             If there is a problem loading the Pascani FScript procedures
+	 *             from the resources
+	 * @throws ScriptException
+	 *             If there is a problem executing any of the scripts
+	 */
+	public static ProbeProxy newProbe(String target, String routingKey,
+			boolean activateProducer) throws IOException, ScriptException {
+		return newProbe(target, routingKey, "pascani-all-events-intent",
+				activateProducer, FrascatiUtils.DEFAULT_BINDING_URI);
 	}
 
 	/**
-	 * <b>Note</b>: DSL-only intended use
-	 * <p>
-	 * Introduces a new monitor probe, and returns a proxy pointing to it. The
-	 * probe created manages event of type {@link TimeLapseEvent},
-	 * {@link InvokeEvent}, and {@link ReturnEvent}
+	 * Introduces a new SCA intent in the specified FraSCAti runtime, bound to
+	 * the specified target and returns a proxy pointing to the corresponding
+	 * {@link Probe}. The probe created manages events of the specified type.
 	 * 
-	 * @param uniqueName
-	 *            A unique name representing the monitor probe
-	 * @return a {@link ProbeProxy} instance pointing to a performance probe
+	 * @param target
+	 *            A FPath selector
+	 * @param routingKey
+	 *            A unique name (within the
+	 *            {@code org.pascani.dsl.lib.PascaniRuntime.Context#PROBE}
+	 *            context) for the new probe
+	 * @param eventType
+	 *            The type of events managed by the {@link Probe}
+	 * @param activateProducer
+	 *            Whether or not the event producer must be activated
+	 * @param bindingUri
+	 *            The URI where the FraSCAti runtime is running
+	 * @return a {@link ProbeProxy} instance pointing to the introduced
+	 *         {@link Probe} or {@code null} if something bad happens while
+	 *         evaluating the FScript commands.
+	 * @throws IOException
+	 *             If there is a problem loading the Pascani FScript procedures
+	 *             from the resources
+	 * @throws ScriptException
+	 *             If there is a problem executing any of the scripts
 	 */
-	public static ProbeProxy newPerformanceProbe(String uniqueName) {
-		return createProbeProxy(uniqueName);
+	public static ProbeProxy newProbe(String target, String routingKey,
+			Class<? extends Event<?>> eventType, boolean activateProducer,
+			URI bindingUri) throws IOException, ScriptException {
+		String intentName = "";
+		if (eventType.equals(TimeLapseEvent.class))
+			intentName = "pascani-performance-intent";
+		else if (eventType.equals(ExceptionEvent.class))
+			intentName = "pascani-exception-intent";
+		else if (eventType.equals(InvokeEvent.class))
+			intentName = "pascani-invoke-intent";
+		else if (eventType.equals(ReturnEvent.class))
+			intentName = "pascani-return-intent";
+		return newProbe(target, routingKey, intentName, activateProducer, bindingUri);
+	}
+	
+	/**
+	 * Introduces a new SCA intent in the default FraSCAti runtime, bound to the
+	 * specified target and returns a proxy pointing to the corresponding
+	 * {@link Probe}. The probe created manages events of the specified type.
+	 * 
+	 * @param target
+	 *            A FPath selector
+	 * @param routingKey
+	 *            A unique name (within the
+	 *            {@code org.pascani.dsl.lib.PascaniRuntime.Context#PROBE}
+	 *            context) for the new probe
+	 * @param eventType
+	 *            The type of events managed by the {@link Probe}
+	 * @param activateProducer
+	 *            Whether or not the event producer must be activated
+	 * @return a {@link ProbeProxy} instance pointing to the introduced
+	 *         {@link Probe} or {@code null} if something bad happens while
+	 *         evaluating the FScript commands.
+	 * @throws IOException
+	 *             If there is a problem loading the Pascani FScript procedures
+	 *             from the resources
+	 * @throws ScriptException
+	 *             If there is a problem executing any of the scripts
+	 */
+	public static ProbeProxy newProbe(String target, String routingKey,
+			Class<? extends Event<?>> eventType, boolean activateProducer)
+					throws IOException, ScriptException {
+		return newProbe(target, routingKey, eventType, activateProducer,
+				FrascatiUtils.DEFAULT_BINDING_URI);
 	}
 
 	/**
@@ -83,21 +212,7 @@ public class PascaniUtils {
 	 */
 	public static <T> T bindService(Map<String, Object> properties,
 			Class<T> clazz) {
-		/*
-		 * At runtime, inside Pascani, it is not important to have the actual
-		 * instance.
-		 */
-		return null;
-	}
-
-	private static ProbeProxy createProbeProxy(String routingKey) {
-		try {
-			return new ProbeProxy(routingKey);
-		} catch (Exception e) {
-			// TODO: log the exception
-			e.printStackTrace();
-		}
-		return null;
+		throw new NotImplementedException();
 	}
 
 }
