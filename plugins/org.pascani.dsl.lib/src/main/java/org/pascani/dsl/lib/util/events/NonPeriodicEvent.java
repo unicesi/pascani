@@ -18,9 +18,12 @@
  */
 package org.pascani.dsl.lib.util.events;
 
+import java.net.URI;
+
 import org.pascani.dsl.lib.Event;
 import org.pascani.dsl.lib.PascaniRuntime;
 import org.pascani.dsl.lib.PascaniRuntime.Context;
+import org.pascani.dsl.lib.Probe;
 import org.pascani.dsl.lib.events.ChangeEvent;
 import org.pascani.dsl.lib.infrastructure.AbstractConsumer;
 import org.pascani.dsl.lib.infrastructure.ProbeProxy;
@@ -40,6 +43,16 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 	 * Indicates whether this event was defined in an external monitor
 	 */
 	protected boolean isProxyEvent = false;
+	
+	/**
+	 * Indicates whether this event must introduce and use a new {@link Probe}
+	 */
+	protected boolean useProbe = false;
+	
+	/**
+	 * The URI where the FraSCAti runtime is running
+	 */
+	protected URI bindingUri;
 
 	/**
 	 * @return The {@link Class} object corresponding to the event type
