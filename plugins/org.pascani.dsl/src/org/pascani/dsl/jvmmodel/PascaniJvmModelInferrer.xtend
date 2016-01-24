@@ -66,6 +66,7 @@ import org.quartz.Job
 import org.quartz.JobDataMap
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
+import org.quartz.CronExpression
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -114,15 +115,17 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			if (monitor.eventImports != null) {
 				for (^import : monitor.eventImports.importDeclarations) {
 					for (event : ^import.events) {
-						val eventTypeRef = event.emitter.eventType.toEventType
-						val innerClass = event.createNonPeriodicClass(^import.monitor, eventTypeRef, true)
-						nestedTypes += innerClass
-						fields += event.toField(event.name, typeRef(NonPeriodicEvent, eventTypeRef)) [
-							^final = true
-							^static = true
-							initializer = '''new «innerClass.simpleName»()'''
-						]
-						events += event
+						if (event != null && event.emitter != null) {
+							val eventTypeRef = event.emitter.eventType.toEventType
+							val innerClass = event.createNonPeriodicClass(^import.monitor, eventTypeRef, true)
+							nestedTypes += innerClass
+							fields += event.toField(event.name, typeRef(NonPeriodicEvent, eventTypeRef)) [
+								^final = true
+								^static = true
+								initializer = '''new «innerClass.simpleName»()'''
+							]
+							events += event	
+						}
 					}
 				}
 			}
@@ -139,7 +142,9 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 					
 					Event case e.emitter != null && e.emitter.cronExpression != null: {
-						methods += e.toMethod("init" + e.name.toFirstUpper, typeRef(String)) [
+						methods += e.toMethod("init" + e.name.toFirstUpper, typeRef(CronExpression)) [
+							^static = true
+							visibility = JvmVisibility::PRIVATE
 							body = e.emitter.cronExpression
 						]
 						fields += e.toField(e.name, typeRef(PeriodicEvent)) [
