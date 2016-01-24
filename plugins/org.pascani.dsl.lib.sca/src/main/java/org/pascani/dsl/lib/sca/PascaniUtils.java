@@ -36,6 +36,7 @@ import org.pascani.dsl.lib.events.ExceptionEvent;
 import org.pascani.dsl.lib.events.InvokeEvent;
 import org.pascani.dsl.lib.events.ReturnEvent;
 import org.pascani.dsl.lib.events.TimeLapseEvent;
+import org.pascani.dsl.lib.infrastructure.AbstractProducer;
 import org.pascani.dsl.lib.infrastructure.ProbeProxy;
 import org.pascani.dsl.lib.util.Exceptions;
 
@@ -47,13 +48,101 @@ import com.google.common.io.Resources;
 public class PascaniUtils {
 
 	private static Map<URI, Boolean> registeredScripts = new HashMap<URI, Boolean>();
+	
+	/**
+	 * Introduces a new SCA intent in the specified FraSCAti runtime, bound to
+	 * the specified target.
+	 * 
+	 * @param target
+	 *            A FPath selector
+	 * @param routingKey
+	 *            A unique name (within the
+	 *            {@code org.pascani.dsl.lib.PascaniRuntime.Context#PROBE}
+	 *            context) for the new probe
+	 * @param intentName
+	 *            The name of the Pascani intent
+	 * @param bindingUri
+	 *            The URI where the FraSCAti runtime is running
+	 * @throws IOException
+	 *             If there is a problem loading the Pascani FScript procedures
+	 *             from the resources
+	 * @throws ScriptException
+	 *             If there is a problem executing any of the scripts
+	 * @see FrascatiUtils#DEFAULT_BINDING_URI
+	 */
+	public static void newIntent(String target, String routingKey,
+			String intentName, URI bindingUri) throws IOException, ScriptException {
+		registerPascaniScripts(bindingUri);
+		String[] data = target.split("/");
+		String parent = data[0] + "/" + data[1];
+		StringBuilder params = new StringBuilder();
+		params.append(parent + ", ");
+		params.append(target + ", ");
+		params.append("\"" + intentName + "\", ");
+		params.append("\"" + routingKey + "\"");
+		eval("pascani-add-intent(" + params.toString() + ");", bindingUri);
+	}
+	
+	/**
+	 * Resets an existing {@link Probe} bound to the given target and routing
+	 * key, in the specified FraSCAti runtime.
+	 * 
+	 * @param target
+	 *            A FPath selector
+	 * @param routingKey
+	 *            A unique name (within the
+	 *            {@code org.pascani.dsl.lib.PascaniRuntime.Context#PROBE}
+	 *            context) for the new probe
+	 * @param bindingUri
+	 *            The URI where the FraSCAti runtime is running
+	 * @throws IOException
+	 *             If there is a problem loading the Pascani FScript procedures
+	 *             from the resources
+	 * @throws ScriptException
+	 *             If there is a problem executing any of the scripts
+	 * @see FrascatiUtils#DEFAULT_BINDING_URI
+	 */
+	public static void resetProbe(String target, String routingKey,
+			URI bindingUri) throws IOException, ScriptException {
+		registerPascaniScripts(bindingUri);
+		String[] data = target.split("/");
+		String parent = data[0] + "/" + data[1];
+		eval("pascani-reset-probe(" + parent + ", \"" + routingKey + "\")",
+				bindingUri);
+	}
+
+	/**
+	 * Resets an existing {@link AbstractProducer} bound to the given target and
+	 * routing key, in the specified FraSCAti runtime.
+	 * 
+	 * @param target
+	 *            A FPath selector
+	 * @param routingKey
+	 *            A unique name (within the
+	 *            {@code org.pascani.dsl.lib.PascaniRuntime.Context#PROBE}
+	 *            context) for the new probe
+	 * @param bindingUri
+	 *            The URI where the FraSCAti runtime is running
+	 * @throws IOException
+	 *             If there is a problem loading the Pascani FScript procedures
+	 *             from the resources
+	 * @throws ScriptException
+	 *             If there is a problem executing any of the scripts
+	 * @see FrascatiUtils#DEFAULT_BINDING_URI
+	 */
+	public static void resetProducer(String target, String routingKey,
+			URI bindingUri) throws IOException, ScriptException {
+		registerPascaniScripts(bindingUri);
+		String[] data = target.split("/");
+		String parent = data[0] + "/" + data[1];
+		eval("pascani-reset-producer(" + parent + ", \"" + routingKey + "\")",
+				bindingUri);
+	}
 
 	/**
 	 * Introduces a new SCA intent in the specified FraSCAti runtime, bound to
 	 * the specified target and returns a proxy pointing to the corresponding
-	 * {@link Probe}. The probe created manages events of type
-	 * {@link TimeLapseEvent}, {@link InvokeEvent}, {@link ExceptionEvent},
-	 * {@link ReturnEvent}.
+	 * {@link Probe}.
 	 * 
 	 * @param target
 	 *            A FPath selector
@@ -79,23 +168,10 @@ public class PascaniUtils {
 	public static ProbeProxy newProbe(String target, String routingKey,
 			String intentName, boolean activateProducer, URI bindingUri)
 					throws IOException, ScriptException {
-		Boolean registered = registeredScripts.get(bindingUri);
-		if (registered == null || !registered) {
-			File fscript = new File(Resources.getResource("pascani.fscript").getFile());
-			List<String> scripts = FrascatiUtils.registerScript(fscript, bindingUri);
-			registeredScripts.put(bindingUri, scripts.size() > 0);
-		}
-		String[] data = target.split("/");
-		String parent = data[0] + "/" + data[1];
-		StringBuilder params = new StringBuilder();
-		params.append(parent + ", ");
-		params.append(target + ", ");
-		params.append("\"" + intentName + "\", ");
-		params.append("\"" + routingKey + "\"");
-		eval("pascani-add-intent(" + params.toString() + ");");
-		eval("pascani-reset-probe(" + parent + ", \"" + routingKey + "\")");
+		newIntent(target, routingKey, intentName, bindingUri);
+		resetProbe(target, routingKey, bindingUri);
 		if (activateProducer)
-			eval("pascani-reset-producer(" + parent + ", \"" + routingKey + "\")");
+			resetProducer(target, routingKey, bindingUri);
 		return Exceptions.sneakyInitializer(ProbeProxy.class, routingKey);
 	}
 	
@@ -219,15 +295,11 @@ public class PascaniUtils {
 	 */
 	public static void removeProbe(String target, String routingKey,
 			URI bindingUri) throws IOException, ScriptException {
-		Boolean registered = registeredScripts.get(bindingUri);
-		if (registered == null || !registered) {
-			File fscript = new File(Resources.getResource("pascani.fscript").getFile());
-			List<String> scripts = FrascatiUtils.registerScript(fscript, bindingUri);
-			registeredScripts.put(bindingUri, scripts.size() > 0);
-		}
+		registerPascaniScripts(bindingUri);
 		String[] data = target.split("/");
 		String parent = data[0] + "/" + data[1];
-		eval("pascani-remove-intent(" + parent + ", " + target + ", \"" + routingKey + "\");");
+		eval("pascani-remove-intent(" + parent + ", " + target + ", \""
+				+ routingKey + "\");", bindingUri);
 	}
 
 	/**
@@ -247,6 +319,28 @@ public class PascaniUtils {
 	public static void removeProbe(String target, String routingKey)
 			throws IOException, ScriptException {
 		removeProbe(target, routingKey, FrascatiUtils.DEFAULT_BINDING_URI);
+	}
+	
+	/**
+	 * Registers the Pascani FScript procedures in the specified FraSCAti
+	 * runtime
+	 * 
+	 * @param bindingUri
+	 *            The URI where the FraSCAti runtime is running
+	 * @throws IOException
+	 *             If there is a problem loading the Pascani FScript procedures
+	 *             from the resources
+	 * @throws ScriptException
+	 *             If there is a problem executing any of the scripts
+	 */
+	private static void registerPascaniScripts(URI bindingUri)
+			throws IOException, ScriptException {
+		Boolean registered = registeredScripts.get(bindingUri);
+		if (registered == null || !registered) {
+			File fscript = new File(Resources.getResource("pascani.fscript").getFile());
+			List<String> scripts = FrascatiUtils.registerScript(fscript, bindingUri);
+			registeredScripts.put(bindingUri, scripts.size() > 0);
+		}
 	}
 
 	/**
