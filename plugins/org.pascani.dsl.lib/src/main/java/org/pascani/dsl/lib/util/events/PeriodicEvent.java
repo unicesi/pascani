@@ -18,6 +18,7 @@
  */
 package org.pascani.dsl.lib.util.events;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,15 +38,14 @@ public class PeriodicEvent extends ManagedEvent {
 	protected List<Class<? extends Job>> classes;
 	private List<Class<? extends Job>> temporal;
 
-	public PeriodicEvent(String cronExpression) {
+	public PeriodicEvent(String cronExpression) throws ParseException {
+		this(new CronExpression(cronExpression));
+	}
+	
+	public PeriodicEvent(CronExpression cronExpression) {
 		this.classes = new ArrayList<Class<? extends Job>>();
 		this.temporal = new ArrayList<Class<? extends Job>>();
-		try {
-			this.expression = new CronExpression(cronExpression);
-		} catch (Exception e) {
-			// TODO: handle the exception
-			e.printStackTrace();
-		}
+		this.expression = cronExpression;
 	}
 
 	public CronExpression getExpression() {
