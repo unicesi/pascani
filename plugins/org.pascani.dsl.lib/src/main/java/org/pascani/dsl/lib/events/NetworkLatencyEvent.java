@@ -73,6 +73,11 @@ public class NetworkLatencyEvent extends Event<Double> {
 	 * The formal parameters of the method
 	 */
 	private final String[] parameters;
+	
+	/**
+	 * The actual method return
+	 */
+	private final Object _return;
 
 	/**
 	 * Creates an instance having all of the parameters
@@ -94,7 +99,7 @@ public class NetworkLatencyEvent extends Event<Double> {
 	 */
 	public NetworkLatencyEvent(final UUID transactionId, final long start,
 			final long end, final String caller, final String callee,
-			final String method, final String[] parameters) {
+			final String method, final String[] parameters, final Object _return) {
 		super(transactionId);
 		this.start = start;
 		this.end = end;
@@ -103,6 +108,7 @@ public class NetworkLatencyEvent extends Event<Double> {
 		this.callee = callee;
 		this.method = method;
 		this.parameters = parameters;
+		this._return = _return;
 	}
 
 	/**
@@ -128,8 +134,8 @@ public class NetworkLatencyEvent extends Event<Double> {
 	 */
 	public NetworkLatencyEvent(final UUID transactionId, final long start,
 			final String caller, final String callee, final String method,
-			final String[] parameters) {
-		this(transactionId, start, 0, caller, callee, method, parameters);
+			final String[] parameters, final Object _return) {
+		this(transactionId, start, 0, caller, callee, method, parameters, _return);
 	}
 
 	/**
@@ -144,7 +150,7 @@ public class NetworkLatencyEvent extends Event<Double> {
 	public NetworkLatencyEvent(final NetworkLatencyEvent event,
 			final long end) {
 		this(event.transactionId, event.start, end, event.caller, event.callee,
-				event.method, event.parameters);
+				event.method, event.parameters, event._return);
 	}
 
 	@Override public Double value() {
@@ -173,6 +179,10 @@ public class NetworkLatencyEvent extends Event<Double> {
 
 	public String[] methodParameters() {
 		return this.parameters;
+	}
+	
+	public Object methodReturn() {
+		return this._return;
 	}
 
 	/**
