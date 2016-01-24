@@ -200,6 +200,54 @@ public class PascaniUtils {
 		return newProbe(target, routingKey, eventType, activateProducer,
 				FrascatiUtils.DEFAULT_BINDING_URI);
 	}
+	
+	/**
+	 * Removes the SCA intent containing the specified probe, in the specified
+	 * FraSCAti runtime.
+	 * 
+	 * @param target
+	 *            A FPath selector
+	 * @param routingKey
+	 *            The routing key of the probe to remove
+	 * @param bindingUri
+	 *            The URI where the FraSCAti runtime is running
+	 * @throws IOException
+	 *             If there is a problem loading the Pascani FScript procedures
+	 *             from the resources
+	 * @throws ScriptException
+	 *             If there is a problem executing any of the scripts
+	 */
+	public static void removeProbe(String target, String routingKey,
+			URI bindingUri) throws IOException, ScriptException {
+		Boolean registered = registeredScripts.get(bindingUri);
+		if (registered == null || !registered) {
+			File fscript = new File(Resources.getResource("pascani.fscript").getFile());
+			List<String> scripts = FrascatiUtils.registerScript(fscript, bindingUri);
+			registeredScripts.put(bindingUri, scripts.size() > 0);
+		}
+		String[] data = target.split("/");
+		String parent = data[0] + "/" + data[1];
+		eval("pascani-remove-intent(" + parent + ", " + target + ", " + routingKey + ");");
+	}
+
+	/**
+	 * Removes the SCA intent containing the specified probe, in the default
+	 * FraSCAti runtime.
+	 * 
+	 * @param target
+	 *            A FPath selector
+	 * @param routingKey
+	 *            The routing key of the probe to remove
+	 * @throws IOException
+	 *             If there is a problem loading the Pascani FScript procedures
+	 *             from the resources
+	 * @throws ScriptException
+	 *             If there is a problem executing any of the scripts
+	 */
+	public static void removeProbe(String target, String routingKey)
+			throws IOException, ScriptException {
+		removeProbe(target, routingKey, FrascatiUtils.DEFAULT_BINDING_URI);
+	}
 
 	/**
 	 * Registers the necessary properties to bind a SCA service
