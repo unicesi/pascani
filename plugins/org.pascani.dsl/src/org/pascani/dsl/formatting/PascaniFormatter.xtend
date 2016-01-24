@@ -92,8 +92,6 @@ class PascaniFormatter extends AbstractDeclarativeFormatter {
 		c.setIndentationDecrement.after(eventEmitterAccess.alternatives)
 
 		c.setSpace(" ").after(cronElementAccess.alternatives)
-		c.setLinewrap(1).after(cronExpressionAccess.alternatives)
-
-	// TODO: continue working on the formatter rules for monitor declarations
+		// TODO: continue working on the formatter rules for monitor declarations
 	}
 }

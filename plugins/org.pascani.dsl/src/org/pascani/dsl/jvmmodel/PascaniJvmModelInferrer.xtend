@@ -95,9 +95,10 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	
 	def void createClass(Monitor monitor, boolean isPreIndexingPhase, IJvmDeclaredTypeAcceptor acceptor) {
 		val monitorImpl = monitor.toClass(monitor.fullyQualifiedName)
+		if (monitorImpl == null)
+			return;
 		monitorImpl.eAdapters.add(new OutputConfigurationAdapter(PascaniOutputConfigurationProvider::PASCANI_OUTPUT))
 		monitorImpl.eAdapters.add(new OutputConfigurationAdapter(PascaniOutputConfigurationProvider::SCA_OUTPUT))
-		
 		acceptor.accept(monitorImpl) [
 			val nestedTypes = new ArrayList
 			val fields = new ArrayList

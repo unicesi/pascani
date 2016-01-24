@@ -63,9 +63,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 
 	@Inject extension IQualifiedNameProvider
 
-	private List<String> cronConstants = newArrayList("reboot", "yearly", "annually", "monthly", "weekly", "daily",
-		"hourly", "minutely", "secondly")
-
 	static val NON_CAPITAL_NAME = "nonCapitalName"
 	static val INVALID_FILE_NAME = "invalidFileName"
 	static val INVALID_PACKAGE_NAME = "invalidPackageName"
@@ -76,7 +73,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 	static val EXPECTED_WHITESPACE = "expectedWhitespace"
 	static val EXPECTED_PERIODICAL = "expectedPeriodical"
 	static val UNEXPECTED_EVENT_SPECIFIER = "unexpectedEventSpecifier"
-	static val EXPECTED_CRON_CONSTANT = "expectedCronConstant"
 	static val EXPECTED_CRON_EXPRESSION = "expectedCronExpression"
 	static val UNEXPECTED_CRON_NTH = "unexpectedCronNth"
 	static val UNEXPECTED_CRON_INCREMENT = "unexpectedCronIncrement"
@@ -435,30 +431,23 @@ class PascaniValidator extends AbstractPascaniValidator {
 
 	@Check
 	def globalValidationsOnCronExp(CronExpression exp) {
-		if (exp.constant == null) {
-			// Validate spaces: all cron parts must be space-separated
-			if (isValidCronExp(exp)) {
-				val node = NodeModelUtils.getNode(exp)
-				val String[] parts = node.text.trim.split(" ")
-				var expectedSize = if(exp.year == null) 6 else 7
+		// Validate spaces: all cron parts must be space-separated
+		if (isValidCronExp(exp)) {
+			val node = NodeModelUtils.getNode(exp)
+			val String[] parts = node.text.trim.split(" ")
+			var expectedSize = if(exp.year == null) 6 else 7
 
-				if (parts.length != expectedSize)
-					warning("Chronological sub-expressions must be separated by one space",
-						PascaniPackage.Literals.CRON_EXPRESSION__SECONDS, EXPECTED_WHITESPACE)
-			}
+			if (parts.length != expectedSize)
+				warning("Chronological sub-expressions must be separated by one space",
+					PascaniPackage.Literals.CRON_EXPRESSION__SECONDS, EXPECTED_WHITESPACE)
+		}
 
-			// Quartz limitations
-			if (isValidCronExp(exp) &&
-				!(isCronElementNoSpecificValue(exp.dayOfMonth) || isCronElementNoSpecificValue(exp.dayOfWeek))) {
-				error("Support for specifying both a day-of-month and a day-of-week value is not complete" +
-					". You must currently use the '?' character in one of these fields",
-					PascaniPackage.Literals.CRON_EXPRESSION__DAY_OF_WEEK, UNSUPPORTED_OPERATION)
-			}
-		} else {
-			if (!cronConstants.contains(exp.constant)) {
-				error("A chronological constant is expected, instead '" + exp.constant + "' was found",
-					PascaniPackage.Literals.CRON_EXPRESSION__CONSTANT, EXPECTED_CRON_CONSTANT)
-			}
+		// Quartz limitations
+		if (isValidCronExp(exp) &&
+			!(isCronElementNoSpecificValue(exp.dayOfMonth) || isCronElementNoSpecificValue(exp.dayOfWeek))) {
+			error("Support for specifying both a day-of-month and a day-of-week value is not complete" +
+				". You must currently use the '?' character in one of these fields",
+				PascaniPackage.Literals.CRON_EXPRESSION__DAY_OF_WEEK, UNSUPPORTED_OPERATION)
 		}
 	}
 

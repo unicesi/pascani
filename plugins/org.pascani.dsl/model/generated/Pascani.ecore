@@ -24,9 +24,9 @@
         eType="#//ImportEventDeclaration" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ImportEventDeclaration">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="monitor" eType="#//Monitor"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="events" unique="false"
         upperBound="-1" eType="#//Event"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="monitor" eType="#//Monitor"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Namespace" eSuperTypes="#//TypeDeclaration platform:/resource/org.eclipse.xtext.xbase/model/Xbase.ecore#//XExpression"/>
   <eClassifiers xsi:type="ecore:EClass" name="Handler" eSuperTypes="platform:/resource/org.eclipse.xtext.xbase/model/Xbase.ecore#//XExpression">
@@ -69,16 +69,6 @@
     <eLiterals name="and" literal="and"/>
     <eLiterals name="or" value="1" literal="or"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EEnum" name="CronConstant">
-    <eLiterals name="secondly" literal="secondly"/>
-    <eLiterals name="minutely" value="1" literal="minutely"/>
-    <eLiterals name="hourly" value="2" literal="hourly"/>
-    <eLiterals name="daily" value="3" literal="daily"/>
-    <eLiterals name="weekly" value="4" literal="weekly"/>
-    <eLiterals name="monthly" value="5" literal="monthly"/>
-    <eLiterals name="annually" value="6" literal="annually"/>
-    <eLiterals name="yearly" value="7" literal="yearly"/>
-  </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="CronExpression" eSuperTypes="platform:/resource/org.eclipse.xtext.xbase/model/Xbase.ecore#//XExpression">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="lsymbol" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="seconds" eType="#//CronElement"
@@ -96,7 +86,6 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="year" eType="#//CronElement"
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="rsymbol" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="constant" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="CronElement"/>
   <eClassifiers xsi:type="ecore:EClass" name="CronElementList" eSuperTypes="#//CronElement">

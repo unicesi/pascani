@@ -85,11 +85,6 @@ class PascaniSemanticHighlightingCalculator extends XbaseHighlightingCalculator 
 		}
 
 		override Void caseCronExpression(CronExpression object) {
-			// Constants
-			val constant = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_Constant());
-			highlightNode(constant, PascaniHighlightingConfiguration.STRING_ID);
-
-			// Expression
 			val leftSymbol = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_Lsymbol())
 			val rightSymbol = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getCronExpression_Rsymbol())
 			

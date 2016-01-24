@@ -46,7 +46,7 @@ ImportEventsSection
 	;
 	
 ImportEventDeclaration
-	:	'import' events += [Event | ID] (',' events += [Event | ID])* 'from' monitor = [Monitor | QualifiedName]  ->';'?
+	:	'from' monitor = [Monitor | QualifiedName] 'import' events += [Event | ID] (',' events += [Event | ID])*  ->';'?
 	;
 	
 MonitorBlockExpression returns XBlockExpression
@@ -107,32 +107,6 @@ EventSpecifier
 	|	'(' RelationalEventSpecifier ')'
 	;
 
-/*
- * This enumeration is added only for content assist purposes.
- * 
- * Equivalences:
- * 
- * 	:	reboot		// Run at startup - Not supported
- *	|	yearly		// 0 0 0 1 1 *
- *	|	annually	// Equal to @yearly
- *	|	monthly		// 0 0 0 1 * *
- *	|	weekly		// 0 0 0 * * 0
- *	|	daily		// 0 0 0 * * *
- *	|	hourly		// 0 0 * * * *
- *	|	minutely	// 0 * * * * *
- *	|	secondly	// * * * * * *
- */
-enum CronConstant
-	:	secondly
-	|	minutely
-	|	hourly
-	|	daily
-	|	weekly
-	|	monthly
-	|	annually
-	|	yearly
-	;
-
 CronExpression
 	:	lsymbol = '«'
 			seconds 	= CronElement
@@ -142,9 +116,6 @@ CronExpression
 			month 		= CronElement
 			dayOfWeek 	= CronElement
 			(year 		= CronElement)?
-		rsymbol = '»'
-	| 	lsymbol = '«' 
-			constant = ID 
 		rsymbol = '»'
 	;
 
