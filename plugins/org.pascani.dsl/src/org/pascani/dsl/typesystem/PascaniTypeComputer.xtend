@@ -15,7 +15,7 @@ class PascaniTypeComputer extends XbaseTypeComputer {
 	}
 	
 	def protected _computeTypes(CronExpression expression, ITypeComputationState state) {
-		val result = getRawTypeForName(String, state);
+		val result = getRawTypeForName(org.quartz.CronExpression, state);
 		state.acceptActualType(result);
 	}
 

@@ -4,8 +4,8 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.compiler.XbaseCompiler
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
-import org.pascani.dsl.pascani.CronExpression
 import org.pascani.dsl.lib.util.CronConstant
+import org.pascani.dsl.pascani.CronExpression
 
 class PascaniCompiler extends XbaseCompiler {
 
@@ -24,11 +24,11 @@ class PascaniCompiler extends XbaseCompiler {
 	}
 
 	def void _toJavaExpression(CronExpression exp, ITreeAppendable appendable) {
-		appendable.append("\"");
+		var _expr = "";
 		if (exp.constant != null) {
 			val constant = exp.constant.toUpperCase
 			if (CronConstant.values.map[v|v.toString].contains(constant))
-				appendable.append(CronConstant.valueOf(constant).expression())
+				_expr = CronConstant.valueOf(constant).expression()
 		} else {
 			val seconds = NodeModelUtils.getNode(exp.seconds).text
 			val minutes = NodeModelUtils.getNode(exp.minutes).text
@@ -36,10 +36,15 @@ class PascaniCompiler extends XbaseCompiler {
 			val dayOfMonth = NodeModelUtils.getNode(exp.dayOfMonth).text
 			val month = NodeModelUtils.getNode(exp.month).text
 			val dayOfWeek = NodeModelUtils.getNode(exp.dayOfWeek).text
-			val year = if(exp.year != null) NodeModelUtils.getNode(exp.year).text
-			appendable.append('''«seconds»«minutes»«hours»«dayOfMonth»«month»«dayOfWeek»«year»''')
+			var year = ""
+			if (exp.year != null)
+				year = NodeModelUtils.getNode(exp.year).text
+			_expr = seconds + minutes + hours + dayOfMonth + month + dayOfWeek + year
 		}
-		appendable.append("\"");
+		appendable.append(org.pascani.dsl.lib.util.Exceptions)
+		appendable.append('''.sneakyInitializer(''')
+		appendable.append(org.quartz.CronExpression)
+		appendable.append('''.class, "«_expr»")''')
 	}
 
 }
