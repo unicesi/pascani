@@ -227,7 +227,7 @@ public class PascaniUtils {
 		}
 		String[] data = target.split("/");
 		String parent = data[0] + "/" + data[1];
-		eval("pascani-remove-intent(" + parent + ", " + target + ", " + routingKey + ");");
+		eval("pascani-remove-intent(" + parent + ", " + target + ", \"" + routingKey + "\");");
 	}
 
 	/**
