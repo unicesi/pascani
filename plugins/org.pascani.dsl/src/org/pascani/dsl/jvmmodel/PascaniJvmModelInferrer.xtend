@@ -416,7 +416,8 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					try {
 						«IF (!isChangeEvent)»
 							«IF(!isProxy)»
-								this.«names.get("probe")» = «typeRef(PascaniUtils)».newProbe(this.«names.get("emitter")», routingKey);
+								this.«names.get("probe")» = 
+									«typeRef(PascaniUtils)».newProbe(this.«names.get("emitter")», routingKey, this.«names.get("type")», true);
 							«ELSE»
 								this.«names.get("probe")» = new «typeRef(ProbeProxy)»(routingKey);
 							«ENDIF»
