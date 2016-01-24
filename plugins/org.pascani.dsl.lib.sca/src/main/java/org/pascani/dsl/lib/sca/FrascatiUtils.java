@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -157,11 +158,11 @@ public class FrascatiUtils {
 	 * 
 	 * @param file
 	 *            The file containing the FScript procedure to load
-	 * @return A String containing the names of the registered procedures
+	 * @return A list containing the names of the registered procedures
 	 * @throws ScriptException
 	 *             if something bad happens!
 	 */
-	public static String registerScript(File file)
+	public static List<String> registerScript(File file)
 			throws IOException, ScriptException {
 		return registerScript(file, DEFAULT_BINDING_URI);
 	}
@@ -173,11 +174,11 @@ public class FrascatiUtils {
 	 *            The file containing the FScript procedure to load
 	 * @param bindingUri
 	 *            The URI where the FraSCAti runtime is running
-	 * @return A String containing the names of the registered procedures
+	 * @return A list containing the names of the registered procedures
 	 * @throws ScriptException
 	 *             if something bad happens!
 	 */
-	public static String registerScript(File file, URI bindingUri)
+	public static List<String> registerScript(File file, URI bindingUri)
 			throws IOException, ScriptException {
 		return registerScript(new String(FileUtil.getBytesFromFile(file)),
 				bindingUri);
@@ -188,11 +189,11 @@ public class FrascatiUtils {
 	 * 
 	 * @param script
 	 *            The FScript procedure to load
-	 * @return TODO
+	 * @return A list containing the names of the registered procedures
 	 * @throws ScriptException
 	 *             if something bad happens!
 	 */
-	public static String registerScript(String script) throws ScriptException {
+	public static List<String> registerScript(String script) throws ScriptException {
 		return registerScript(script, DEFAULT_BINDING_URI);
 	}
 
@@ -203,13 +204,15 @@ public class FrascatiUtils {
 	 *            The FScript procedure to load
 	 * @param bindingUri
 	 *            The URI where the FraSCAti runtime is running
-	 * @return A String containing the names of the registered procedures
+	 * @return A list containing the names of the registered procedures
 	 * @throws ScriptException
 	 *             if something bad happens!
 	 */
-	public static String registerScript(String script, URI bindingUri)
+	public static List<String> registerScript(String script, URI bindingUri)
 			throws ScriptException {
-		return getReconfigurationInstance(bindingUri).register(script);
+		String result = getReconfigurationInstance(bindingUri).register(script);
+		String[] names = result.substring(1, result.length() - 2).split(", ");
+		return Arrays.asList(names);
 	}
 
 	/**
