@@ -30,9 +30,15 @@ public class InvokeIntentHandler extends AbstractIntentHandler {
 
 	public Object invoke(IntentJoinPoint ijp) throws Throwable {
 		UUID transactionId = UUID.randomUUID();
+		String[] parameterTypes = 
+				new String[ijp.getMethod().getParameterTypes().length];
+		for (int i = 0; i < parameterTypes.length; i++) {
+			parameterTypes[i] = 
+					ijp.getMethod().getParameterTypes()[i].getCanonicalName();
+		}
 		InvokeEvent invokeEvent = new InvokeEvent(transactionId,
-				ijp.getMethod().getDeclaringClass(), ijp.getMethod().getName(),
-				ijp.getMethod().getParameterTypes(), ijp.getArguments());
+				ijp.getMethod().getDeclaringClass().getCanonicalName(),
+				ijp.getMethod().getName(), parameterTypes);
 		super.handler.handle(invokeEvent);
 		Object _return = ijp.proceed();
 		return _return;

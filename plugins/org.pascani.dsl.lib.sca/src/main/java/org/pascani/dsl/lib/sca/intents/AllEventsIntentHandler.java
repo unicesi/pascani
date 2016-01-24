@@ -33,9 +33,16 @@ public class AllEventsIntentHandler extends AbstractIntentHandler {
 
 	public Object invoke(IntentJoinPoint ijp) throws Throwable {
 		UUID transactionId = UUID.randomUUID();
+		String[] parameterTypes = 
+				new String[ijp.getMethod().getParameterTypes().length];
+		for (int i = 0; i < parameterTypes.length; i++) {
+			parameterTypes[i] = 
+					ijp.getMethod().getParameterTypes()[i].getCanonicalName();
+		}
 		InvokeEvent invokeEvent = new InvokeEvent(transactionId,
-				ijp.getMethod().getDeclaringClass(), ijp.getMethod().getName(),
-				ijp.getMethod().getParameterTypes(), ijp.getArguments());
+				ijp.getMethod().getDeclaringClass().getCanonicalName(), 
+				ijp.getMethod().getName(),
+				parameterTypes);
 		super.handler.handle(invokeEvent);
 		long start = System.nanoTime();
 		Object _return = null;
@@ -43,9 +50,10 @@ public class AllEventsIntentHandler extends AbstractIntentHandler {
 			_return = ijp.proceed();
 		} catch (Throwable cause) {
 			ExceptionEvent exceptionEvent = new ExceptionEvent(transactionId,
-					new Exception(cause), ijp.getMethod().getDeclaringClass(),
+					new Exception(cause), 
+					ijp.getMethod().getDeclaringClass().getCanonicalName(),
 					ijp.getMethod().getName(),
-					ijp.getMethod().getParameterTypes(), ijp.getArguments());
+					parameterTypes);
 			super.handler.handle(exceptionEvent);
 			throw new Throwable(cause);
 		}
@@ -53,8 +61,9 @@ public class AllEventsIntentHandler extends AbstractIntentHandler {
 		TimeLapseEvent timeLapseEvent = new TimeLapseEvent(transactionId, start, end);
 		super.handler.handle(timeLapseEvent);
 		ReturnEvent returnEvent = new ReturnEvent(transactionId,
-				ijp.getMethod().getDeclaringClass(), ijp.getMethod().getName(),
-				ijp.getMethod().getParameterTypes(), _return);
+				ijp.getMethod().getDeclaringClass().getCanonicalName(), 
+				ijp.getMethod().getName(),
+				parameterTypes);
 		super.handler.handle(returnEvent);
 		return _return;
 	}

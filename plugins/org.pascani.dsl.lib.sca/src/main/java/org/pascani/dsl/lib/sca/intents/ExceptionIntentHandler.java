@@ -30,14 +30,20 @@ public class ExceptionIntentHandler extends AbstractIntentHandler {
 
 	public Object invoke(IntentJoinPoint ijp) throws Throwable {
 		UUID transactionId = UUID.randomUUID();
+		String[] parameterTypes = 
+				new String[ijp.getMethod().getParameterTypes().length];
+		for (int i = 0; i < parameterTypes.length; i++) {
+			parameterTypes[i] = 
+					ijp.getMethod().getParameterTypes()[i].getCanonicalName();
+		}
 		Object _return = null;
 		try {
 			_return = ijp.proceed();
 		} catch (Throwable cause) {
 			ExceptionEvent exceptionEvent = new ExceptionEvent(transactionId,
-					new Exception(cause), ijp.getMethod().getDeclaringClass(),
-					ijp.getMethod().getName(),
-					ijp.getMethod().getParameterTypes(), ijp.getArguments());
+					new Exception(cause),
+					ijp.getMethod().getDeclaringClass().getCanonicalName(),
+					ijp.getMethod().getName(), parameterTypes);
 			super.handler.handle(exceptionEvent);
 			throw new Throwable(cause);
 		}

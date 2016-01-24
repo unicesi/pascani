@@ -30,10 +30,16 @@ public class ReturnIntentHandler extends AbstractIntentHandler {
 
 	public Object invoke(IntentJoinPoint ijp) throws Throwable {
 		UUID transactionId = UUID.randomUUID();
+		String[] parameterTypes = 
+				new String[ijp.getMethod().getParameterTypes().length];
+		for (int i = 0; i < parameterTypes.length; i++) {
+			parameterTypes[i] = 
+					ijp.getMethod().getParameterTypes()[i].getCanonicalName();
+		}
 		Object _return = ijp.proceed();
 		ReturnEvent returnEvent = new ReturnEvent(transactionId,
-				ijp.getMethod().getDeclaringClass(), ijp.getMethod().getName(),
-				ijp.getMethod().getParameterTypes(), _return);
+				ijp.getMethod().getDeclaringClass().getCanonicalName(),
+				ijp.getMethod().getName(), parameterTypes);
 		super.handler.handle(returnEvent);
 		return _return;
 	}
