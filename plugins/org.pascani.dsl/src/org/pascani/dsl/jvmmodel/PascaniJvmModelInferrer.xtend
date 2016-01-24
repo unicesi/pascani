@@ -401,7 +401,9 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			
 			members += e.toConstructor[
 				body = '''
-					super.isProxyEvent = «isProxy»;
+					«IF isProxy»
+						super.isProxyEvent = «isProxy»;
+					«ENDIF»
 					initialize();
 				'''
 			]
