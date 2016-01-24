@@ -204,7 +204,7 @@ public class PascaniUtils {
 		return newProbe(target, routingKey, "pascani-all-events-intent",
 				activateProducer, FrascatiUtils.DEFAULT_BINDING_URI);
 	}
-
+	
 	/**
 	 * Introduces a new SCA intent in the specified FraSCAti runtime, bound to
 	 * the specified target and returns a proxy pointing to the corresponding
@@ -234,15 +234,7 @@ public class PascaniUtils {
 	public static ProbeProxy newProbe(String target, String routingKey,
 			Class<? extends Event<?>> eventType, boolean activateProducer,
 			URI bindingUri) throws IOException, ScriptException {
-		String intentName = "";
-		if (eventType.equals(TimeLapseEvent.class))
-			intentName = "pascani-performance-intent";
-		else if (eventType.equals(ExceptionEvent.class))
-			intentName = "pascani-exception-intent";
-		else if (eventType.equals(InvokeEvent.class))
-			intentName = "pascani-invoke-intent";
-		else if (eventType.equals(ReturnEvent.class))
-			intentName = "pascani-return-intent";
+		String intentName = intentName(eventType);
 		return newProbe(target, routingKey, intentName, activateProducer, bindingUri);
 	}
 	
@@ -319,6 +311,26 @@ public class PascaniUtils {
 	public static void removeProbe(String target, String routingKey)
 			throws IOException, ScriptException {
 		removeProbe(target, routingKey, FrascatiUtils.DEFAULT_BINDING_URI);
+	}
+	
+	/**
+	 * Selects the SCA intent corresponding to the given {@link Event} type
+	 * 
+	 * @param eventType
+	 *            The type of Event
+	 * @return the name of the corresponding Pascani intent
+	 */
+	public static String intentName(Class<? extends Event<?>> eventType) {
+		String intentName = null;
+		if (eventType.equals(TimeLapseEvent.class))
+			intentName = "pascani-performance-intent";
+		else if (eventType.equals(ExceptionEvent.class))
+			intentName = "pascani-exception-intent";
+		else if (eventType.equals(InvokeEvent.class))
+			intentName = "pascani-invoke-intent";
+		else if (eventType.equals(ReturnEvent.class))
+			intentName = "pascani-return-intent";
+		return intentName;
 	}
 	
 	/**
