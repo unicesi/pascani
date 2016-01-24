@@ -42,22 +42,17 @@ public class ExceptionEvent extends Event<Exception> {
 	/**
 	 * The class in which the exception was raised
 	 */
-	private final Class<?> clazz;
+	private final String clazz;
 
 	/**
 	 * The method that raised the exception
 	 */
-	private final String methodName;
+	private final String method;
 
 	/**
 	 * The formal parameters of the method
 	 */
-	private final Class<?>[] parameters;
-
-	/**
-	 * The arguments with which the method was called
-	 */
-	private final Object[] arguments;
+	private final String[] parameters;
 
 	/**
 	 * Creates an instance having all of the parameters
@@ -68,42 +63,35 @@ public class ExceptionEvent extends Event<Exception> {
 	 *            The actual Exception
 	 * @param clazz
 	 *            The class in which the exception was raised
-	 * @param methodName
-	 *            The method that raised the exception
+	 * @param method
+	 *            The method that threw the exception
 	 * @param parameters
 	 *            The formal parameters of the method
-	 * @param arguments
-	 *            The arguments with which the method was called
 	 */
 	public ExceptionEvent(final UUID transactionId, final Exception exception,
-			final Class<?> clazz, final String methodName,
-			final Class<?>[] parameters, final Object... arguments) {
+			final String clazz, final String method,
+			final String[] parameters) {
 		super(transactionId);
 		this.exception = exception;
 		this.clazz = clazz;
-		this.methodName = methodName;
+		this.method = method;
 		this.parameters = parameters;
-		this.arguments = arguments;
 	}
 
 	@Override public Exception value() {
 		return this.exception;
 	}
 
-	public Class<?> clazz() {
+	public String clazz() {
 		return this.clazz;
 	}
 
-	public String methodName() {
-		return this.methodName;
+	public String method() {
+		return this.method;
 	}
 
-	public Class<?>[] parameters() {
+	public String[] parameters() {
 		return this.parameters;
-	}
-
-	public Object[] arguments() {
-		return this.arguments;
 	}
 
 	/**
@@ -115,7 +103,7 @@ public class ExceptionEvent extends Event<Exception> {
 		sb.append(this.transactionId + "\t");
 		sb.append(this.identifier + "\t");
 		sb.append(this.clazz + "\t");
-		sb.append(this.methodName + "\t");
+		sb.append(this.method + "\t");
 		sb.append(this.parameters + "\t");
 		sb.append(this.timestamp + "\t");
 		sb.append(value().toString());

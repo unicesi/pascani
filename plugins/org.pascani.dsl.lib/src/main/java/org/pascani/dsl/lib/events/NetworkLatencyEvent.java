@@ -57,32 +57,22 @@ public class NetworkLatencyEvent extends Event<Double> {
 	/**
 	 * The class performing the method call
 	 */
-	private final Class<?> caller;
+	private final String caller;
 
 	/**
 	 * The class providing the method
 	 */
-	private final Class<?> callee;
+	private final String callee;
 
 	/**
-	 * The actual method return
+	 * The invoked method
 	 */
-	private final Object _return;
-
-	/**
-	 * The name of the method
-	 */
-	private final String methodName;
+	private final String method;
 
 	/**
 	 * The formal parameters of the method
 	 */
-	private final Class<?>[] parameters;
-
-	/**
-	 * The arguments with which the method was called
-	 */
-	private final Object[] arguments;
+	private final String[] parameters;
 
 	/**
 	 * Creates an instance having all of the parameters
@@ -97,29 +87,22 @@ public class NetworkLatencyEvent extends Event<Double> {
 	 *            The class performing the method call
 	 * @param callee
 	 *            The class from which the method is member
-	 * @param _return
-	 *            The actual method return
-	 * @param methodName
+	 * @param method
 	 *            The name of the method
 	 * @param parameters
 	 *            The formal parameters of the method
-	 * @param arguments
-	 *            The arguments with which the method was called
 	 */
 	public NetworkLatencyEvent(final UUID transactionId, final long start,
-			final long end, final Class<?> caller, final Class<?> callee,
-			final Object _return, final String methodName,
-			final Class<?>[] parameters, Object... arguments) {
+			final long end, final String caller, final String callee,
+			final String method, final String[] parameters) {
 		super(transactionId);
 		this.start = start;
 		this.end = end;
 		this.latency = this.end - this.start;
 		this.caller = caller;
 		this.callee = callee;
-		this._return = _return;
-		this.methodName = methodName;
+		this.method = method;
 		this.parameters = parameters;
-		this.arguments = arguments;
 	}
 
 	/**
@@ -138,21 +121,15 @@ public class NetworkLatencyEvent extends Event<Double> {
 	 *            The class performing the method call
 	 * @param callee
 	 *            The class from which the method is member
-	 * @param _return
-	 *            The actual method return
-	 * @param methodName
+	 * @param method
 	 *            The name of the method
 	 * @param parameters
 	 *            The formal parameters of the method
-	 * @param arguments
-	 *            The arguments with which the method was called
 	 */
 	public NetworkLatencyEvent(final UUID transactionId, final long start,
-			final Class<?> caller, final Class<?> callee, final Object _return,
-			final String methodName, final Class<?>[] parameters,
-			Object... arguments) {
-		this(transactionId, start, 0, caller, callee, _return, methodName,
-				parameters, arguments);
+			final String caller, final String callee, final String method,
+			final String[] parameters) {
+		this(transactionId, start, 0, caller, callee, method, parameters);
 	}
 
 	/**
@@ -164,10 +141,10 @@ public class NetworkLatencyEvent extends Event<Double> {
 	 * @param end
 	 *            The final timestamp
 	 */
-	public NetworkLatencyEvent(final NetworkLatencyEvent event, final long end) {
+	public NetworkLatencyEvent(final NetworkLatencyEvent event,
+			final long end) {
 		this(event.transactionId, event.start, end, event.caller, event.callee,
-				event._return, event.methodName, event.parameters,
-				event.arguments);
+				event.method, event.parameters);
 	}
 
 	@Override public Double value() {
@@ -182,28 +159,20 @@ public class NetworkLatencyEvent extends Event<Double> {
 		return this.end;
 	}
 
-	public Class<?> methodCaller() {
+	public String methodCaller() {
 		return this.caller;
 	}
 
-	public Class<?> methodProvider() {
+	public String methodProvider() {
 		return this.callee;
 	}
 
-	public String methodName() {
-		return this.methodName;
+	public String method() {
+		return this.method;
 	}
 
-	public Class<?>[] methodParameters() {
+	public String[] methodParameters() {
 		return this.parameters;
-	}
-
-	public Object[] methodArguments() {
-		return this.arguments;
-	}
-
-	public Object methodReturn() {
-		return this._return;
 	}
 
 	/**
@@ -230,9 +199,9 @@ public class NetworkLatencyEvent extends Event<Double> {
 		sb.append(this.getClass().getCanonicalName() + "\t");
 		sb.append(this.transactionId + "\t");
 		sb.append(this.identifier + "\t");
-		sb.append(this.caller.getCanonicalName() + "\t");
-		sb.append(this.callee.getCanonicalName() + "\t");
-		sb.append(this.methodName + "\t");
+		sb.append(this.caller + "\t");
+		sb.append(this.callee + "\t");
+		sb.append(this.method + "\t");
 		sb.append(Arrays.toString(parameters) + "\t");
 		sb.append(this.start + "\t");
 		sb.append(this.end + "\t");

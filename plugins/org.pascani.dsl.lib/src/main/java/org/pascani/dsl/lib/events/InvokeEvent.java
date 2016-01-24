@@ -39,22 +39,17 @@ public class InvokeEvent extends Event<Long> {
 	/**
 	 * The class providing the method
 	 */
-	private final Class<?> clazz;
+	private final String clazz;
 
 	/**
-	 * The name of the method
+	 * The invoked method
 	 */
-	private final String methodName;
+	private final String method;
 
 	/**
 	 * The formal parameters of the method
 	 */
-	private final Class<?>[] parameters;
-
-	/**
-	 * The arguments with which the method was called
-	 */
-	private final Object[] arguments;
+	private final String[] parameters;
 
 	/**
 	 * Creates an instance having all of the parameters
@@ -63,41 +58,33 @@ public class InvokeEvent extends Event<Long> {
 	 *            The transaction of which this event makes part
 	 * @param clazz
 	 *            The class from which the method is member
-	 * @param methodName
+	 * @param method
 	 *            The name of the method
 	 * @param parameters
 	 *            The formal parameters of the method
-	 * @param arguments
-	 *            The arguments with which the method was called
 	 */
-	public InvokeEvent(final UUID transactionId, final Class<?> clazz,
-			final String methodName, final Class<?>[] parameters,
-			Object... arguments) {
+	public InvokeEvent(final UUID transactionId, final String clazz,
+			final String method, final String[] parameters) {
 		super(transactionId);
 		this.clazz = clazz;
-		this.methodName = methodName;
+		this.method = method;
 		this.parameters = parameters;
-		this.arguments = arguments;
 	}
 
 	@Override public Long value() {
 		return this.timestamp;
 	}
 
-	public Class<?> methodProvider() {
+	public String methodProvider() {
 		return this.clazz;
 	}
 
-	public String methodName() {
-		return this.methodName;
+	public String method() {
+		return this.method;
 	}
 
-	public Class<?>[] methodParameters() {
+	public String[] methodParameters() {
 		return this.parameters;
-	}
-
-	public Object[] methodArguments() {
-		return this.arguments;
 	}
 
 	/**
@@ -108,8 +95,8 @@ public class InvokeEvent extends Event<Long> {
 		sb.append(this.getClass().getCanonicalName() + "\t");
 		sb.append(this.transactionId + "\t");
 		sb.append(this.identifier + "\t");
-		sb.append(this.clazz.getCanonicalName() + "\t");
-		sb.append(this.methodName + "\t");
+		sb.append(this.clazz + "\t");
+		sb.append(this.method + "\t");
 		sb.append(Arrays.toString(parameters) + "\t");
 		sb.append(value());
 

@@ -39,22 +39,17 @@ public class ReturnEvent extends Event<Long> {
 	/**
 	 * The class providing the method
 	 */
-	private final Class<?> clazz;
+	private final String clazz;
 
 	/**
 	 * The name of the method
 	 */
-	private final String methodName;
+	private final String method;
 
 	/**
 	 * The formal parameters of the method
 	 */
-	private final Class<?>[] parameters;
-
-	/**
-	 * The actual method return
-	 */
-	private final Object _return;
+	private final String[] parameters;
 
 	/**
 	 * Creates an instance having all of the parameters
@@ -70,33 +65,28 @@ public class ReturnEvent extends Event<Long> {
 	 * @param _return
 	 *            The actual method return
 	 */
-	public ReturnEvent(final UUID transactionId, final Class<?> clazz,
-			final String methodName, final Class<?>[] parameters, Object _return) {
+	public ReturnEvent(final UUID transactionId, final String clazz,
+			final String method, final String[] parameters) {
 		super(transactionId);
 		this.clazz = clazz;
-		this.methodName = methodName;
+		this.method = method;
 		this.parameters = parameters;
-		this._return = _return;
 	}
 
 	@Override public Long value() {
 		return this.timestamp;
 	}
 
-	public Class<?> methodProvider() {
+	public String methodProvider() {
 		return this.clazz;
 	}
 
-	public String methodName() {
-		return this.methodName;
+	public String method() {
+		return this.method;
 	}
 
-	public Class<?>[] methodParameters() {
+	public String[] methodParameters() {
 		return this.parameters;
-	}
-
-	public Object methodReturn() {
-		return this._return;
 	}
 
 	/**
@@ -107,8 +97,8 @@ public class ReturnEvent extends Event<Long> {
 		sb.append(this.getClass().getCanonicalName() + "\t");
 		sb.append(this.transactionId + "\t");
 		sb.append(this.identifier + "\t");
-		sb.append(this.clazz.getCanonicalName() + "\t");
-		sb.append(this.methodName + "\t");
+		sb.append(this.clazz + "\t");
+		sb.append(this.method + "\t");
 		sb.append(Arrays.toString(parameters) + "\t");
 		sb.append(this.value());
 
