@@ -91,10 +91,9 @@ class NetworkLatencyTemplates {
 					System.nanoTime(),
 					«eventVar».methodCaller(),
 					«eventVar».methodProvider(),
-					«_return»,
-					«eventVar».methodName(),
+					«eventVar».method(),
 					«eventVar».methodParameters(),
-					«eventVar».methodArguments()
+					«_return»
 				);
 				
 				return «_returnEvent»;
@@ -121,7 +120,7 @@ class NetworkLatencyTemplates {
 	 */
 	def static String getParameterTypesArray(String arrayVar, Collection<String> paramTypes) {
 		'''
-			Class<?>[] «arrayVar» = new Class<?>[«paramTypes.size»];
+			String[] «arrayVar» = new String[«paramTypes.size»];
 			«FOR index : 0 ..< paramTypes.size»
 				«arrayVar»[«index»] = «paramTypes.get(index)»;
 			«ENDFOR»

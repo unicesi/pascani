@@ -230,7 +230,7 @@ public class LatencyProbeGenerator {
 							+ name.substring(name.lastIndexOf('>') + 1);
 				}
 
-				return Types.toSimpleName(name) + ".class";
+				return Types.toSimpleName(name) + ".class.getCanonicalName()";
 			}
 		};
 
@@ -258,12 +258,11 @@ public class LatencyProbeGenerator {
 
 			eventParams.add("UUID.randomUUID()");
 			eventParams.add(startParam);
-			eventParams.add(_interface.getName() + ".class");
-			eventParams.add(_interface.getName() + ".class");
-			eventParams.add("null");
+			eventParams.add(_interface.getName() + ".class.getCanonicalName()");
+			eventParams.add(_interface.getName() + ".class.getCanonicalName()");
 			eventParams.add("\"" + classMethod.getName() + "\"");
 			eventParams.add(paramTypesArray);
-			eventParams.add(Joiner.on(", ").join(names));
+			eventParams.add("null");
 
 			String body = NetworkLatencyTemplates.initialAdapterMethod(
 					startParam, eventParam, eventParams, exceptionParam,
