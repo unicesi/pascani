@@ -28,7 +28,11 @@ class PascaniQualifiedNameProvider extends DefaultDeclarativeQualifiedNameProvid
 	override QualifiedName getFullyQualifiedName(EObject obj) {
 		switch (obj) {
 			// Allow to import events in monitors using simple names instead of fully qualified names
-			Event: return QualifiedName.create(obj.name)
+			Event: {
+				if (obj.name == null)
+					return QualifiedName.create("")
+				return QualifiedName.create(obj.name)
+			}
 			default: return super.getFullyQualifiedName(obj)
 		}
 	}

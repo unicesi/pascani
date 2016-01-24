@@ -171,18 +171,20 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 					
 					Handler: {
-						if (e.param.parameterType.type.qualifiedName.equals(IntervalEvent.canonicalName)) {
-							nestedTypes += e.createJobClass
-						} else {
-							val innerClass = e.createNonPeriodicClass(monitor.name + "_")
-							nestedTypes += innerClass
-							fields +=
-								e.toField(e.name,
-									typeRef(EventObserver, typeRef(e.param.parameterType.type.qualifiedName))) [
-									^final = true
-									^static = true
-									initializer = '''new «innerClass.simpleName»()'''
-								]
+						if (e.param !== null && e.param.parameterType != null) {
+							if (e.param.parameterType.type.qualifiedName.equals(IntervalEvent.canonicalName)) {
+								nestedTypes += e.createJobClass
+							} else {
+								val innerClass = e.createNonPeriodicClass(monitor.name + "_")
+								nestedTypes += innerClass
+								fields +=
+									e.toField(e.name,
+										typeRef(EventObserver, typeRef(e.param.parameterType.type.qualifiedName))) [
+										^final = true
+										^static = true
+										initializer = '''new «innerClass.simpleName»()'''
+									]
+							}	
 						}
 					}
 					
@@ -382,7 +384,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				initializer = '''«eventTypeRef».class'''
 			]
 			
-			if (!isProxy) {
+			if (!isProxy && e.emitter.emitter != null) {
 				members += e.emitter.toField(names.get("emitter"), e.emitter.emitter.inferredType) [
 					initializer = e.emitter.emitter
 				]
