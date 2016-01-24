@@ -113,6 +113,14 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			annotations += annotationRef(Scope, "COMPOSITE")
 			superTypes += typeRef(org.pascani.dsl.lib.infrastructure.Monitor)
 			
+			if (monitor.usings != null) {
+				for (namespace : monitor.usings.filter[n|n.name != null]) {
+					fields += namespace.toField(namespace.name, typeRef(namespace.fullyQualifiedName.toString)) [
+						^static = true
+					]
+				}
+			}
+			
 			if (monitor.eventImports != null) {
 				for (^import : monitor.eventImports.importDeclarations) {
 					for (event : ^import.events) {
@@ -249,14 +257,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					«events.map[e|e.name].join("\n", [e|e + ".resume();"])»
 				'''
 			]
-			
-			if (monitor.usings != null) {
-				for (namespace : monitor.usings.filter[n|n.name != null]) {
-					fields += namespace.toField(namespace.name, typeRef(namespace.fullyQualifiedName.toString)) [
-						^static = true
-					]
-				}
-			}
 			
 			// Add members in an organized way
 			members += fields
