@@ -18,6 +18,9 @@
  */
 package org.pascani.dsl.lib.util;
 
+import org.pascani.dsl.lib.util.Exceptions;
+import org.quartz.CronExpression;
+
 /**
  * This enumeration facilitates the use of cron expressions by allowing to
  * define them from a set of constants.
@@ -35,7 +38,8 @@ public enum CronConstant {
 		this.expression = expression;
 	}
 
-	public String expression() {
-		return this.expression;
+	public CronExpression expression() {
+		return Exceptions.sneakyInitializer(CronExpression.class,
+				this.expression);
 	}
 }
