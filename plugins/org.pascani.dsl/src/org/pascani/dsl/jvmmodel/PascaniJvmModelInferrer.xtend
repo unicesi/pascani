@@ -67,6 +67,7 @@ import org.quartz.JobDataMap
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
 import org.quartz.CronExpression
+import org.pascani.dsl.lib.sca.FrascatiUtils
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -414,19 +415,27 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					final «typeRef(Context)» context = «typeRef(Context)».«Context.MONITOR.toString»;
 					final String routingKey = «routingKey.get(0)»;
 					final String consumerTag = "«monitor.fullyQualifiedName».«e.name»";
-					«IF (isChangeEvent)»
+					«IF isChangeEvent»
 						final String variable = routingKey + ".«getEmitterFQN(e.emitter.emitter).toList.reverseView.drop(1).join(".")»";
 					«ENDIF»
 					try {
-						«IF (!isChangeEvent)»
-							«IF(!isProxy)»
-								this.«names.get("probe")» = 
-									«typeRef(PascaniUtils)».newProbe(this.«names.get("emitter")», routingKey, this.«names.get("type")», true);
+						«IF !isChangeEvent»
+							«IF !isProxy»
+								if (bindingUri == null)
+									this.bindingUri = «typeRef(FrascatiUtils)».DEFAULT_BINDING_URI;
+								final String intentName = «typeRef(PascaniUtils)».intentName(this.«names.get("type")»);
+								«typeRef(PascaniUtils)».newIntent(this.«names.get("emitter")», routingKey, intentName, bindingUri);
+								if (useProbe) {
+									«typeRef(PascaniUtils)».resetProbe(this.«names.get("emitter")», routingKey, bindingUri);
+									this.«names.get("probe")» = new «typeRef(ProbeProxy)»(routingKey);
+								}
+								«typeRef(PascaniUtils)».resetProducer(this.«names.get("emitter")», routingKey, bindingUri);
 							«ELSE»
-								this.«names.get("probe")» = new «typeRef(ProbeProxy)»(routingKey);
+								if (useProbe)
+									this.«names.get("probe")» = new «typeRef(ProbeProxy)»(routingKey);
 							«ENDIF»
 						«ENDIF»
-						this.«names.get("consumer")» = initializeConsumer(context, routingKey, consumerTag«IF (isChangeEvent)», variable«ENDIF»);
+						this.«names.get("consumer")» = initializeConsumer(context, routingKey, consumerTag«IF isChangeEvent», variable«ENDIF»);
 						this.«names.get("consumer")».start();
 					} catch(Exception e) {
 						e.printStackTrace();
