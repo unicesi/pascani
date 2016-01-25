@@ -80,7 +80,7 @@ public final class EventSet<T extends Event<?>> extends LoggingSortedSet<T> {
 	 */
 	public synchronized EventSet<T> clean(final long start, final long end) {
 		Collection<T> toRemove = filter(start, end);
-		this.removeAll(toRemove);
+		this.standardRemoveAll(toRemove);
 
 		return (EventSet<T>) toRemove;
 	}
