@@ -26,21 +26,11 @@ import org.eclipse.xtext.xbase.scoping.XImportSectionNamespaceScopeProvider
 class PascaniImportedNamespaceAwareLocalScopeProvider extends XImportSectionNamespaceScopeProvider {
 
 	public static final QualifiedName LIB = QualifiedName.create("org", "pascani", "dsl", "lib");
-	public static final QualifiedName LIB_EVENTS = QualifiedName.create("org", "pascani", "dsl", "lib", "events");
-	public static final QualifiedName LIB_UTIL = QualifiedName.create("org", "pascani", "dsl", "lib", "util");
-	public static final QualifiedName LIB_UTIL_EVENTS = QualifiedName.create("org", "pascani", "dsl", "lib", "util", "events");
-	public static final QualifiedName LIB_INFRASTRUCTURE = QualifiedName.create("org", "pascani", "dsl", "lib", "infrastructure");
 
 	override List<ImportNormalizer> getImplicitImports(boolean ignoreCase) {
-		val imports = newArrayList(
-			doCreateImportNormalizer(LIB, true, false),
-			doCreateImportNormalizer(LIB_EVENTS, true, false),
-			doCreateImportNormalizer(LIB_UTIL, true, false),
-			doCreateImportNormalizer(LIB_UTIL_EVENTS, true, false),
-			doCreateImportNormalizer(LIB_INFRASTRUCTURE, true, false)
-		)
-		imports.addAll(super.getImplicitImports(ignoreCase))
-		return imports
+		return (
+			super.getImplicitImports(ignoreCase) + #[doCreateImportNormalizer(LIB, true, false)]
+		).toList
 	}
 
 }
