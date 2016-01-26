@@ -71,7 +71,7 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	 * A map containing the variables defined in this namespace, with their
 	 * corresponding current values
 	 */
-	protected final Map<String, Serializable> variables;
+	private final Map<String, Serializable> variables;
 	
 	/**
 	 * The variable representing the current state (stopped or not)
