@@ -511,11 +511,13 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				superTypes += typeRef(BasicNamespace)
 
 				for (decl : declarations) {
-					val name = decl.fullyQualifiedName.toString.replace(".", "_")
-					val type = decl.type // ?: inferredType(decl.right)
-					members += decl.toField(name, type) [
-						initializer = decl.right
-					]
+					if (decl.name != null) {
+						val name = decl.fullyQualifiedName.toString.replace(".", "_")
+						val type = decl.type // ?: inferredType(decl.right)
+						members += decl.toField(name, type) [
+							initializer = decl.right
+						]
+					}
 				}
 				members += namespace.toConstructor [
 					exceptions += typeRef(Exception)
@@ -561,7 +563,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				
 				for (e : namespace.body.expressions) {
 					switch (e) {
-						Namespace: {
+						Namespace case e.name != null: {
 							val internalClass = createProxy(e, isPreIndexingPhase, acceptor, false)
 							nestedTypes += internalClass
 							fields += e.toField(e.name, typeRef(internalClass)) [
@@ -575,7 +577,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				}
 				for (e : namespace.body.expressions) {
 					switch (e) {
-						XVariableDeclaration: {
+						XVariableDeclaration case e.name != null: {
 							val name = e.fullyQualifiedName.toString
 							val type = e.type // ?: inferredType(e.right)
 							val cast = if(type != null) "(" + type.simpleName + ")"
