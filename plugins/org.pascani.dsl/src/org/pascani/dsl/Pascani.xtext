@@ -50,11 +50,11 @@ ImportEventDeclaration
 	;
 	
 MonitorBlockExpression returns XBlockExpression
-	:	{XBlockExpression} '{' (expressions += InternalMonitorDeclaration ';'?)* '}'
+	:	{XBlockExpression} '{' (expressions += InternalMonitorDeclaration)* '}'
 	;
 
 InternalMonitorDeclaration returns XExpression
-	:	XVariableDeclaration
+	:	XVariableDeclaration ->';'?
 	|	XBlockExpression
 	|	EventDeclaration
 	|	HandlerDeclaration
@@ -65,11 +65,11 @@ NamespaceDeclaration returns Namespace
 	;
 
 NamespaceBlockExpression returns XBlockExpression
-	:	{XBlockExpression} '{' (expressions += InternalNamespaceDeclaration ';'?)* '}'
+	:	{XBlockExpression} '{' (expressions += InternalNamespaceDeclaration)* '}'
 	;
 
 InternalNamespaceDeclaration returns XExpression
-	:	XVariableDeclaration
+	:	XVariableDeclaration ->';'?
 	|	NamespaceDeclaration
 	;
 
