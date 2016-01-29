@@ -50,7 +50,7 @@ ImportEventDeclaration
 	;
 	
 MonitorBlockExpression returns XBlockExpression
-	:	{XBlockExpression} '{' (expressions += InternalMonitorDeclaration)* '}'
+	:	{MonitorBlockExpression} '{' (expressions += InternalMonitorDeclaration)* '}'
 	;
 
 InternalMonitorDeclaration returns XExpression
@@ -65,7 +65,7 @@ NamespaceDeclaration returns Namespace
 	;
 
 NamespaceBlockExpression returns XBlockExpression
-	:	{XBlockExpression} '{' (expressions += InternalNamespaceDeclaration)* '}'
+	:	{NamespaceBlockExpression} '{' (expressions += InternalNamespaceDeclaration)* '}'
 	;
 
 InternalNamespaceDeclaration returns XExpression

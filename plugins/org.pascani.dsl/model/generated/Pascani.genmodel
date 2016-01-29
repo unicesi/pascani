@@ -91,6 +91,8 @@
     <genClasses ecoreClass="Pascani.ecore#//TerminalCronElement">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Pascani.ecore#//TerminalCronElement/expression"/>
     </genClasses>
+    <genClasses ecoreClass="Pascani.ecore#//MonitorBlockExpression"/>
+    <genClasses ecoreClass="Pascani.ecore#//NamespaceBlockExpression"/>
     <genClasses ecoreClass="Pascani.ecore#//RelationalEventSpecifier">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Pascani.ecore#//RelationalEventSpecifier/left"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Pascani.ecore#//RelationalEventSpecifier/operator"/>

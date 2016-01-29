@@ -115,6 +115,8 @@
   <eClassifiers xsi:type="ecore:EClass" name="TerminalCronElement" eSuperTypes="#//RangeCronElement">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="expression" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MonitorBlockExpression" eSuperTypes="platform:/resource/org.eclipse.xtext.xbase/model/Xbase.ecore#//XBlockExpression"/>
+  <eClassifiers xsi:type="ecore:EClass" name="NamespaceBlockExpression" eSuperTypes="platform:/resource/org.eclipse.xtext.xbase/model/Xbase.ecore#//XBlockExpression"/>
   <eClassifiers xsi:type="ecore:EClass" name="RelationalEventSpecifier" eSuperTypes="#//EventSpecifier">
     <eStructuralFeatures xsi:type="ecore:EReference" name="left" eType="#//EventSpecifier"
         containment="true"/>
