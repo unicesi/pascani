@@ -23,6 +23,9 @@ import org.eclipse.xtext.generator.OutputConfiguration
 import org.eclipse.xtext.generator.IFileSystemAccess
 import java.util.Set
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 class PascaniOutputConfigurationProvider implements IOutputConfigurationProvider {
 
 	public static val PASCANI_OUTPUT = "pascani"

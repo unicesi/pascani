@@ -40,6 +40,8 @@ import org.pascani.dsl.typesystem.PascaniTypeComputer
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 class PascaniRuntimeModule extends AbstractPascaniRuntimeModule {
 	

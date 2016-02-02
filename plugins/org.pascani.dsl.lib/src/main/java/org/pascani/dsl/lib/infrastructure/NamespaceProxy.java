@@ -27,6 +27,9 @@ import org.pascani.dsl.lib.PascaniRuntime;
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQRpcClient;
 import org.pascani.dsl.lib.util.SerializationUtils6;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class NamespaceProxy implements Namespace {
 
 	/**

@@ -29,6 +29,8 @@ import org.pascani.dsl.ui.AbstractPascaniUiModule
 
 /**
  * Use this class to register components to be used within the Eclipse IDE.
+ * 
+ * @author Miguel Jiménez - Initial API and contribution
  */
 @FinalFieldsConstructor
 class PascaniUiModule extends AbstractPascaniUiModule {

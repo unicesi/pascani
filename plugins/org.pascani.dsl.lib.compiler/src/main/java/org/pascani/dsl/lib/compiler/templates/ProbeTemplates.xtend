@@ -31,6 +31,9 @@ import org.pascani.dsl.lib.infrastructure.AbstractProducer
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQProducer
 import org.pascani.dsl.lib.util.LocalEventProducer
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 class ProbeTemplates {
 
 	/**

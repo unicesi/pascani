@@ -33,8 +33,7 @@ import org.pascani.dsl.lib.compiler.util.NameProposal;
 import org.pascani.dsl.lib.events.ExceptionEvent;
 import org.pascani.dsl.lib.infrastructure.LocalProbe;
 
-/**
- * 
+/** 
  * Generates the source code of a {@link Probe} for interceptor-based
  * measurements. For example, (i) generation of {@link ExceptionEvent} objects
  * from intercepting service executions, or (ii) execution time measurement.

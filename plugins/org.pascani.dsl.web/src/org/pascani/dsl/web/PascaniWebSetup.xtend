@@ -29,6 +29,8 @@ import org.pascani.dsl.PascaniStandaloneSetup
 
 /**
  * Initialization support for running Xtext languages in web applications.
+ * 
+ * @author Miguel Jiménez - Initial API and contribution
  */
 @FinalFieldsConstructor
 class PascaniWebSetup extends PascaniStandaloneSetup {

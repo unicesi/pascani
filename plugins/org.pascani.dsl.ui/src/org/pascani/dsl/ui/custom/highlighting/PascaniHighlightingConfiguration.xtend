@@ -23,6 +23,9 @@ import org.eclipse.swt.graphics.RGB
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfigurationAcceptor
 import org.eclipse.xtext.xbase.ui.highlighting.XbaseHighlightingConfiguration
 
+/**
+ * @author Miguel Jiménez - Initial API and contribution
+ */
 class PascaniHighlightingConfiguration extends XbaseHighlightingConfiguration {
 
 	public static val String RELATIONAL_OP_ID = "relational_op";

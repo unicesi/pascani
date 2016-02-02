@@ -30,6 +30,8 @@ import org.pascani.dsl.services.PascaniGrammarAccess
  * on how and when to use it.
  * 
  * Also see {@link org.eclipse.xtext.xtext.XtextFormattingTokenSerializer} as an example
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 class PascaniFormatter extends AbstractDeclarativeFormatter {
 

@@ -24,6 +24,9 @@ import org.eclipse.xtext.generator.IFileSystemAccess
 import com.google.inject.Inject
 import org.pascani.dsl.generator.PascaniGenerator
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 class OutputConfigurationAwaredGenerator extends JvmModelGenerator {
 	
 	@Inject private PascaniGenerator generator

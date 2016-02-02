@@ -37,6 +37,9 @@ import org.pascani.dsl.pascani.impl.EventEmitterImpl
 import org.pascani.dsl.pascani.impl.RelationalEventSpecifierImpl
 import org.pascani.dsl.pascani.util.PascaniSwitch
 
+/**
+ * @author Miguel Jiménez - Initial API and contribution
+ */
 class PascaniSemanticHighlightingCalculator extends XbaseHighlightingCalculator {
 
 	override void provideHighlightingFor(XtextResource resource, IHighlightedPositionAcceptor acceptor,

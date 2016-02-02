@@ -73,7 +73,9 @@ import org.pascani.dsl.lib.sca.FrascatiUtils
  * <p>Infers a JVM model from the source model.</p> 
  * 
  * <p>The JVM model should contain all elements that would appear in the Java code 
- * which is generated from the source model. Other models link against the JVM model rather than the source model.</p>     
+ * which is generated from the source model. Other models link against the JVM model rather than the source model.</p>
+ * 
+ * @author Miguel Jiménez - Initial contribution and API  
  */
 class PascaniJvmModelInferrer extends AbstractModelInferrer {
 

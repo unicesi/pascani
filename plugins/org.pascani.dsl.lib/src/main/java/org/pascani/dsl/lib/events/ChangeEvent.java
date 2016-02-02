@@ -23,6 +23,9 @@ import java.util.UUID;
 
 import org.pascani.dsl.lib.Event;
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 public class ChangeEvent extends Event<Serializable> {
 
 	/**

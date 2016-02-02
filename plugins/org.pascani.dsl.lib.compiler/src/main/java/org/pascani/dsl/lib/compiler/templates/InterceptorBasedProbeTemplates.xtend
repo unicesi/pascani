@@ -20,6 +20,9 @@ package org.pascani.dsl.lib.compiler.templates
 
 import org.pascani.dsl.lib.PascaniRuntime.Context
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 class InterceptorBasedProbeTemplates {
 
 	/**

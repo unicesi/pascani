@@ -24,6 +24,8 @@ package org.pascani.dsl.ui.labeling
  * Provides labels for IEObjectDescriptions and IResourceDescriptions.
  * 
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#label-provider
+ * 
+ * @author Miguel Jiménez - Initial API and contribution
  */
 class PascaniDescriptionLabelProvider extends org.eclipse.xtext.xbase.ui.labeling.XbaseDescriptionLabelProvider {
 

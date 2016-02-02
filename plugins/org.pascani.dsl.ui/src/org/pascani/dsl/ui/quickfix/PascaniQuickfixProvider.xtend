@@ -26,6 +26,8 @@ package org.pascani.dsl.ui.quickfix
  * Custom quickfixes.
  *
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#quick-fixes
+ * 
+ * @author Miguel Jiménez - Initial API and contribution
  */
 class PascaniQuickfixProvider extends org.eclipse.xtext.xbase.ui.quickfix.XbaseQuickfixProvider {
 

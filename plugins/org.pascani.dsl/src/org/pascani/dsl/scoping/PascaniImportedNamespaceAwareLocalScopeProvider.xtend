@@ -23,6 +23,9 @@ import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.scoping.impl.ImportNormalizer
 import org.eclipse.xtext.xbase.scoping.XImportSectionNamespaceScopeProvider
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 class PascaniImportedNamespaceAwareLocalScopeProvider extends XImportSectionNamespaceScopeProvider {
 
 	public static final QualifiedName LIB = QualifiedName.create("org", "pascani", "dsl", "lib");

@@ -22,6 +22,8 @@ import org.pascani.dsl.PascaniStandaloneSetupGenerated
 
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 class PascaniStandaloneSetup extends PascaniStandaloneSetupGenerated {
 

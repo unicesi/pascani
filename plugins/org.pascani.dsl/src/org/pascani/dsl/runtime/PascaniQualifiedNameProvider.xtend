@@ -23,6 +23,9 @@ import org.eclipse.xtext.naming.DefaultDeclarativeQualifiedNameProvider
 import org.eclipse.xtext.naming.QualifiedName
 import org.pascani.dsl.pascani.Event
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 class PascaniQualifiedNameProvider extends DefaultDeclarativeQualifiedNameProvider {
 
 	override QualifiedName getFullyQualifiedName(EObject obj) {

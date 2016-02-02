@@ -26,6 +26,9 @@ import org.pascani.dsl.lib.compiler.util.NameProposal
 import org.pascani.dsl.lib.events.NetworkLatencyEvent
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQProducer
 
+/**
+ * @author Miguel Jiménez - Initial contribution and API
+ */
 class NetworkLatencyTemplates {
 
 	/**

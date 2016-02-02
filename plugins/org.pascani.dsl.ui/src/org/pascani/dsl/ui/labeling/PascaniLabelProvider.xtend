@@ -24,6 +24,8 @@ import com.google.inject.Inject
  * Provides labels for EObjects.
  * 
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#label-provider
+ * 
+ * @author Miguel Jiménez - Initial API and contribution
  */
 class PascaniLabelProvider extends org.eclipse.xtext.xbase.ui.labeling.XbaseLabelProvider {
 

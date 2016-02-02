@@ -25,6 +25,9 @@ import org.pascani.dsl.pascani.Handler
 import org.pascani.dsl.pascani.Monitor
 import org.pascani.dsl.pascani.Namespace
 
+/**
+ * @author Miguel Jiménez - Initial API and contribution
+ */
 class PascaniFoldingRegionProvider extends DefaultFoldingRegionProvider {
 
 	override boolean isHandled(EObject eObject) {

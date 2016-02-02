@@ -58,6 +58,8 @@ import org.pascani.dsl.pascani.TypeDeclaration
  * This class contains custom validation rules. 
  * 
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
+ * 
+ * @author Miguel Jiménez - Initial contribution and API
  */
 class PascaniValidator extends AbstractPascaniValidator {
 

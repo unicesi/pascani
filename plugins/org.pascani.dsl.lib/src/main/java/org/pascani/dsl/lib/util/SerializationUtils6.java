@@ -13,7 +13,7 @@ import org.apache.commons.lang3.SerializationUtils;
  * {@link SerializationUtils}, removing incompatible use of generics for JDK 1.6
  * (<T> T).
  * 
- * @author Miguel Jiménez
+ * @author Miguel Jiménez - Initial contribution and API
  */
 public class SerializationUtils6 {
 

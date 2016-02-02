@@ -30,6 +30,8 @@ import org.pascani.dsl.services.PascaniGrammarAccess
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
  * on how to customize the content assistant.
+ * 
+ * @author Miguel Jiménez - Initial API and contribution
  */
 class PascaniProposalProvider extends AbstractPascaniProposalProvider {
 
