@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Pascani Core Library
-Bundle-Vendor: Universidad Icesi
+Bundle-Vendor: Miguel Jiménez
 Bundle-Version: 0.0.1.qualifier
 Bundle-SymbolicName: org.pascani.dsl;singleton:=true
 Bundle-ActivationPolicy: lazy
