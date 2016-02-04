@@ -63,11 +63,7 @@ public final class EventSet<T extends Event<?>> extends LoggingSortedSet<T> {
 	 * @return an {@link EventSet} filtered according to the given time window
 	 */
 	public EventSet<T> filter(final long start, final long end) {
-		ImmutableSet<T> frozen = null;
-		synchronized(this) {
-			frozen = ImmutableSet.copyOf(this);
-		}
-		Collection<T> filtered = Collections2.filter(frozen,
+		Collection<T> filtered = Collections2.filter(freeze(),
 				new Predicate<T>() {
 					public boolean apply(T event) {
 						return event.isInTimeWindow(start, end);
@@ -76,6 +72,31 @@ public final class EventSet<T extends Event<?>> extends LoggingSortedSet<T> {
 		EventSet<T> filteredSet = new EventSet<T>();
 		filteredSet.addAll(filtered);
 		return filteredSet;
+	}
+	
+	/**
+	 * Counts how many events are in this set according to a time window, by
+	 * checking if the events were raised within the range [{@code start},
+	 * {@code end}]; by means of {@link Event#isInTimeWindow(long, long)}.
+	 * 
+	 * <b>Note</b>: Before filtering, an immutable copy of this set is made, to
+	 * avoid {@link ConcurrentModificationException}.
+	 * 
+	 * @param start
+	 *            The initial timestamp of the filtering criteria, in
+	 *            nanoseconds
+	 * @param end
+	 *            The final timestamp of the filtering criteria, in nanoseconds
+	 * @return The number of events within the given time window
+	 */
+	public int count(final long start, final long end) {
+		int count = 0;
+		ImmutableSet<T> frozen = freeze();
+		for (T event : frozen) {
+			if (event.isInTimeWindow(start, end))
+				++count;
+		}
+		return count;
 	}
 
 	/**
@@ -90,6 +111,12 @@ public final class EventSet<T extends Event<?>> extends LoggingSortedSet<T> {
 		Collection<T> toRemove = filter(start, end);
 		this.standardRemoveAll(toRemove);
 		return (EventSet<T>) toRemove;
+	}
+	
+	private ImmutableSet<T> freeze() {
+		synchronized(this) {
+			return ImmutableSet.copyOf(this);
+		}
 	}
 
 }

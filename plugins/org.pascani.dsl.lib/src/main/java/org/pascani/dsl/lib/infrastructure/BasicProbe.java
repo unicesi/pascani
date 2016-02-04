@@ -168,7 +168,7 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 		int count = 0;
 		for (String clazz : types(eventTypes)) {
 			if (this.events.containsKey(clazz)) {
-				count += this.events.get(clazz).filter(start, end).size();
+				count += this.events.get(clazz).count(start, end);
 			}
 		}
 		return count;
