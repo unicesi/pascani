@@ -19,11 +19,13 @@
 package org.pascani.dsl.lib.util;
 
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
 
 import org.pascani.dsl.lib.Event;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * A sorted set of {@link Event} objects with logging capabilities (by means of
@@ -50,6 +52,9 @@ public final class EventSet<T extends Event<?>> extends LoggingSortedSet<T> {
 	 * the events were raised within the range [{@code start}, {@code end}]; by
 	 * means of {@link Event#isInTimeWindow(long, long)}.
 	 * 
+	 * <b>Note</b>: Before filtering, an immutable copy of this set is made, to
+	 * avoid {@link ConcurrentModificationException}.
+	 * 
 	 * @param start
 	 *            The initial timestamp of the filtering criteria, in
 	 *            nanoseconds
@@ -58,15 +63,18 @@ public final class EventSet<T extends Event<?>> extends LoggingSortedSet<T> {
 	 * @return an {@link EventSet} filtered according to the given time window
 	 */
 	public EventSet<T> filter(final long start, final long end) {
-		Collection<T> filtered = Collections2.filter(this, new Predicate<T>() {
-			public boolean apply(T event) {
-				return event.isInTimeWindow(start, end);
-			}
-		});
-
+		ImmutableSet<T> frozen = null;
+		synchronized(this) {
+			frozen = ImmutableSet.copyOf(this);
+		}
+		Collection<T> filtered = Collections2.filter(frozen,
+				new Predicate<T>() {
+					public boolean apply(T event) {
+						return event.isInTimeWindow(start, end);
+					}
+				});
 		EventSet<T> filteredSet = new EventSet<T>();
 		filteredSet.addAll(filtered);
-
 		return filteredSet;
 	}
 
@@ -81,7 +89,6 @@ public final class EventSet<T extends Event<?>> extends LoggingSortedSet<T> {
 	public synchronized EventSet<T> clean(final long start, final long end) {
 		Collection<T> toRemove = filter(start, end);
 		this.standardRemoveAll(toRemove);
-
 		return (EventSet<T>) toRemove;
 	}
 
