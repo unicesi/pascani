@@ -211,7 +211,7 @@ public class FrascatiUtils {
 	public static List<String> registerScript(String script, URI bindingUri)
 			throws ScriptException {
 		String result = getReconfigurationInstance(bindingUri).register(script);
-		String[] names = result.substring(1, result.length() - 2).split(", ");
+		String[] names = result.substring(1, result.length() - 1).split(", ");
 		return Arrays.asList(names);
 	}
 
