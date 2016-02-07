@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JTextField;
 
 import org.ow2.frascati.explorer.gui.AbstractSelectionPanel;
 import org.pascani.dsl.lib.util.Resumable;
@@ -45,11 +46,32 @@ public class ResumablePanel extends AbstractSelectionPanel<Resumable> {
 	 * The button to resume the {@link Resumable}
 	 */
 	private JButton resume;
+	
+	/**
+	 * The text field showing the current status
+	 */
+	private JTextField status;
+	
+	/**
+	 * The button to update the current status
+	 */
+	private JButton refresh;
+	
+	/**
+	 * The text shown when the {@link Resumable} is paused
+	 */
+	private final String PAUSED = "Paused";
+	
+	/**
+	 * The text shown when the {@link Resumable} is not paused
+	 */
+	private final String NOT_PAUSED = "Not Paused";
 
 	public ResumablePanel() {
 		super();
 		initialize();
 		makeUI();
+		configure();
 	}
 
 	private void initialize() {
@@ -58,6 +80,7 @@ public class ResumablePanel extends AbstractSelectionPanel<Resumable> {
 			@Override public void actionPerformed(ActionEvent event) {
 				pause.setEnabled(false);
 				resume.setEnabled(true);
+				status.setText(PAUSED);
 				selected.pause();
 			}
 		});
@@ -67,19 +90,53 @@ public class ResumablePanel extends AbstractSelectionPanel<Resumable> {
 			@Override public void actionPerformed(ActionEvent event) {
 				resume.setEnabled(false);
 				pause.setEnabled(true);
+				status.setText(NOT_PAUSED);
 				selected.resume();
 			}
 		});
-
-		if (selected != null && selected.isPaused())
-			this.pause.setEnabled(false);
-		else
-			this.resume.setEnabled(false);
+		
+		this.status = new JTextField(6);
+		this.status.setEditable(false);
+		
+		this.refresh = new JButton("Refresh");
+		this.refresh.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+				update();
+			}
+		});
 	}
 
 	private void makeUI() {
 		add(this.pause);
 		add(this.resume);
+		add(this.status);
+		add(this.refresh);
+	}
+	
+	private void configure() {
+		new Thread() {
+			@Override public void run() {
+				try {
+					Thread.sleep(1000);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				update();
+			}
+		}.start();
+	}
+	
+	private void update() {
+		if (this.selected == null)
+			this.status.setText("NULL");
+		
+		if (this.selected.isPaused()) {
+			this.pause.setEnabled(false);
+			this.status.setText(this.PAUSED);
+		} else {
+			this.resume.setEnabled(false);
+			this.status.setText(this.NOT_PAUSED);
+		}
 	}
 
 }
