@@ -21,7 +21,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.pascani</groupId>
 	<artifactId>org.pascani.tycho.parent</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<name>Pascani Eclipse plugins parent</name>
 	<packaging>pom</packaging>
 	<properties>
