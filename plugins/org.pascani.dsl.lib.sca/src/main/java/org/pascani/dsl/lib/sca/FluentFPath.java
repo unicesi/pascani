@@ -331,7 +331,7 @@ public class FluentFPath {
 	 * @return A new builder to create a FPath expression, starting from the
 	 *         domain (i.e., $domain/)
 	 */
-	public static Builder.FirstLevelBuilder $() {
+	public static Builder.FirstLevelBuilder $domain() {
 		return new Builder.FirstLevelBuilder(new ArrayList<Step>());
 	}
 
