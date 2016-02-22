@@ -51,7 +51,7 @@ class ServerLauncher {
 		val log = new Slf4jLog(ServerLauncher.name)
 		try {
 			server.start
-			log.info('Server started ' + server + '...')
+			log.info('Server started ' + server.getURI + '...')
 			new Thread[
 				log.info('Press enter to stop the server...')
 				val key = System.in.read
