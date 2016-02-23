@@ -53,6 +53,7 @@ import org.pascani.dsl.pascani.PascaniPackage
 import org.pascani.dsl.pascani.RangeCronElement
 import org.pascani.dsl.pascani.TerminalCronElement
 import org.pascani.dsl.pascani.TypeDeclaration
+import org.eclipse.xtext.EcoreUtil2
 
 /**
  * This class contains custom validation rules. 
@@ -298,13 +299,11 @@ class PascaniValidator extends AbstractPascaniValidator {
 	}
 	
 	@Check
-	def checkImportIsExternal(ImportEventsSection importSection) {
-		val monitor = importSection.eContainer as Monitor
-		for (importDeclaration : importSection.importDeclarations) {
-			if (monitor.fullyQualifiedName.equals(importDeclaration.monitor.fullyQualifiedName)) {
-				error("A monitor cannot import events from itself",
-					PascaniPackage.Literals.IMPORT_EVENTS_SECTION__IMPORT_DECLARATIONS, INVALID_SELF_IMPORT)
-			}
+	def checkIncludeIsExternal(ImportEventDeclaration importDeclaration) {
+		val monitor = (EcoreUtil2.getRootContainer(importDeclaration) as Model).typeDeclaration as Monitor
+		if (monitor.equals(importDeclaration.monitor)) {
+			error("A monitor cannot import events from itself",
+				PascaniPackage.Literals.IMPORT_EVENT_DECLARATION__MONITOR, INVALID_SELF_IMPORT)
 		}
 	}
 
