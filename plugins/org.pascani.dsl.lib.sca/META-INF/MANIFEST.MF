@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Pascani SCA Library
+Bundle-SymbolicName: org.pascani.dsl.lib.sca
+Bundle-Version: 1.0.0.qualifier
+Export-Package: org.ow2.scesame.qoscare.core.scaspec,
+ org.pascani.dsl.lib.sca,
+ org.pascani.dsl.lib.sca.explorer,
+ org.pascani.dsl.lib.sca.intents,
+ org.pascani.dsl.lib.sca.probes
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.pascani.dsl.lib;bundle-version="1.0.0"

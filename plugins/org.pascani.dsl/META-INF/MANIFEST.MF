@@ -16,7 +16,10 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.emf.common,
  org.eclipse.xtext.common.types,
  org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional,
- org.eclipse.core.resources
+ org.eclipse.core.resources,
+ org.pascani.dsl.lib;bundle-version="1.0.0",
+ org.pascani.dsl.lib.compiler;bundle-version="1.0.0",
+ org.pascani.dsl.lib.sca;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.pascani.dsl.pascani.util,
  org.pascani.dsl.validation,
@@ -32,7 +35,4 @@ Export-Package: org.pascani.dsl.pascani.util,
  org.pascani.dsl.jvmmodel,
  org.pascani.dsl.pascani.util
 Import-Package: org.apache.log4j
-Bundle-ClassPath: .,
- org.pascani.dsl.lib-1.0.0-SNAPSHOT-dependencies.jar,
- org.pascani.dsl.lib.compiler-1.0.0-SNAPSHOT.jar,
- org.pascani.dsl.lib.sca-1.0.0-SNAPSHOT-dependencies.jar
+Bundle-ClassPath: .
