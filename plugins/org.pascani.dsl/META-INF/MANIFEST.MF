@@ -17,9 +17,9 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.xtext.common.types,
  org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional,
  org.eclipse.core.resources,
- org.pascani.dsl.lib;bundle-version="1.0.0",
- org.pascani.dsl.lib.compiler;bundle-version="1.0.0",
- org.pascani.dsl.lib.sca;bundle-version="1.0.0"
+ org.pascani.dsl.lib,
+ org.pascani.dsl.lib.compiler,
+ org.pascani.dsl.lib.sca
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.pascani.dsl.pascani.util,
  org.pascani.dsl.validation,

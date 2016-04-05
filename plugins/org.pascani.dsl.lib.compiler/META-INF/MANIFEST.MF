@@ -7,6 +7,4 @@ Export-Package: org.pascani.dsl.lib.compiler,
  org.pascani.dsl.lib.compiler.templates,
  org.pascani.dsl.lib.compiler.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: org.pascani.dsl.lib;bundle-version="1.0.0",
- org.pascani.dsl.lib.sca;bundle-version="1.0.0",
- org.eclipse.xtend.lib;bundle-version="2.9.1"
+Bundle-ClassPath: .
