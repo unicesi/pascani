@@ -25,7 +25,6 @@
 		<version>1.0.0-SNAPSHOT</version>
 		<relativePath>../../maven/org.pascani.tycho.parent/pom.xml</relativePath>
 	</parent>
-	<packaging>eclipse-plugin</packaging>
 	
 	<artifactId>org.pascani.dsl.lib.sca</artifactId>
 	<name>Pascani SCA Library</name>

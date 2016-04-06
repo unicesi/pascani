@@ -59,18 +59,12 @@
 					<dependency>
 						<groupId>org.eclipse.emf</groupId>
 						<artifactId>org.eclipse.emf.mwe2.launch</artifactId>
-						<version>[2.8.2,3.0)</version>
+						<version>2.8.3</version>
 					</dependency>
 					<dependency>
 						<groupId>org.eclipse.xtext</groupId>
 						<artifactId>org.eclipse.xtext.xtext.generator</artifactId>
 						<version>${xtextVersion}</version>
-						<exclusions>
-							<exclusion>
-          						<groupId>org.eclipse.emf</groupId>
-							<artifactId>org.eclipse.emf.mwe2.runtime</artifactId>
-        					</exclusion>
-						</exclusions>
 					</dependency>
 					<dependency>
 						<groupId>org.eclipse.xtext</groupId>
@@ -82,13 +76,6 @@
 			<plugin>
 				<groupId>org.eclipse.xtend</groupId>
 				<artifactId>xtend-maven-plugin</artifactId>
-				<dependencies>
-					<dependency>
-						<groupId>org.eclipse.xtend</groupId>
-						<artifactId>org.eclipse.xtend.core</artifactId>
-						<version>${xtextVersion}</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -97,12 +84,6 @@
 					<filesets combine.children="append">
 						<fileset>
 							<directory>${basedir}/../org.pascani.dsl/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../org.pascani.dsl.tests/src-gen/</directory>
 							<includes>
 								<include>**/*</include>
 							</includes>
@@ -120,12 +101,6 @@
 							</includes>
 						</fileset>
 						<fileset>
-							<directory>${basedir}/../org.pascani.dsl.ui.tests/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
 							<directory>${basedir}/../org.pascani.dsl.web/src-gen/</directory>
 							<!-- <directory>${basedir}/../../web/org.pascani.dsl.web/src-gen/</directory> -->
 							<includes>
@@ -138,7 +113,6 @@
 					</filesets>
 				</configuration>
 			</plugin>
-
 		</plugins>
 		<pluginManagement>
 			<plugins>

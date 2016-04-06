@@ -35,13 +35,6 @@
 			<plugin>
 				<groupId>org.eclipse.xtend</groupId>
 				<artifactId>xtend-maven-plugin</artifactId>
-				<dependencies>
-					<dependency>
-						<groupId>org.eclipse.xtend</groupId>
-						<artifactId>org.eclipse.xtend.core</artifactId>
-						<version>${xtextVersion}</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 		</plugins>
 	</build>

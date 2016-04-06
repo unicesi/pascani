@@ -45,13 +45,6 @@
 			<plugin>
 				<groupId>org.eclipse.xtend</groupId>
 				<artifactId>xtend-maven-plugin</artifactId>
-				<dependencies>
-					<dependency>
-						<groupId>org.eclipse.xtend</groupId>
-						<artifactId>org.eclipse.xtend.core</artifactId>
-						<version>${xtextVersion}</version>
-					</dependency>
-				</dependencies>
 			</plugin>
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
@@ -108,11 +101,6 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>org.pascani.dsl.ide</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>org.pascani.dsl.lib.sca</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
