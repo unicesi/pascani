@@ -29,8 +29,8 @@
 		<xtextVersion>2.9.1</xtextVersion>
 		<frascatiVersion>1.4</frascatiVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
 	</properties>
 	<modules>
 		<module>../org.pascani.dsl.target</module>

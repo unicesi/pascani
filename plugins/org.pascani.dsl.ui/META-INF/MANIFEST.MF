@@ -21,7 +21,7 @@ Require-Bundle: org.pascani.dsl,
  org.eclipse.xtext.xbase.ui,
  org.eclipse.jdt.debug.ui
 Import-Package: org.apache.log4j
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.pascani.dsl.ui.quickfix,
  org.pascani.dsl.ui.internal,
  org.pascani.dsl.ui.contentassist,
