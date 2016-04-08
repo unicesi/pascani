@@ -34,14 +34,14 @@
 	</properties>
 	<modules>
 		<module>../org.pascani.dsl.target</module>
+		<module>../org.pascani.dsl.lib</module>
+		<module>../org.pascani.dsl.lib.compiler</module>
+		<module>../org.pascani.dsl.lib.sca</module>
 		<module>../../plugins/org.pascani.dsl</module>
 		<module>../../plugins/org.pascani.dsl.ide</module>
-		<module>../../plugins/org.pascani.dsl.lib</module>
-		<module>../../plugins/org.pascani.dsl.lib.compiler</module>
-		<module>../../plugins/org.pascani.dsl.lib.sca</module>
 		<module>../../plugins/org.pascani.dsl.lib.osgi</module>
 		<module>../../plugins/org.pascani.dsl.ui</module>
-		<module>../../plugins/org.pascani.dsl.web</module>
+		<module>../../web/org.pascani.dsl.web</module>
 	</modules>
 	<licenses>
 		<license>

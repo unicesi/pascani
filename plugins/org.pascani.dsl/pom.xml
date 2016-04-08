@@ -101,8 +101,7 @@
 							</includes>
 						</fileset>
 						<fileset>
-							<directory>${basedir}/../org.pascani.dsl.web/src-gen/</directory>
-							<!-- <directory>${basedir}/../../web/org.pascani.dsl.web/src-gen/</directory> -->
+							<directory>${basedir}/../../web/org.pascani.dsl.web/src-gen/</directory>
 							<includes>
 								<include>**/*</include>
 							</includes>
