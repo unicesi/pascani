@@ -28,6 +28,11 @@
 	
 	<artifactId>org.pascani.dsl.lib.sca</artifactId>
 	<name>Pascani SCA Library</name>
+
+	<properties>
+		<jarFileName>${project.artifactId}-${project.version}</jarFileName>
+		<bundleDir>../../plugins/org.pascani.dsl.lib.osgi/</bundleDir>
+	</properties>
 	
 	<dependencies>
 		<dependency>
@@ -147,9 +152,26 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
-					<finalName>${project.artifactId}-${project.version}-dependencies</finalName>
+					<finalName>${jarFileName}-dependencies</finalName>
         			<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+          			<execution>
+          				<phase>package</phase>
+          				<goals>
+          					<goal>run</goal>
+          				</goals>
+          				<configuration>
+          					<tasks>
+          						<copy file="target/${jarFileName}-dependencies.jar" tofile="${bundleDir}/${jarFileName}-dependencies.jar"/>
+          						<copy file="target/${jarFileName}-sources.jar" tofile="${bundleDir}/${jarFileName}-sources.jar"/>
+          					</tasks>
+          				</configuration>
+          			</execution>
+          		</executions>
 			</plugin>
 		</plugins>
 	</build>
