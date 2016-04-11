@@ -344,7 +344,7 @@
 	        point="org.eclipse.ui.ide.markerResolution">
 	    <markerResolutionGenerator
 	        class="org.pascani.dsl.ui.PascaniExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
-	        markerType="dsl.ui.pascani.check.fast">
+	        markerType="org.pascani.dsl.ui.pascani.check.fast">
 	        <attribute
 	            name="FIXABLE_KEY"
 	            value="true">
@@ -352,7 +352,7 @@
 	    </markerResolutionGenerator>
 	    <markerResolutionGenerator
 	        class="org.pascani.dsl.ui.PascaniExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
-	        markerType="dsl.ui.pascani.check.normal">
+	        markerType="org.pascani.dsl.ui.pascani.check.normal">
 	        <attribute
 	            name="FIXABLE_KEY"
 	            value="true">
@@ -360,7 +360,7 @@
 	    </markerResolutionGenerator>
 	    <markerResolutionGenerator
 	        class="org.pascani.dsl.ui.PascaniExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
-	        markerType="dsl.ui.pascani.check.expensive">
+	        markerType="org.pascani.dsl.ui.pascani.check.expensive">
 	        <attribute
 	            name="FIXABLE_KEY"
 	            value="true">
