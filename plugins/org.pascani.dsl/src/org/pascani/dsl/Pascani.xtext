@@ -55,7 +55,7 @@ MonitorBlockExpression returns XBlockExpression
 
 InternalMonitorDeclaration returns XExpression
 	:	XVariableDeclaration ->';'?
-	|	XBlockExpression
+	|	ConfigBlockExpression
 	|	EventDeclaration
 	|	HandlerDeclaration
 	;
@@ -71,6 +71,10 @@ NamespaceBlockExpression returns XBlockExpression
 InternalNamespaceDeclaration returns XExpression
 	:	XVariableDeclaration ->';'?
 	|	NamespaceDeclaration
+	;
+
+ConfigBlockExpression returns XBlockExpression
+	:	{ConfigBlockExpression} 'config' '{' (expressions += XExpressionOrVarDeclaration ';'?)* '}'
 	;
 
 HandlerDeclaration returns Handler

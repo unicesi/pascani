@@ -33,7 +33,6 @@ import org.eclipse.xtext.common.types.JvmTypeReference
 import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
-import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
@@ -47,12 +46,14 @@ import org.pascani.dsl.lib.infrastructure.AbstractConsumer
 import org.pascani.dsl.lib.infrastructure.BasicNamespace
 import org.pascani.dsl.lib.infrastructure.NamespaceProxy
 import org.pascani.dsl.lib.infrastructure.ProbeProxy
+import org.pascani.dsl.lib.sca.FrascatiUtils
 import org.pascani.dsl.lib.sca.PascaniUtils
 import org.pascani.dsl.lib.util.events.EventObserver
 import org.pascani.dsl.lib.util.events.NonPeriodicEvent
 import org.pascani.dsl.lib.util.events.PeriodicEvent
 import org.pascani.dsl.outputconfiguration.OutputConfigurationAdapter
 import org.pascani.dsl.outputconfiguration.PascaniOutputConfigurationProvider
+import org.pascani.dsl.pascani.ConfigBlockExpression
 import org.pascani.dsl.pascani.Event
 import org.pascani.dsl.pascani.EventSpecifier
 import org.pascani.dsl.pascani.EventType
@@ -62,12 +63,11 @@ import org.pascani.dsl.pascani.Namespace
 import org.pascani.dsl.pascani.RelationalEventSpecifier
 import org.pascani.dsl.pascani.RelationalOperator
 import org.pascani.dsl.pascani.TypeDeclaration
+import org.quartz.CronExpression
 import org.quartz.Job
 import org.quartz.JobDataMap
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
-import org.quartz.CronExpression
-import org.pascani.dsl.lib.sca.FrascatiUtils
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -199,7 +199,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						}
 					}
 					
-					XBlockExpression case !e.expressions.isEmpty: {
+					ConfigBlockExpression case !e.expressions.isEmpty: {
 						methods += monitor.toMethod("applyCustomCode" + nblocks++, typeRef(void)) [
 							visibility = JvmVisibility::PRIVATE
 							documentation = e.documentation
