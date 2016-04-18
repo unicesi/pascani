@@ -82,6 +82,8 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	@Inject extension JvmTypesBuilder
 	
 	@Inject extension IQualifiedNameProvider
+	
+	static val prefix = "＿" 
 
 	def dispatch void infer(Monitor monitor, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		monitor.createClass(isPreIndexingPhase, acceptor)
@@ -292,9 +294,8 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	// FIXME: reproduce explicit parentheses
 	def String parseSpecifier(String changeEvent, EventSpecifier specifier, List<JvmMember> members) {
 		val op = parseSpecifierRelOp(specifier)
-		val suffix = System.nanoTime()
 		val typeRef = typeRef(BigDecimal)
-		members += specifier.value.toField("value" + suffix, specifier.value.inferredType) [
+		members += specifier.value.toField(prefix + "value", specifier.value.inferredType) [
 			initializer = specifier.value
 		]
 		if (specifier.
@@ -302,11 +303,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			'''
 				(new «typeRef.qualifiedName»(«changeEvent».previousValue().toString()).subtract(
 				 new «typeRef.qualifiedName»(«changeEvent».value().toString())
-				)).abs().doubleValue() «op» new «typeRef.qualifiedName»(«changeEvent».previousValue().toString()).doubleValue() * (this.value«suffix» / 100.0)
+				)).abs().doubleValue() «op» new «typeRef.qualifiedName»(«changeEvent».previousValue().toString()).doubleValue() * (this.«prefix»value / 100.0)
 			'''
 		} else {
 			'''
-				new «typeRef.qualifiedName»(«changeEvent».value().toString()).doubleValue() «op» this.value«suffix»
+				new «typeRef.qualifiedName»(«changeEvent».value().toString()).doubleValue() «op» this.«prefix»value
 			'''
 		}
 	}
@@ -364,14 +365,13 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 
 	def JvmGenericType createNonPeriodicClass(Event e, Monitor monitor, JvmTypeReference eventTypeRef, boolean isProxy) {
 		e.toClass(monitor.fullyQualifiedName + "_" + e.name) [
-			val suffix = System.nanoTime
 			val names = #{
-				"probe" -> "probe" + suffix, 
-				"type" -> "type" + suffix, 
-				"emitter" -> "emitter" + suffix,
-				"consumer" -> "consumer" + suffix,
+				"probe" -> prefix + "probe", 
+				"type" -> prefix + "type", 
+				"emitter" -> prefix + "emitter",
+				"consumer" -> prefix + "consumer",
 				"Specifier" -> "Specifier_" + e.name,
-				"changeEvent" -> "changeEvent" + suffix
+				"changeEvent" -> prefix + "changeEvent"
 			}
 			val specifierTypeRef = typeRef(Function, typeRef(ChangeEvent), typeRef(Boolean))
 			val eventClassRef = typeRef(Class, wildcardExtends(typeRef(org.pascani.dsl.lib.Event, wildcard())))
