@@ -57,6 +57,10 @@ public class FluentFPath {
 		private final String selector;
 		private final boolean self;
 
+		public Step(final String selector) {
+			this(null, selector, false);
+		}
+		
 		public Step(final Axis axis, final String selector) {
 			this(axis, selector, false);
 		}
@@ -69,8 +73,16 @@ public class FluentFPath {
 		}
 
 		@Override public String toString() {
-			return this.axis + (this.self ? "-or-self" : "") + "::"
-					+ this.selector;
+			StringBuilder sb = new StringBuilder();
+			if (this.axis != null) {
+				sb.append(this.axis);
+				sb.append(this.self ? "-or-self" : "");
+				sb.append("::");
+				sb.append(this.selector);
+			} else {
+				sb.append("$" + this.selector);
+			}
+			return sb.toString();
 		}
 	}
 
@@ -78,7 +90,7 @@ public class FluentFPath {
 		
 		public static class FirstLevelBuilder extends Builder {
 			
-			public FirstLevelBuilder(List<Step> steps) {
+			private FirstLevelBuilder(List<Step> steps) {
 				super(steps);
 			}
 			
@@ -208,7 +220,7 @@ public class FluentFPath {
 			}
 		}
 
-		public class SecondLevelBuilder extends FirstLevelBuilder {
+		public static class SecondLevelBuilder extends FirstLevelBuilder {
 			
 			public SecondLevelBuilder(List<Step> steps) {
 				super(steps);
@@ -317,7 +329,6 @@ public class FluentFPath {
 		 */
 		@Override public String toString() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("$domain/");
 			for (int i = 0; i < this.steps.size(); i++) {
 				sb.append(this.steps.get(i)
 						+ (i == this.steps.size() - 1 ? "" : "/"));
@@ -332,7 +343,19 @@ public class FluentFPath {
 	 *         domain (i.e., $domain/)
 	 */
 	public static Builder.FirstLevelBuilder $domain() {
-		return new Builder.FirstLevelBuilder(new ArrayList<Step>());
+		List<Step> steps = new ArrayList<Step>();
+		steps.add(new Step("domain"));
+		return new Builder.FirstLevelBuilder(steps);
+	}
+
+	/**
+	 * @return A new builder to create a FPath expression, starting from the
+	 *         given variable (i.e., $variable/)
+	 */
+	public static Builder.SecondLevelBuilder $(final String variable) {
+		List<Step> steps = new ArrayList<Step>();
+		steps.add(new Step(variable));
+		return new Builder.SecondLevelBuilder(steps);
 	}
 
 }
