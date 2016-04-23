@@ -222,7 +222,7 @@ public class FluentFPath {
 
 		public static class SecondLevelBuilder extends FirstLevelBuilder {
 			
-			public SecondLevelBuilder(List<Step> steps) {
+			private SecondLevelBuilder(List<Step> steps) {
 				super(steps);
 			}
 			
@@ -265,7 +265,7 @@ public class FluentFPath {
 
 		public class ThirdLevelBuilder extends Builder {
 			
-			public ThirdLevelBuilder(List<Step> steps) {
+			private ThirdLevelBuilder(List<Step> steps) {
 				super(steps);
 			}
 
