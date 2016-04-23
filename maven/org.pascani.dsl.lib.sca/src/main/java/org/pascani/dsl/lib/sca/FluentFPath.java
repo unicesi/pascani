@@ -29,6 +29,8 @@ import java.util.List;
 public class FluentFPath {
 	
 	private enum Axis {
+		ATTIBUTE("attribute"),
+		INTERFACE("interface"),
 		SCA_PARENT("scaparent"),
 		SCA_CHILD("scachild"),
 		SCA_SERVICE("scaservice"),
@@ -227,6 +229,18 @@ public class FluentFPath {
 			}
 			
 			/**
+			 * Adds a step to the FPath expression of type interface
+			 * 
+			 * @param selector
+			 *            A valid FPath selector
+			 * @return this builder
+			 */
+			public ThirdLevelBuilder interface$(final String selector) {
+				this.steps.add(new Step(Axis.INTERFACE, selector));
+				return new ThirdLevelBuilder(this.steps);
+			}
+			
+			/**
 			 * Adds a step to the FPath expression of type scaservice
 			 * 
 			 * @param selector
@@ -276,9 +290,9 @@ public class FluentFPath {
 			 *            A valid FPath selector
 			 * @return this builder
 			 */
-			public Builder binding(final String selector) {
+			public FourLevelBuilder binding(final String selector) {
 				this.steps.add(new Step(Axis.SCA_BINDING, selector));
-				return new Builder(this.steps);
+				return new FourLevelBuilder(this.steps);
 			}
 
 			/**
@@ -302,6 +316,25 @@ public class FluentFPath {
 			 */
 			public Builder intent(final String selector) {
 				this.steps.add(new Step(Axis.SCA_INTENT, selector));
+				return new Builder(this.steps);
+			}
+		}
+		
+		public class FourLevelBuilder extends Builder {
+
+			private FourLevelBuilder(List<Step> steps) {
+				super(steps);
+			}
+
+			/**
+			 * Adds a step to the FPath expression of type attribute
+			 * 
+			 * @param selector
+			 *            A valid FPath selector
+			 * @return this builder
+			 */
+			public Builder attribute(final String selector) {
+				this.steps.add(new Step(Axis.ATTIBUTE, selector));
 				return new Builder(this.steps);
 			}
 		}
