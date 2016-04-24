@@ -149,9 +149,9 @@
 					</execution>
 				</executions>
 				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
+					<descriptors>
+						<descriptor>src/main/resources/assembly/jar.xml</descriptor>
+					</descriptors>
 					<finalName>${jarFileName}-dependencies</finalName>
         			<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
