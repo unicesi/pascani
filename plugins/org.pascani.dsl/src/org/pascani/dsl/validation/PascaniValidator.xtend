@@ -375,7 +375,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 
 	@Check
 	def checkHandlerParameter(Handler handler) {
-		// TODO check: handler if subscribed to events, the parameter must be the corresponding event type
 		if (handler.param.actualType.getSuperType(org.pascani.dsl.lib.Event) == null) {
 			error("The parameter type must be subclass of Event", PascaniPackage.Literals.HANDLER__PARAM,
 				INVALID_PARAMETER_TYPE)
