@@ -67,7 +67,6 @@ public class JobScheduler {
 			throws SchedulerException {
 		if (scheduler == null)
 			initialize();
-
 		scheduler.scheduleJob(jobDetail, trigger);
 	}
 
@@ -84,11 +83,10 @@ public class JobScheduler {
 	public static void schedule(Class<? extends Job> jobClass,
 			CronExpression expression, JobDataMap data)
 					throws SchedulerException {
-
 		JobDetail jobDetail = newJob(jobClass).usingJobData(data).build();
 		Trigger trigger = newTrigger().startNow()
+				.withIdentity(jobClass.getCanonicalName())
 				.withSchedule(cronSchedule(expression)).build();
-
 		schedule(jobDetail, trigger);
 	}
 
