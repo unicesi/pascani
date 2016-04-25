@@ -54,6 +54,7 @@ import org.pascani.dsl.pascani.RangeCronElement
 import org.pascani.dsl.pascani.TerminalCronElement
 import org.pascani.dsl.pascani.TypeDeclaration
 import org.eclipse.xtext.EcoreUtil2
+import org.pascani.dsl.lib.util.CronConstant
 
 /**
  * This class contains custom validation rules. 
@@ -341,7 +342,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 					}
 				]
 				val duplicateUsings = parent.usings.filter[n|n.name.equals(varDecl.name)]
-
 				if (!duplicateUsings.isEmpty) {
 					error("Local variable " + varDecl.name + " duplicates namespace " +
 						duplicateUsings.get(0).fullyQualifiedName, XbasePackage.Literals.XVARIABLE_DECLARATION__NAME,
@@ -358,7 +358,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 				 * are allowed to be defined within namespaces
 				 */
 				val type = varDecl.right.actualType
-
 				if (!type.isPrimitive && type.getSuperType(Serializable) == null) {
 					error(
 						"Variables must be serializable",
@@ -366,7 +365,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 						NOT_SERIALIZABLE_TYPE
 					);
 				}
-
 				if (varDecl.type == null) {
 					warning("Discouraged use of implicit type", XbasePackage.Literals.XVARIABLE_DECLARATION__TYPE,
 						IMPLICIT_TYPE)
@@ -390,7 +388,9 @@ class PascaniValidator extends AbstractPascaniValidator {
 			error("Chronological events must be raised periodically", PascaniPackage.Literals.EVENT__PERIODICAL,
 				EXPECTED_PERIODICAL)
 		}
-		if (event.isPeriodical && !event.emitter.cronExpression.actualType.isAssignableFrom(org.quartz.CronExpression)) {
+		if (event.isPeriodical 
+			&& !event.emitter.cronExpression.actualType.isAssignableFrom(org.quartz.CronExpression)
+			&& !event.emitter.cronExpression.actualType.isAssignableFrom(CronConstant)) {
 			error("A chronological expression is expected, instead " +
 				event.emitter.cronExpression.actualType.simpleName + " was found",
 				PascaniPackage.Literals.EVENT__EMITTER, EXPECTED_CRON_EXPRESSION);

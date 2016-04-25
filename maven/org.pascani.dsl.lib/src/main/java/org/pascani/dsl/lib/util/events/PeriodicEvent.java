@@ -22,6 +22,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.pascani.dsl.lib.util.CronConstant;
 import org.pascani.dsl.lib.util.JobScheduler;
 import org.quartz.CronExpression;
 import org.quartz.Job;
@@ -40,6 +41,10 @@ public class PeriodicEvent extends ManagedEvent {
 
 	public PeriodicEvent(String cronExpression) throws ParseException {
 		this(new CronExpression(cronExpression));
+	}
+	
+	public PeriodicEvent(CronConstant cronConstant) {
+		this(cronConstant.expression());
 	}
 	
 	public PeriodicEvent(CronExpression cronExpression) {

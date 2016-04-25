@@ -63,7 +63,6 @@ import org.pascani.dsl.pascani.Namespace
 import org.pascani.dsl.pascani.RelationalEventSpecifier
 import org.pascani.dsl.pascani.RelationalOperator
 import org.pascani.dsl.pascani.TypeDeclaration
-import org.quartz.CronExpression
 import org.quartz.Job
 import org.quartz.JobDataMap
 import org.quartz.JobExecutionContext
@@ -157,7 +156,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 					
 					Event case e.emitter != null && e.emitter.cronExpression != null: {
-						getters += e.toMethod("init" + e.name.toFirstUpper, typeRef(CronExpression)) [
+						getters += e.toMethod("init" + e.name.toFirstUpper, inferredType) [
 							^static = true
 							visibility = JvmVisibility::PRIVATE
 							body = e.emitter.cronExpression
