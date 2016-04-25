@@ -30,8 +30,8 @@
 	<name>Pascani SCA Library</name>
 
 	<properties>
-		<jarFileName>${project.artifactId}-${project.version}</jarFileName>
-		<bundleDir>../../plugins/org.pascani.dsl.lib.osgi/</bundleDir>
+		<jar.name>${project.artifactId}-${project.version}</jar.name>
+		<bundle.dir>../../plugins/org.pascani.dsl.lib.osgi/</bundle.dir>
 	</properties>
 	
 	<dependencies>
@@ -166,8 +166,8 @@
           				</goals>
           				<configuration>
           					<tasks>
-          						<copy file="target/${jarFileName}-dependencies.jar" tofile="${bundleDir}/${jarFileName}-dependencies.jar"/>
-          						<copy file="target/${jarFileName}-sources.jar" tofile="${bundleDir}/${jarFileName}-sources.jar"/>
+          						<copy file="target/${jar.name}-dependencies.jar" tofile="${bundle.dir}/${jar.name}-dependencies.jar"/>
+          						<unzip src="target/${jar.name}-sources.jar" dest="${bundle.dir}/OSGI-OPT/src/${project.artifactId}"/>
           					</tasks>
           				</configuration>
           			</execution>
