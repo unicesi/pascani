@@ -38,6 +38,10 @@ class PascaniHighlightingConfiguration extends XbaseHighlightingConfiguration {
 		acceptor.acceptDefaultHighlighting(CRON_EXPRESSION_ID, "Cron expressions", cronExpression());
 		super.configure(acceptor);
 	}
+	
+	override staticField(){
+		return defaultTextStyle().copy();
+	}
 
 	def relationalOperator() {
 		val textStyle = stringTextStyle().copy();
