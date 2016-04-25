@@ -2,20 +2,20 @@
 <!--
  Copyright © 2015 Universidad Icesi
  
- This file is part of the Pascani library.
+ This file is part of the Pascani project.
  
- The Pascani library is free software: you can redistribute it and/or modify
+ The Pascani project is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
  the Free Software Foundation, either version 3 of the License, or (at your
  option) any later version.
  
- The Pascani library is distributed in the hope that it will be useful, but
+ The Pascani project is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
  for more details.
  
  You should have received a copy of the GNU Lesser General Public License
- along with The Pascani library. If not, see http://www.gnu.org/licenses/
+ along with The Pascani project. If not, see http://www.gnu.org/licenses/
 -->
 <templates>
 	<template autoinsert="true" context="org.pascani.dsl.Pascani.kw_package" deleted="false" description="Package declaration" enabled="true" id="package" name="Package">package ${name};</template>
