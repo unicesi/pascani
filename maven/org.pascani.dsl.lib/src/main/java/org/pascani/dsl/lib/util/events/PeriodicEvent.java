@@ -58,8 +58,10 @@ public class PeriodicEvent extends ManagedEvent {
 	}
 
 	public void updateExpression(CronExpression expression) {
+		List<Class<? extends Job>> tmp = this.classes;
+		this.classes = new ArrayList<Class<? extends Job>>();
 		this.expression = expression;
-		for (Class<? extends Job> clazz : this.classes) {
+		for (Class<? extends Job> clazz : tmp) {
 			unsubscribe(clazz);
 			subscribe(clazz);
 		}
@@ -82,7 +84,6 @@ public class PeriodicEvent extends ManagedEvent {
 	}
 
 	public boolean unsubscribe(final Class<? extends Job> jobClass) {
-		this.classes.remove(jobClass);
 		try {
 			return JobScheduler.unschedule(jobClass);
 		} catch (Exception e) {
@@ -100,8 +101,9 @@ public class PeriodicEvent extends ManagedEvent {
 	@Override public synchronized void pause() {
 		if (isPaused())
 			return;
-		for (Class<? extends Job> clazz : this.classes) {
-			this.temporal.add(clazz);
+		this.temporal = this.classes;
+		this.classes = new ArrayList<Class<? extends Job>>();
+		for (Class<? extends Job> clazz : this.temporal) {
 			unsubscribe(clazz);
 		}
 		super.pause();
