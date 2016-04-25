@@ -109,6 +109,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			val fields = new ArrayList
 			val constructors = new ArrayList
 			val methods = new ArrayList
+			val getters = new ArrayList
 			
 			// utility variables
 			var nblocks = 0
@@ -156,7 +157,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 					
 					Event case e.emitter != null && e.emitter.cronExpression != null: {
-						methods += e.toMethod("init" + e.name.toFirstUpper, typeRef(CronExpression)) [
+						getters += e.toMethod("init" + e.name.toFirstUpper, typeRef(CronExpression)) [
 							^static = true
 							visibility = JvmVisibility::PRIVATE
 							body = e.emitter.cronExpression
@@ -268,6 +269,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			members += constructors
 			members += methods
 			members += nestedTypes
+			members += getters
 		]
 	}
 
