@@ -1,7 +1,9 @@
 package org.pascani.dsl.lib.util;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Useful helper methods when dealing with exceptions.
@@ -9,6 +11,11 @@ import java.lang.reflect.InvocationTargetException;
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class Exceptions {
+	
+	/**
+	 * The logger
+	 */
+	protected final static Logger logger = LogManager.getLogger(Exceptions.class);
 
 	/**
 	 * Creates an instance of the given class T. This is useful to initialize
@@ -29,17 +36,8 @@ public class Exceptions {
 		try {
 			Constructor<T> constructor = clazz.getConstructor(parameterTypes);
 			return constructor.newInstance(arguments);
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
+		} catch (Exception e) {
+			logger.error(e);
 			e.printStackTrace();
 		}
 		return null;
@@ -72,6 +70,7 @@ public class Exceptions {
 	public static RuntimeException sneakyThrow(Throwable t) {
 		if (t == null)
 			throw new NullPointerException("t");
+		logger.error(t);
 		Exceptions.<RuntimeException> sneakyThrow0(t);
 		return null;
 	}
