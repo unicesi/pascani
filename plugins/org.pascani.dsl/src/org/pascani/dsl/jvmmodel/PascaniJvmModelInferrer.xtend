@@ -293,21 +293,21 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 
 	// FIXME: reproduce explicit parentheses
 	def String parseSpecifier(String changeEvent, EventSpecifier specifier, List<JvmMember> members) {
+		val suffix = System.nanoTime
 		val op = parseSpecifierRelOp(specifier)
 		val typeRef = typeRef(BigDecimal)
-		members += specifier.value.toField(prefix + "value", specifier.value.inferredType) [
+		members += specifier.value.toField("value" + suffix, specifier.value.inferredType) [
 			initializer = specifier.value
 		]
-		if (specifier.
-			isPercentage) {
+		if (specifier.isPercentage) {
 			'''
 				(new «typeRef.qualifiedName»(«changeEvent».previousValue().toString()).subtract(
 				 new «typeRef.qualifiedName»(«changeEvent».value().toString())
-				)).abs().doubleValue() «op» new «typeRef.qualifiedName»(«changeEvent».previousValue().toString()).doubleValue() * (this.«prefix»value / 100.0)
+				)).abs().doubleValue() «op» new «typeRef.qualifiedName»(«changeEvent».previousValue().toString()).doubleValue() * (this.value«suffix» / 100.0)
 			'''
 		} else {
 			'''
-				new «typeRef.qualifiedName»(«changeEvent».value().toString()).doubleValue() «op» this.«prefix»value
+				new «typeRef.qualifiedName»(«changeEvent».value().toString()).doubleValue() «op» this.value«suffix»
 			'''
 		}
 	}
