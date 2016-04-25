@@ -68,7 +68,7 @@ class PascaniGenerator implements IGenerator {
 	override doGenerate(Resource resource, IFileSystemAccess fsa) {
 		// FIXME: This is Eclipse-dependent (dependency: org.eclipse.core.resources)
 		val currentProject = ResourcesPlugin.workspace.root.getProject(resource.URI.segmentsList.get(1))
-		val filePath = currentProject.getFile("sca-gen/" + PORTS_FILE).locationURI.rawPath
+		val filePath = currentProject.getFile("pascani-gen/" + PORTS_FILE).locationURI.rawPath
 		readPorts(filePath, fsa)
 		
 		resource.allContents.forEach [ element |
@@ -100,7 +100,7 @@ class PascaniGenerator implements IGenerator {
 
 							val contents = ScaCompositeTemplates.parseComponent(component)
 							fsa.generateFile(declaration.fullyQualifiedName.segments.join(File.separator) +
-								".composite", PascaniOutputConfigurationProvider::SCA_OUTPUT, contents)
+								".composite", PascaniOutputConfigurationProvider::PASCANI_OUTPUT, contents)
 						}
 						Namespace: {
 							val component = new SCAComponent(declaration.name)
@@ -118,7 +118,7 @@ class PascaniGenerator implements IGenerator {
 
 							val contents = ScaCompositeTemplates.parseComponent(component)
 							fsa.generateFile(declaration.fullyQualifiedName.segments.join(File.separator) +
-								".composite", PascaniOutputConfigurationProvider::SCA_OUTPUT, contents)
+								".composite", PascaniOutputConfigurationProvider::PASCANI_OUTPUT, contents)
 						}
 					}
 				}
@@ -152,7 +152,7 @@ class PascaniGenerator implements IGenerator {
 			sb.append(value)
 			sb.append("\n")
 		}
-		fsa.generateFile(PORTS_FILE, PascaniOutputConfigurationProvider::SCA_OUTPUT, sb.toString)
+		fsa.generateFile(PORTS_FILE, PascaniOutputConfigurationProvider::PASCANI_OUTPUT, sb.toString)
 	}
 
 	def getPort(TypeDeclaration typeDeclaration) {
