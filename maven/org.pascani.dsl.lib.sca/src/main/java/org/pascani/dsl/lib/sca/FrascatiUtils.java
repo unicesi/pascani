@@ -42,6 +42,7 @@ import org.ow2.frascati.remote.introspection.resources.Port;
 import org.ow2.frascati.remote.introspection.resources.Property;
 import org.ow2.scesame.qoscare.core.scaspec.FraSCAti2QoSCAre;
 import org.ow2.scesame.qoscare.core.scaspec.SCANamedNode;
+import org.pascani.dsl.lib.util.Exceptions;
 
 /**
  * Static methods to ease deployment and reconfiguration of SCA elements by
@@ -99,8 +100,7 @@ public class FrascatiUtils {
 				try {
 					this.base64 = FileUtil.getStringFromFile(this.contribution);
 				} catch (IOException e) {
-					// TODO: log the exception
-					e.printStackTrace();
+					Exceptions.sneakyThrow(e);
 				}
 			}
 			return instance.deploy(base64) == 0;
@@ -232,8 +232,7 @@ public class FrascatiUtils {
 			// From: AbstractBindingFactoryProcessor.BINDING_URI_BASE_DEFAULT_VALUE
 			uri = new URI("http://localhost:8090");
 		} catch (URISyntaxException e) {
-			// TODO: log the exception
-			e.printStackTrace();
+			Exceptions.sneakyThrow(e);
 		}
 		return uri;
 	}

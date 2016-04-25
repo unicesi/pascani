@@ -210,7 +210,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 				}
 			}
-			// TODO: handle the exception
 			val fblocks = nblocks
 			constructors += monitor.toConstructor [
 				body = '''
@@ -222,7 +221,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							«ENDFOR»
 						«ENDIF»
 					} catch(Exception e) {
-						e.printStackTrace();
+						«org.pascani.dsl.lib.util.Exceptions.canonicalName».sneakyThrow(e);
 					}
 				'''
 			]
@@ -411,7 +410,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					initialize();
 				'''
 			]
-			// TODO: handle the exception	
 			members += e.emitter.toMethod("initialize", typeRef(void)) [
 				visibility = JvmVisibility::PRIVATE
 				body = '''
@@ -441,7 +439,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						this.«names.get("consumer")» = initializeConsumer(context, routingKey, consumerTag«IF isChangeEvent», variable«ENDIF»);
 						this.«names.get("consumer")».start();
 					} catch(Exception e) {
-						e.printStackTrace();
+						«org.pascani.dsl.lib.util.Exceptions.canonicalName».sneakyThrow(e);
 					}
 				'''
 			]
@@ -598,8 +596,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						}
 					}
 				}
-
-				// TODO: Handle the exception
 				if (isParentNamespace) {
 					fields += namespace.toField(namespace.name + "Proxy", typeRef(NamespaceProxy))
 					constructors += namespace.toConstructor [
@@ -607,7 +603,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							try {
 								this.«namespace.name»Proxy = new «NamespaceProxy»("«namespace.fullyQualifiedName»");
 							} catch(«Exception» e) {
-								e.printStackTrace();
+								«org.pascani.dsl.lib.util.Exceptions.canonicalName».sneakyThrow(e);
 							}
 						'''
 					]

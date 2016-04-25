@@ -27,6 +27,7 @@ import org.pascani.dsl.lib.infrastructure.AbstractProducer;
 import org.pascani.dsl.lib.infrastructure.LocalProbe;
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQProducer;
 import org.pascani.dsl.lib.sca.EventHandler;
+import org.pascani.dsl.lib.util.Exceptions;
 import org.pascani.dsl.lib.util.Resumable;
 
 /**
@@ -102,8 +103,7 @@ public abstract class AbstractProbeImpl implements EventHandler, Resumable {
 					PascaniRuntime.Context.PROBE);
 			this.probe.acceptOnly(this.acceptedTypes);
 		} catch (Exception e) {
-			// TODO: handle the exception
-			e.printStackTrace();
+			Exceptions.sneakyThrow(e);
 		}
 	}
 
@@ -116,8 +116,7 @@ public abstract class AbstractProbeImpl implements EventHandler, Resumable {
 					this.routingKey);
 			this.producer.acceptOnly(this.acceptedTypes);
 		} catch (Exception e) {
-			// TODO: handle the exception
-			e.printStackTrace();
+			Exceptions.sneakyThrow(e);
 		}
 	}
 

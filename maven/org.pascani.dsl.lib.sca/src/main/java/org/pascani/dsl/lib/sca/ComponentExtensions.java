@@ -31,6 +31,7 @@ import org.ow2.scesame.qoscare.core.scaspec.SCAComponent;
 import org.ow2.scesame.qoscare.core.scaspec.SCADomain;
 import org.ow2.scesame.qoscare.core.scaspec.SCAPort;
 import org.ow2.scesame.qoscare.core.scaspec.SCAProperty;
+import org.pascani.dsl.lib.util.Exceptions;
 
 /**
  * Extension methods to ease introspection of SCA components by means of the
@@ -160,8 +161,7 @@ public class ComponentExtensions {
 			// From: AbstractBindingFactoryProcessor.BINDING_URI_BASE_DEFAULT_VALUE
 			uri = new URI("http://localhost:8090");
 		} catch (URISyntaxException e) {
-			// TODO: log the exception
-			e.printStackTrace();
+			Exceptions.sneakyThrow(e);
 		}
 		return uri;
 	}

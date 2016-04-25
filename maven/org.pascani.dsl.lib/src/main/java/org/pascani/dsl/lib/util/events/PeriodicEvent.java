@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.pascani.dsl.lib.util.CronConstant;
+import org.pascani.dsl.lib.util.Exceptions;
 import org.pascani.dsl.lib.util.JobScheduler;
 import org.quartz.CronExpression;
 import org.quartz.Job;
@@ -77,8 +78,7 @@ public class PeriodicEvent extends ManagedEvent {
 						new CronExpression(getExpression().getCronExpression()),
 						data);
 			} catch (Exception e) {
-				// TODO: handle exception
-				e.printStackTrace();
+				Exceptions.sneakyThrow(e);
 			}
 		}
 	}
@@ -87,8 +87,7 @@ public class PeriodicEvent extends ManagedEvent {
 		try {
 			return JobScheduler.unschedule(jobClass);
 		} catch (Exception e) {
-			// TODO: handle exception
-			e.printStackTrace();
+			Exceptions.sneakyThrow(e);
 		}
 		return false;
 	}
