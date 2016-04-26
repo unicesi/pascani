@@ -39,6 +39,12 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>org.pascani.dsl.lib</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+		    </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
