@@ -20,9 +20,12 @@ package org.pascani.dsl.lib.util;
 
 import java.text.ParseException;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 import org.osoa.sca.annotations.Service;
 
@@ -41,9 +44,21 @@ public interface MonitorEventsService {
 	 * @param cronExpression
 	 *            The new chronological expression
 	 */
-	@PUT @Path("{event}/expression/{expression}") 
-	public void updateCronExpression(
-			@PathParam("event") String eventName,
+	@PUT
+	@Path("{event}/expression/{expression}")
+	public void updateCronExpression(@PathParam("event") String eventName,
 			@PathParam("expression") String cronExpression) throws ParseException;
+
+	/**
+	 * Gets the chronological expression of a periodic event
+	 * 
+	 * @param eventName
+	 *            The name of the periodic event
+	 * @return The chronological expression of the specified event
+	 */
+	@GET
+	@Path("{event}/expression")
+	@Produces({ MediaType.TEXT_PLAIN })
+	public String getExpression(@PathParam("event") String eventName);
 
 }

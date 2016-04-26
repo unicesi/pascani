@@ -81,12 +81,26 @@ public abstract class Monitor implements Resumable, MonitorEventsService {
 	 * org.pascani.dsl.lib.util.sca.MonitorEventsService#updateCronExpression(
 	 * java.lang.String, java.lang.String)
 	 */
-	public void updateCronExpression(String eventName, String cronExpression)
+	public void updateCronExpression(final String eventName, final String cronExpression)
 			throws ParseException {
 		PeriodicEvent event = this.periodicEvents.get(eventName);
 		if (event == null)
 			throw new InvalidParameterException("The specified event does not exists");
 		event.updateExpression(new CronExpression(cronExpression));
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.pascani.dsl.lib.util.MonitorEventsService#getExpression(java.lang.
+	 * String)
+	 */
+	public String getExpression(final String eventName) {
+		PeriodicEvent event = this.periodicEvents.get(eventName);
+		if (event == null)
+			throw new InvalidParameterException("The specified event does not exists");
+		return event.getExpression().toString();
 	}
 
 }
