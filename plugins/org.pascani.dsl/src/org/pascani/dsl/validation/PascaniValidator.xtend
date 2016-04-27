@@ -72,11 +72,11 @@ class PascaniValidator extends AbstractPascaniValidator {
 	public static val EXPECTED_CRON_EXPRESSION = "pascani.issue.expectedCronExpression"
 	public static val EXPECTED_PERIODICAL = "pascani.issue.expectedPeriodical"
 	public static val EXPECTED_WHITESPACE = "pascani.issue.expectedWhitespace"
-	public static val IMPLICIT_TYPE = "pascani.issue.implicitType"
 	public static val INVALID_FILE_NAME = "pascani.issue.invalidFileName"
 	public static val INVALID_PACKAGE_NAME = "pascani.issue.invalidPackageName"
 	public static val INVALID_PARAMETER_TYPE = "pascani.issue.invalidParameterType"
 	public static val INVALID_SELF_IMPORT = "pascani.issue.invalidSelfImport"
+	public static val MISSING_TYPE = "pascani.issue.missingType"
 	public static val NON_CAPITAL_NAME = "pascani.issue.nonCapitalName"
 	public static val NOT_SERIALIZABLE_TYPE = "pascani.issue.notSerializableType"
 	public static val UNEXPECTED_CRON_NTH = "pascani.issue.unexpectedCronNth"
@@ -366,8 +366,8 @@ class PascaniValidator extends AbstractPascaniValidator {
 					);
 				}
 				if (varDecl.type == null) {
-					warning("Discouraged use of implicit type", XbasePackage.Literals.XVARIABLE_DECLARATION__TYPE,
-						IMPLICIT_TYPE)
+					error("Missing variable type", 
+						XbasePackage.Literals.XVARIABLE_DECLARATION__TYPE, MISSING_TYPE)
 				}
 			}
 		}
@@ -863,9 +863,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 			val ClassLoader classLoader = this.getClass().getClassLoader();
 			try {
 				val clazz = classLoader.loadClass("java.lang." + typeDecl.name);
-
-				warning(
-					"The use of type name " + typeDecl.name +
+				warning("The use of type name " + typeDecl.name +
 						" is discouraged because it can cause unexpected behavior with members from class " +
 						clazz.canonicalName, PascaniPackage.Literals.TYPE_DECLARATION__NAME, DISCOURAGED_USAGE)
 
