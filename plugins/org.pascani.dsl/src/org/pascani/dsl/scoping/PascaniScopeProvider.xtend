@@ -32,7 +32,7 @@ import org.pascani.dsl.pascani.PascaniPackage
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#scoping
  * on how and when to use it.
  */
-class PascaniScopeProvider extends PascaniImportedNamespaceAwareLocalScopeProvider {
+class PascaniScopeProvider extends AbstractPascaniScopeProvider {
 
 	override getScope(EObject context, EReference reference) {
 		if (context instanceof ImportEventDeclaration) {
