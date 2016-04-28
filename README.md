@@ -13,12 +13,12 @@ If you want to build the Pascani sources locally, you need Maven.
 
 First of all, make sure to increase memory
 
-```
+```bash
 export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=256m"
 ```
 
 And then run
 
-```
+```bash
 mvn install -file maven/org.pascani.tycho.parent/pom.xml
 ```
