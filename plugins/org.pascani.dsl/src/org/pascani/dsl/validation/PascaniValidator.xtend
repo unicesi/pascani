@@ -417,7 +417,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 		if (emitter.eventType.equals(EventType.CHANGE)) {
 			// TODO: validate emitter comes from a namespace
 			if (emitterType.getSuperType(Serializable) == null) {
-				error("The emitter type must be subclass of Serializable",
+				error("The emitter type must be Serializable",
 					PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
 			}
 		} else {
@@ -426,7 +426,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 					PascaniPackage.Literals.EVENT_EMITTER__SPECIFIER, UNEXPECTED_EVENT_SPECIFIER)
 			}
 			if (emitterType.getSuperType(String) == null) {
-				error("The emitter type must be subclass of String",
+				error("The emitter of type String",
 					PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
 			}
 		}
