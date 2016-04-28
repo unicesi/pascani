@@ -79,7 +79,7 @@ class PascaniGenerator implements IGenerator {
 					switch (declaration) {
 						Monitor: {
 							val component = new SCAComponent(declaration.name)
-							val child = new SCAComponent("monitor", declaration.fullyQualifiedName.segments.join("."))
+							val child = new SCAComponent("monitor", declaration.fullyQualifiedName.toString)
 
 							// Resumable service
 							val resumable = new SCAPort("resumable")
@@ -99,12 +99,12 @@ class PascaniGenerator implements IGenerator {
 							component.children += child
 
 							val contents = ScaCompositeTemplates.parseComponent(component)
-							fsa.generateFile(declaration.fullyQualifiedName.segments.join(File.separator) +
+							fsa.generateFile(declaration.fullyQualifiedName.toString(File.separator) +
 								".composite", PascaniOutputConfigurationProvider::PASCANI_OUTPUT, contents)
 						}
 						Namespace: {
 							val component = new SCAComponent(declaration.name)
-							val child = new SCAComponent("namespace", declaration.fullyQualifiedName.segments.join("."))
+							val child = new SCAComponent("namespace", declaration.fullyQualifiedName.toString)
 
 							// Resumable service
 							val resumable = new SCAPort("resumable")
@@ -117,7 +117,7 @@ class PascaniGenerator implements IGenerator {
 							component.children += child
 
 							val contents = ScaCompositeTemplates.parseComponent(component)
-							fsa.generateFile(declaration.fullyQualifiedName.segments.join(File.separator) +
+							fsa.generateFile(declaration.fullyQualifiedName.toString(File.separator) +
 								".composite", PascaniOutputConfigurationProvider::PASCANI_OUTPUT, contents)
 						}
 					}
