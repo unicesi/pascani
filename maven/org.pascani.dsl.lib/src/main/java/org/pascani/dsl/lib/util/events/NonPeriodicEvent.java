@@ -47,12 +47,12 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 	/**
 	 * Indicates whether this event must introduce and use a new {@link Probe}
 	 */
-	protected boolean useProbe = false;
+	public boolean useProbe = false;
 	
 	/**
 	 * The URI where the FraSCAti runtime is running
 	 */
-	protected URI bindingUri;
+	public URI bindingUri;
 
 	/**
 	 * @return The {@link Class} object corresponding to the event type
