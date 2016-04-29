@@ -220,6 +220,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 								applyCustomCode«i»();
 							«ENDFOR»
 						«ENDIF»
+						initializeEvents();
 					} catch(Exception e) {
 						«org.pascani.dsl.lib.util.Exceptions.canonicalName».sneakyThrow(e);
 					}
@@ -239,6 +240,15 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					«ENDFOR»
 				'''
 				exceptions += typeRef(Exception)
+			]
+			
+			methods += monitor.toMethod("initializeEvents", typeRef(void)) [
+				visibility = JvmVisibility::PRIVATE
+				body = '''
+					«FOR event : events.filter[e|e.emitter.cronExpression == null]»
+						«event.name».«prefix»configure();
+					«ENDFOR»
+				'''
 			]
 			
 			// Methods from the super type
@@ -407,11 +417,10 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					«IF isProxy»
 						super.isProxyEvent = «isProxy»;
 					«ENDIF»
-					initialize();
 				'''
 			]
-			members += e.emitter.toMethod("initialize", typeRef(void)) [
-				visibility = JvmVisibility::PRIVATE
+			members += e.emitter.toMethod(prefix + "configure", typeRef(void)) [
+				annotations += annotationRef(Override)
 				body = '''
 					final «typeRef(Context)» context = «typeRef(Context)».«Context.MONITOR.toString»;
 					final String routingKey = «routingKey.get(0)»;
