@@ -20,9 +20,9 @@ package org.pascani.dsl.lib.sca;
 
 import static org.pascani.dsl.lib.sca.FrascatiUtils.eval;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -349,7 +349,7 @@ public class PascaniUtils {
 			throws IOException, ScriptException {
 		Boolean registered = registeredScripts.get(bindingUri);
 		if (registered == null || !registered) {
-			File fscript = new File(Resources.getResource("pascani.fscript").getFile());
+			String fscript = Resources.toString(Resources.getResource("pascani.fscript"), Charset.defaultCharset());
 			List<String> scripts = FrascatiUtils.registerScript(fscript, bindingUri);
 			registeredScripts.put(bindingUri, scripts.size() > 0);
 		}
