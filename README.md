@@ -10,7 +10,7 @@ Pascani requires [Amelia](https://github.com/unicesi/amelia), so please make sur
 ### Clone
 
 ```bash
-git clone -b "master" --single-branch https://github.com/unicesi/amelia
+git clone -b "master" --single-branch https://github.com/unicesi/pascani
 ```
 
 ### Compiling From Sources
