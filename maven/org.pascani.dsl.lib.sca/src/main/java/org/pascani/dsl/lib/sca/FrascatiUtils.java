@@ -109,7 +109,7 @@ public class FrascatiUtils {
 
 	protected static final Map<URI, Reconfiguration> reconfiguration = new HashMap<URI, Reconfiguration>();
 	protected static final Map<URI, Deployment> deployment = new HashMap<URI, Deployment>();
-	public static URI DEFAULT_BINDING_URI = initializeDefaultUri();
+	public static final URI DEFAULT_BINDING_URI = initializeDefaultUri();
 
 	/**
 	 * Executes a FraSCAti Script statement in the default FraSCAti runtime
