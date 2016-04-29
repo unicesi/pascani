@@ -69,6 +69,11 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 	 *         routing key assigned to this event
 	 */
 	public abstract AbstractConsumer getConsumer();
+	
+	/**
+	 * Used to initialize all of the event members
+	 */
+	public abstract void ＿configure();
 
 	public Function<ChangeEvent, Boolean> getSpecifier() {
 		return new Function<ChangeEvent, Boolean>() {
