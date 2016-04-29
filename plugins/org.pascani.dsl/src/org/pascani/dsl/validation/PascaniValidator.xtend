@@ -426,7 +426,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 					PascaniPackage.Literals.EVENT_EMITTER__SPECIFIER, UNEXPECTED_EVENT_SPECIFIER)
 			}
 			if (emitterType.getSuperType(String) == null) {
-				error("The emitter of type String",
+				error("The emitter must be of type String",
 					PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
 			}
 		}
