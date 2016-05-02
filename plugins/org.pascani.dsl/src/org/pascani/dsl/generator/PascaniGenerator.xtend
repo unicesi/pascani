@@ -77,54 +77,60 @@ class PascaniGenerator implements IGenerator {
 					val declaration = element.typeDeclaration
 					var port = getPort(declaration)
 					switch (declaration) {
-						Monitor: {
-							val component = new SCAComponent(declaration.name)
-							val child = new SCAComponent("monitor", declaration.fullyQualifiedName.toString)
-
-							// Resumable service
-							val resumable = new SCAPort("resumable")
-							resumable.implement = new SCAInterface("resumable", Resumable.canonicalName)
-							resumable.bindings +=
-								new SCABinding(SCABinding.Kind.REST,
-									newArrayList(new SCAAttribute("uri", "http://localhost:" + port++)))
-
-							// Events service
-							val events = new SCAPort("events")
-							events.implement = new SCAInterface("events", MonitorEventsService.canonicalName)
-							events.bindings +=
-								new SCABinding(SCABinding.Kind.REST,
-									newArrayList(new SCAAttribute("uri", "http://localhost:" + port++)))
-
-							child.services += #[resumable, events]
-							component.children += child
-
-							val contents = ScaCompositeTemplates.parseComponent(component)
-							fsa.generateFile(declaration.fullyQualifiedName.toString(File.separator) +
-								".composite", PascaniOutputConfigurationProvider::PASCANI_OUTPUT, contents)
-						}
-						Namespace: {
-							val component = new SCAComponent(declaration.name)
-							val child = new SCAComponent("namespace", declaration.fullyQualifiedName.toString + "Namespace")
-
-							// Resumable service
-							val resumable = new SCAPort("resumable")
-							resumable.implement = new SCAInterface("resumable", Resumable.canonicalName)
-							resumable.bindings +=
-								new SCABinding(SCABinding.Kind.REST,
-									newArrayList(new SCAAttribute("uri", "http://localhost:" + port++)))
-
-							child.services += resumable
-							component.children += child
-
-							val contents = ScaCompositeTemplates.parseComponent(component)
-							fsa.generateFile(declaration.fullyQualifiedName.toString(File.separator) +
-								".composite", PascaniOutputConfigurationProvider::PASCANI_OUTPUT, contents)
-						}
+						Monitor: infer(declaration, port, fsa)
+						Namespace: infer(declaration, port, fsa)
 					}
 				}
 			}
 		]
 		savePorts(fsa)
+	}
+	
+	def void infer(Monitor declaration, int initialPort, IFileSystemAccess fsa) {
+		var port = initialPort
+		val component = new SCAComponent(declaration.name)
+		val child = new SCAComponent("monitor", declaration.fullyQualifiedName.toString)
+
+		// Resumable service
+		val resumable = new SCAPort("resumable")
+		resumable.implement = new SCAInterface("resumable", Resumable.canonicalName)
+		resumable.bindings +=
+			new SCABinding(SCABinding.Kind.REST, 
+				newArrayList(new SCAAttribute("uri", "http://localhost:" + port++)))
+
+		// Events service
+		val events = new SCAPort("events")
+		events.implement = new SCAInterface("events", MonitorEventsService.canonicalName)
+		events.bindings +=
+			new SCABinding(SCABinding.Kind.REST, 
+				newArrayList(new SCAAttribute("uri", "http://localhost:" + port++)))
+
+		child.services += #[resumable, events]
+		component.children += child
+
+		val contents = ScaCompositeTemplates.parseComponent(component)
+		fsa.generateFile(declaration.fullyQualifiedName.toString(File.separator) + ".composite",
+			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, contents)	
+	}
+	
+	def void infer(Namespace declaration, int initialPort, IFileSystemAccess fsa) {
+		var port = initialPort
+		val component = new SCAComponent(declaration.name)
+		val child = new SCAComponent("namespace", declaration.fullyQualifiedName.toString + "Namespace")
+
+		// Resumable service
+		val resumable = new SCAPort("resumable")
+		resumable.implement = new SCAInterface("resumable", Resumable.canonicalName)
+		resumable.bindings +=
+			new SCABinding(SCABinding.Kind.REST, 
+				newArrayList(new SCAAttribute("uri", "http://localhost:" + port++)))
+
+		child.services += resumable
+		component.children += child
+
+		val contents = ScaCompositeTemplates.parseComponent(component)
+		fsa.generateFile(declaration.fullyQualifiedName.toString(File.separator) + ".composite",
+			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, contents)
 	}
 
 	def void readPorts(String filePath, IFileSystemAccess fsa) {
