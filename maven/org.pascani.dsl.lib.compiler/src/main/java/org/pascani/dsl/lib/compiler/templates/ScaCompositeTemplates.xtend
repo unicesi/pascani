@@ -99,11 +99,9 @@ class ScaCompositeTemplates {
 
 	def static parseBinding(SCABinding binding) {
 		'''
-			<frascati:binding.«binding.type.toString.toLowerCase»
-				«FOR attribute : binding.attributes»
-					«attribute.name»="«attribute.value»"
-				«ENDFOR»
-			/>
+			<frascati:binding.«binding.type.toString.toLowerCase» «binding.attributes.join(" ", [ a |
+				'''«a.name»="«a.value»"'''
+			])» />
 		'''
 	}
 
