@@ -20,22 +20,20 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.jcabi</groupId>
+		<groupId>org.pascani</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.43</version>
+		<version>1.0.0-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
-	<groupId>org.pascani</groupId>
+	<packaging>pom</packaging>
 	<artifactId>org.pascani.tycho.parent</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Pascani is a Domain Specific Language for specifying, compiling and deploying dynamic performance monitors to introspect (FraSCAti) SCA applications at runtime.</description>
 	<url>https://pascani.org</url>
-	<packaging>pom</packaging>
 	<properties>
 		<tycho-version>0.24.0</tycho-version>
 		<xtextVersion>2.9.1</xtextVersion>
 		<frascatiVersion>1.4</frascatiVersion>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
 	</properties>
@@ -83,17 +81,6 @@
 		<system>Github</system>
 		<url>https://github.com/unicesi/pascani/issues</url>
 	</issueManagement>
-	<profiles>
-		<profile>
-			<id>doclint-java8-disable</id>
-			<activation>
-				<jdk>[1.8,)</jdk>
-			</activation>
-			<properties>
-				<javadoc.opts>-Xdoclint:none</javadoc.opts>
-			</properties>
-		</profile>
-	</profiles>
 	<build>
 		<plugins>
 			<plugin>
