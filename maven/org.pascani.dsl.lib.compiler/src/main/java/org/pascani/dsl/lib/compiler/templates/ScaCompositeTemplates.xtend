@@ -39,6 +39,12 @@ class ScaCompositeTemplates {
 					xmlns="http://www.osoa.org/xmlns/sca/1.0"
 					xmlns:frascati="http://frascati.ow2.org/xmlns/sca/1.1"
 					targetNamespace="http://frascati.ow2.org/«component.name»">
+					«FOR service : component.services»
+						«parseService(service, true)»
+					«ENDFOR»
+					«FOR reference : component.references»
+						«parseReference(reference, true)»
+					«ENDFOR»
 					«FOR child : component.children»
 						«parseComponent(child)»
 					«ENDFOR»
@@ -47,10 +53,10 @@ class ScaCompositeTemplates {
 				<component name="«component.name»">
 					<implementation.java class="«component.clazz»" />
 					«FOR service : component.services»
-						«parseService(service)»
+						«parseService(service, false)»
 					«ENDFOR»
 					«FOR reference : component.references»
-						«parseReference(reference)»
+						«parseReference(reference, false)»
 					«ENDFOR»
 					«FOR property : component.properties»
 						«parseProperty(property)»
@@ -69,9 +75,9 @@ class ScaCompositeTemplates {
 		'''
 	}
 
-	def static parseService(SCAPort service) {
+	def static parseService(SCAPort service, boolean promote) {
 		'''
-			<service name="«service.name»">
+			<service name="«service.name»"«IF promote» promote="«service.wiredTo»"«ENDIF»>
 				<interface.java interface="«service.implement.clazz»"/>
 				«FOR binding : service.bindings»
 					«parseBinding(binding)»
@@ -80,9 +86,9 @@ class ScaCompositeTemplates {
 		'''
 	}
 
-	def static parseReference(SCAPort reference) {
+	def static parseReference(SCAPort reference, boolean promote) {
 		'''
-			<reference name="«reference.name»">
+			<reference name="«reference.name»"«IF promote» promote="«reference.wiredTo»"«ENDIF»>
 				<interface.java interface="«reference.implement.clazz»"/>
 				«FOR binding : reference.bindings»
 					«parseBinding(binding)»
