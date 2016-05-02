@@ -80,9 +80,8 @@
 		</profile>
 		<profile>
 			<!-- 
-			The profile deploys all artifacts to oss.sonatype.org repository 
-			(if you're registered there). It also skips default deployment plugin. 
-			@see http://www.jcabi.com/jcabi-parent/profile-sonatype.html 
+			The profile deploys all artifacts to oss.sonatype.org repository.
+			It also skips default deployment plugin.
 			-->
 			<id>sonatype</id>
 			<build>
