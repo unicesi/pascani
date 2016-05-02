@@ -22,7 +22,9 @@
 	<groupId>org.pascani</groupId>
 	<artifactId>org.pascani.tycho.parent</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>Pascani Eclipse plugins parent</name>
+	<name>${project.groupId}:${project.artifactId}</name>
+	<description>Pascani is a Domain Specific Language for specifying, compiling and deploying dynamic performance monitors to introspect (FraSCAti) SCA applications at runtime.</description>
+	<url>https://pascani.org</url>
 	<packaging>pom</packaging>
 	<properties>
 		<tycho-version>0.24.0</tycho-version>
