@@ -226,7 +226,10 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 				'''
 			]
-			
+			methods += monitor.toMethod("run", typeRef(void)) [
+				annotations += annotationRef(Override)
+				body = ''''''
+			]
 			methods += monitor.toMethod("initialize", typeRef(void)) [
 				visibility = JvmVisibility::PRIVATE
 				body = '''
