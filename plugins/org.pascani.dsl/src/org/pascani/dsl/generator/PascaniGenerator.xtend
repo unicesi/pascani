@@ -89,6 +89,9 @@ class PascaniGenerator implements IGenerator {
 	def void infer(Monitor declaration, int initialPort, IFileSystemAccess fsa) {
 		var port = initialPort
 		val component = new SCAComponent(declaration.name)
+		val runnablePromote = new SCAPort("r")
+		runnablePromote.implement = new SCAInterface("r", Runnable.canonicalName)
+		runnablePromote.wiredTo = "monitor/r"
 		val child = new SCAComponent("monitor", declaration.fullyQualifiedName.toString)
 
 		// Resumable service
@@ -104,9 +107,14 @@ class PascaniGenerator implements IGenerator {
 		events.bindings +=
 			new SCABinding(SCABinding.Kind.REST, 
 				newArrayList(new SCAAttribute("uri", "http://localhost:" + port++)))
+		
+		// Runnable service
+		val runnable = new SCAPort("r")
+		runnable.implement = new SCAInterface("r", Runnable.canonicalName)
 
-		child.services += #[resumable, events]
+		child.services += #[resumable, events, runnable]
 		component.children += child
+		component.services += #[runnablePromote]
 
 		val contents = ScaCompositeTemplates.parseComponent(component)
 		fsa.generateFile(declaration.fullyQualifiedName.toString(File.separator) + ".composite",
