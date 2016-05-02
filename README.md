@@ -33,5 +33,5 @@ export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=256m"
 And then run
 
 ```bash
-mvn install -file maven/org.pascani.tycho.parent/pom.xml
+mvn install
 ```
