@@ -31,7 +31,8 @@ import org.quartz.CronExpression;
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class Monitor implements Resumable, MonitorEventsService {
+public abstract class Monitor 
+	implements Runnable, Resumable, MonitorEventsService {
 
 	/**
 	 * The variable representing the current state (stopped or not)
