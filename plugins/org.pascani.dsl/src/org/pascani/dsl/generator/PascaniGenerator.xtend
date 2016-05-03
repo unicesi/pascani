@@ -70,7 +70,7 @@ class PascaniGenerator implements IGenerator {
 	/**
 	 * The port from which service ports are assigned
 	 */
-	static val DEFAULT_STARTING_PORT = 9000
+	static val DEFAULT_STARTING_PORT = 10000
 	
 	/**
 	 * The table containing past and new port assignments
