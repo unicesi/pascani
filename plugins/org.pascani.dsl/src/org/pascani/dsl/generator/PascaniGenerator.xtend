@@ -40,16 +40,16 @@ import org.ow2.scesame.qoscare.core.scaspec.SCABinding
 import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
 import org.ow2.scesame.qoscare.core.scaspec.SCAInterface
 import org.ow2.scesame.qoscare.core.scaspec.SCAPort
-import org.pascani.dsl.lib.compiler.templates.ScaCompositeTemplates
 import org.pascani.dsl.lib.compiler.templates.DeploymentTemplates
+import org.pascani.dsl.lib.compiler.templates.ScaCompositeTemplates
 import org.pascani.dsl.lib.util.MonitorEventsService
 import org.pascani.dsl.lib.util.Resumable
 import org.pascani.dsl.outputconfiguration.PascaniOutputConfigurationProvider
 import org.pascani.dsl.pascani.Model
 import org.pascani.dsl.pascani.Monitor
 import org.pascani.dsl.pascani.Namespace
-import org.pascani.dsl.pascani.TypeDeclaration
 import org.pascani.dsl.pascani.PascaniPackage
+import org.pascani.dsl.pascani.TypeDeclaration
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -100,25 +100,35 @@ class PascaniGenerator implements IGenerator {
 		
 		// Generate deployment descriptors
 		val projectPath = currentProject.locationURI.toURL.file
-		val monitors = getEObjectDescriptions(resource, PascaniPackage.eINSTANCE.monitor).map [ d |
-			d.getEObject(resource) as Monitor
+		val decls = getEObjectDescriptions(resource, PascaniPackage.eINSTANCE.typeDeclaration).map [ d |
+			d.getEObject(resource) as TypeDeclaration
 		]
-		monitors.generateDeploymentArtifacts(projectPath, fsa)
+		decls.generateDeploymentArtifacts(projectPath, fsa)
 	}
 	
-	def void generateDeploymentArtifacts(List<Monitor> monitors, String projectPath, IFileSystemAccess fsa) {
+	def void generateDeploymentArtifacts(List<TypeDeclaration> decls, String projectPath, IFileSystemAccess fsa) {
 		var packageName = "deployment"
-		val _monitors = monitors.toMap[m|m.name].mapValues[m|(m as TypeDeclaration).port]
-		val deployment = DeploymentTemplates.deployment("^" + packageName, "Deployment")
+		val comps = decls.toMap[m|m.name].mapValues[m|m.port]
+		// Contents
+		val deployment = DeploymentTemplates.deployment("^" + packageName, #["Execution"], "Deployment")
 		val prerequisites = DeploymentTemplates.prerequisites("^" + packageName, projectPath)
-		val subsystems = DeploymentTemplates.subsystems("^" + packageName, "Monitors", _monitors)
+		val subsystems = DeploymentTemplates.subsystems("^" + packageName, "Execution", comps)
 		// Generate files
-		fsa.generateFile(packageName + ".Deployment".replaceAll("\\.", File.separator) + ".amelia",
-			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, deployment)
-		fsa.generateFile(packageName + ".Prerequisites".replaceAll("\\.", File.separator) + ".amelia",
-			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, prerequisites)
-		fsa.generateFile(packageName + ".Monitors".replaceAll("\\.", File.separator) + ".amelia",
-			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, subsystems)
+		val deploymentFile = packageName + ".Deployment".prepareFileName + ".amelia"
+		val prerequisitesFile = packageName + ".Prerequisites".prepareFileName + ".amelia"
+		val monitorsFile = packageName + ".Execution".prepareFileName + ".amelia"
+		// 1. Remove existing
+		fsa.deleteFile(deploymentFile)
+		fsa.deleteFile(prerequisitesFile)
+		fsa.deleteFile(monitorsFile)
+		// 2. Create again
+		fsa.generateFile(deploymentFile, PascaniOutputConfigurationProvider::PASCANI_OUTPUT, deployment)
+		fsa.generateFile(prerequisitesFile, PascaniOutputConfigurationProvider::PASCANI_OUTPUT, prerequisites)
+		fsa.generateFile(monitorsFile, PascaniOutputConfigurationProvider::PASCANI_OUTPUT, subsystems)
+	}
+	
+	def prepareFileName(String qualifiedName) {
+		return qualifiedName.replaceAll("\\.", File.separator)
 	}
 	
 	def void infer(Monitor declaration, int initialPort, IFileSystemAccess fsa) {
