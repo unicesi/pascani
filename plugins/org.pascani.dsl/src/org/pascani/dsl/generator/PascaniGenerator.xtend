@@ -100,10 +100,13 @@ class PascaniGenerator implements IGenerator {
 		
 		// Generate deployment descriptors
 		val projectPath = currentProject.locationURI.toURL.file
-		val decls = getEObjectDescriptions(resource, PascaniPackage.eINSTANCE.typeDeclaration).map [ d |
+		val namespaces = getEObjectDescriptions(resource, PascaniPackage.eINSTANCE.namespace).map [ d |
 			d.getEObject(resource) as TypeDeclaration
 		]
-		decls.generateDeploymentArtifacts(projectPath, fsa)
+		val monitors = getEObjectDescriptions(resource, PascaniPackage.eINSTANCE.monitor).map [ d |
+			d.getEObject(resource) as TypeDeclaration
+		]
+		(namespaces + monitors).toList.generateDeploymentArtifacts(projectPath, fsa)
 	}
 	
 	def void generateDeploymentArtifacts(List<TypeDeclaration> decls, String projectPath, IFileSystemAccess fsa) {
@@ -117,11 +120,6 @@ class PascaniGenerator implements IGenerator {
 		val deploymentFile = packageName + ".Deployment".prepareFileName + ".amelia"
 		val prerequisitesFile = packageName + ".Prerequisites".prepareFileName + ".amelia"
 		val monitorsFile = packageName + ".Execution".prepareFileName + ".amelia"
-		// 1. Remove existing
-		fsa.deleteFile(deploymentFile)
-		fsa.deleteFile(prerequisitesFile)
-		fsa.deleteFile(monitorsFile)
-		// 2. Create again
 		fsa.generateFile(deploymentFile, PascaniOutputConfigurationProvider::PASCANI_OUTPUT, deployment)
 		fsa.generateFile(prerequisitesFile, PascaniOutputConfigurationProvider::PASCANI_OUTPUT, prerequisites)
 		fsa.generateFile(monitorsFile, PascaniOutputConfigurationProvider::PASCANI_OUTPUT, subsystems)
