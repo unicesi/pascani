@@ -23,18 +23,25 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.util.Date
+import java.util.List
 import java.util.Properties
 import org.eclipse.core.resources.ResourcesPlugin
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.generator.IGenerator
 import org.eclipse.xtext.naming.IQualifiedNameProvider
+import org.eclipse.xtext.resource.IContainer
+import org.eclipse.xtext.resource.IEObjectDescription
+import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider
 import org.ow2.scesame.qoscare.core.scaspec.SCAAttribute
 import org.ow2.scesame.qoscare.core.scaspec.SCABinding
 import org.ow2.scesame.qoscare.core.scaspec.SCAComponent
 import org.ow2.scesame.qoscare.core.scaspec.SCAInterface
 import org.ow2.scesame.qoscare.core.scaspec.SCAPort
 import org.pascani.dsl.lib.compiler.templates.ScaCompositeTemplates
+import org.pascani.dsl.lib.compiler.templates.DeploymentTemplates
 import org.pascani.dsl.lib.util.MonitorEventsService
 import org.pascani.dsl.lib.util.Resumable
 import org.pascani.dsl.outputconfiguration.PascaniOutputConfigurationProvider
@@ -42,11 +49,16 @@ import org.pascani.dsl.pascani.Model
 import org.pascani.dsl.pascani.Monitor
 import org.pascani.dsl.pascani.Namespace
 import org.pascani.dsl.pascani.TypeDeclaration
+import org.pascani.dsl.pascani.PascaniPackage
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
 class PascaniGenerator implements IGenerator {
+	
+	@Inject ResourceDescriptionsProvider resourceDescriptionsProvider
+	
+	@Inject IContainer.Manager containerManager
 
 	@Inject extension IQualifiedNameProvider
 
@@ -69,25 +81,48 @@ class PascaniGenerator implements IGenerator {
 		// FIXME: This is Eclipse-dependent (dependency: org.eclipse.core.resources)
 		val currentProject = ResourcesPlugin.workspace.root.getProject(resource.URI.segmentsList.get(1))
 		val filePath = currentProject.getFile("pascani-gen/" + PORTS_FILE).locationURI.rawPath
-		readPorts(filePath, fsa)
 		
+		// Generate composite files
+		readPorts(filePath, fsa)
 		resource.allContents.forEach [ element |
 			switch (element) {
 				Model: {
 					val declaration = element.typeDeclaration
 					var port = getPort(declaration)
 					switch (declaration) {
-						Monitor: infer(declaration, port, fsa)
-						Namespace: infer(declaration, port, fsa)
+						Monitor: declaration.infer(port, fsa)
+						Namespace: declaration.infer(port, fsa)
 					}
 				}
 			}
 		]
 		savePorts(fsa)
+		
+		// Generate deployment descriptors
+		val projectPath = currentProject.locationURI.toURL.file
+		val monitors = getEObjectDescriptions(resource, PascaniPackage.eINSTANCE.monitor).map [ d |
+			d.getEObject(resource) as Monitor
+		]
+		monitors.generateDeploymentArtifacts(projectPath, fsa)
+	}
+	
+	def void generateDeploymentArtifacts(List<Monitor> monitors, String projectPath, IFileSystemAccess fsa) {
+		var packageName = "deployment"
+		val _monitors = monitors.toMap[m|m.name].mapValues[m|(m as TypeDeclaration).port]
+		val deployment = DeploymentTemplates.deployment("^" + packageName, "Deployment")
+		val prerequisites = DeploymentTemplates.prerequisites("^" + packageName, projectPath)
+		val subsystems = DeploymentTemplates.subsystems("^" + packageName, "Monitors", _monitors)
+		// Generate files
+		fsa.generateFile(packageName + ".Deployment".replaceAll("\\.", File.separator) + ".amelia",
+			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, deployment)
+		fsa.generateFile(packageName + ".Prerequisites".replaceAll("\\.", File.separator) + ".amelia",
+			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, prerequisites)
+		fsa.generateFile(packageName + ".Monitors".replaceAll("\\.", File.separator) + ".amelia",
+			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, subsystems)
 	}
 	
 	def void infer(Monitor declaration, int initialPort, IFileSystemAccess fsa) {
-		var port = initialPort
+		var port = initialPort + 1
 		val component = new SCAComponent(declaration.name)
 		val runnablePromote = new SCAPort("r")
 		runnablePromote.implement = new SCAInterface("r", Runnable.canonicalName)
@@ -118,11 +153,11 @@ class PascaniGenerator implements IGenerator {
 
 		val contents = ScaCompositeTemplates.parseComponent(component)
 		fsa.generateFile(declaration.fullyQualifiedName.toString(File.separator) + ".composite",
-			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, contents)	
+			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, contents)
 	}
 	
 	def void infer(Namespace declaration, int initialPort, IFileSystemAccess fsa) {
-		var port = initialPort
+		var port = initialPort + 1
 		val component = new SCAComponent(declaration.name)
 		val child = new SCAComponent("namespace", declaration.fullyQualifiedName.toString + "Namespace")
 
@@ -185,6 +220,23 @@ class PascaniGenerator implements IGenerator {
 		if(newPort)
 			ports.put(typeDeclaration.fullyQualifiedName.toString, port + "")
 		return port
+	}
+	
+	def List<IEObjectDescription> getEObjectDescriptions(Resource resource, EClass eClass) {
+	    val descriptions = newArrayList;
+	    val resourceDescriptions = resourceDescriptionsProvider.getResourceDescriptions(resource);
+	    val resourceDescription = resourceDescriptions.getResourceDescription(resource.getURI());
+	    for (c : containerManager.getVisibleContainers(resourceDescription, resourceDescriptions)) {
+	        for (ob : c.getExportedObjectsByType(eClass)) {
+	            descriptions.add(ob);
+	        }
+	    }
+	    return descriptions;
+	}
+	
+	def EObject getEObject(IEObjectDescription description, Resource resource) {
+		val resourceSet = resource.getResourceSet()
+		return resourceSet.getEObject(description.getEObjectURI(), true)
 	}
 
 }
