@@ -25,7 +25,20 @@ import java.util.Map
  */
 class DeploymentTemplates {
 	
-	def static monitor(String packageName, String subsystemName, Map<String, Integer> monitors) {
+	def static deployment(String packageName, String deploymentName) {
+		'''
+			package «packageName»
+			
+			deployment «deploymentName» {
+			
+				// Deploy and wait
+				start(true, false)
+			
+			}
+		'''
+	}
+	
+	def static subsystems(String packageName, String subsystemName, Map<String, Integer> monitors) {
 		'''
 			package «packageName»
 			
@@ -53,7 +66,7 @@ class DeploymentTemplates {
 			
 			subsystem Prerequisites {
 				
-				param Host host = host("192.168.99.100", 32799, 32798, "frascati", "frascati", "jachinte/frascati-1.4")
+				param Host host = host("<hostname>", 21, 22, "<user>", "<password>", "<identifier>")
 				param String projectPath = "«projectPath»"
 				param String temporalDirectory = "/tmp/"
 				param String dependencies = 'dependencies'
