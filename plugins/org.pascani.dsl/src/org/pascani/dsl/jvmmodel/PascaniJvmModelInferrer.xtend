@@ -521,7 +521,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				// More information on the Scope annotation: http://mail-archive.ow2.org/frascati/2011-02/msg00001.html
 				annotations += annotationRef(Scope, "COMPOSITE")
 				superTypes += typeRef(BasicNamespace)
-
+				superTypes += typeRef(Runnable)
 				for (decl : declarations) {
 					if (decl.name != null) {
 						val name = decl.fullyQualifiedName.toString.replace(".", "_")
@@ -539,6 +539,9 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							registerVariable("«decl.fullyQualifiedName»", «decl.fullyQualifiedName.toString.replace(".", "_")», false);
 						«ENDFOR»
 					'''
+				]
+				members += namespace.toMethod("run", typeRef(void)) [
+					body = ''''''
 				]
 			}
 		]
