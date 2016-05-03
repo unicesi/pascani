@@ -19,15 +19,18 @@
 package org.pascani.dsl.lib.compiler.templates
 
 import java.util.Map
+import java.util.List
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
 class DeploymentTemplates {
 	
-	def static deployment(String packageName, String deploymentName) {
+	def static deployment(String packageName, List<String> subsystemNames, String deploymentName) {
 		'''
 			package «packageName»
+			
+			«subsystemNames.join("\n", [s|"includes " + s])»
 			
 			deployment «deploymentName» {
 			
@@ -38,18 +41,18 @@ class DeploymentTemplates {
 		'''
 	}
 	
-	def static subsystems(String packageName, String subsystemName, Map<String, Integer> monitors) {
+	def static subsystems(String packageName, String subsystemName, Map<String, Integer> components) {
 		'''
 			package «packageName»
 			
-			includes Prerequisites
+			includes «packageName».Prerequisites
 			
 			subsystem «subsystemName» {
 				
 				on host {
-					«FOR monitor : monitors.keySet»
-						«monitor.toFirstLower»: compilation;
-							run -r «monitors.get(monitor)» "«monitor.toFirstUpper»" -libpath classpath + #["monitors.jar"]
+					«FOR c : components.keySet»
+						«c.toFirstLower»: compilation;
+							run -r «components.get(c)» "«c.toFirstUpper»" -libpath classpath + #["monitors.jar"]
 					«ENDFOR»
 				}
 			
