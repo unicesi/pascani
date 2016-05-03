@@ -102,6 +102,8 @@ class PascaniGenerator implements IGenerator {
 		val projectPath = currentProject.locationURI.toURL.file
 		val namespaces = getEObjectDescriptions(resource, PascaniPackage.eINSTANCE.namespace).map [ d |
 			d.getEObject(resource) as TypeDeclaration
+		].filter [ n |
+			n.eContainer instanceof Model
 		]
 		val monitors = getEObjectDescriptions(resource, PascaniPackage.eINSTANCE.monitor).map [ d |
 			d.getEObject(resource) as TypeDeclaration
