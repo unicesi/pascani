@@ -28,6 +28,9 @@
 	<url>https://pascani.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<!-- ${main.basedir} is the root directory. 
+		 Used for the missing-dependencies repository -->
+		<main.basedir>${project.basedir}</main.basedir>
 	</properties>
 	<modules>
 		<module>maven/org.pascani.tycho.parent</module>
@@ -44,11 +47,11 @@
 		</profile>
 		<profile>
 			<!--
-            Sign artifacts before installation with GPG. To enable
-            this profile property "gpg.keyname" should be properly defined.
-            -->
+			Sign artifacts before installation with GPG. To enable
+			this profile property "gpg.keyname" should be properly defined.
+			-->
 			<id>pascani-gpg</id>
-            <activation>
+			<activation>
 				<property>
 					<name>gpg.keyname</name>
 				</property>
@@ -57,14 +60,14 @@
 				<plugins>
 					<plugin>
 						<!--
-                        To GPG-sign the artifact before deployment to foreign
-                        repository. GPG keys have to be provided in CI
-                        environment, and published beforehand.
-                        @link http://www.sonatype.com/people/2010/01/how-to-generate-pgp-signatures-with-maven/
-                        -->
+						To GPG-sign the artifact before deployment to foreign
+						repository. GPG keys have to be provided in CI
+						environment, and published beforehand.
+						@link http://www.sonatype.com/people/2010/01/how-to-generate-pgp-signatures-with-maven/
+						-->
 						<groupId>org.apache.maven.plugins</groupId>
-		        		<artifactId>maven-gpg-plugin</artifactId>
-		        		<version>1.6</version>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
@@ -76,7 +79,7 @@
 						</executions>
 					</plugin>
 				</plugins>
-			</build>	
+			</build>    
 		</profile>
 		<profile>
 			<!-- 
@@ -148,6 +151,19 @@
 			</build>
 		</profile>
 	</profiles>
+	<repositories>
+		<repository>
+			<id>missing-artifacts-repo</id>
+			<name>Missing Artifacts Repository</name>
+			<url>file://${main.basedir}/missing-artifacts</url>
+			<releases>
+				<updatePolicy>never</updatePolicy>
+			</releases>
+			<snapshots>
+				<updatePolicy>never</updatePolicy>
+			</snapshots>
+		</repository>
+	</repositories>
 	<distributionManagement>
 		<repository>
 			<id>oss.sonatype.org</id>
@@ -162,8 +178,8 @@
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
-		        <artifactId>versions-maven-plugin</artifactId>
-		        <version>2.1</version>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.1</version>
 				<configuration>
 					<generateBackupPoms>false</generateBackupPoms>
 				</configuration>

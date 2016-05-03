@@ -30,6 +30,12 @@
 	<artifactId>org.pascani.dsl.web</artifactId>
 	<name>Pascani Web Editor</name>
 
+	<properties>
+	<!-- ${main.basedir} is the root directory. 
+		 Used for the missing-dependencies repository -->
+		<main.basedir>${project.basedir}/../..</main.basedir>
+	</properties>
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>

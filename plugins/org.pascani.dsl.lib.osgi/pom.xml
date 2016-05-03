@@ -29,4 +29,10 @@
 
 	<artifactId>org.pascani.dsl.lib.osgi</artifactId>
 	<name>Bundle for runtime libraries</name>
+
+	<properties>
+	<!-- ${main.basedir} is the root directory. 
+		 Used for the missing-dependencies repository -->
+		<main.basedir>${project.basedir}/../..</main.basedir>
+	</properties>
 </project>

@@ -29,6 +29,12 @@
 	
 	<artifactId>org.pascani.dsl.ui</artifactId>
 	<name>Pascani UI</name>
+
+	<properties>
+	<!-- ${main.basedir} is the root directory. 
+		 Used for the missing-dependencies repository -->
+		<main.basedir>${project.basedir}/../..</main.basedir>
+	</properties>
 	
 	<build>
 		<plugins>
