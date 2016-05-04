@@ -51,7 +51,7 @@ class DeploymentTemplates {
 				
 				on host {
 					«FOR c : components.keySet»
-						«c.toFirstLower»: compilation;
+						«c»: compilation;
 							run -r «components.get(c)» "«c»" -libpath classpath + #["monitors.jar"] -s "r" -m "run"
 					«ENDFOR»
 				}
