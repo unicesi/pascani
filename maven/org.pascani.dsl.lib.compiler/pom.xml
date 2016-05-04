@@ -64,11 +64,23 @@
 			<groupId>org.ow2.frascati.tinfi</groupId>
 			<artifactId>frascati-tinfi-runtime-api</artifactId>
 			<version>1.4.5</version>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.ow2.frascati</groupId>
 			<artifactId>frascati-introspection-api</artifactId>
 			<version>${frascatiVersion}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.fabric3.spec</groupId>
