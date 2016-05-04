@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.oasis-open.sca.j</groupId>
+  <artifactId>sca-caa-apis</artifactId>
+  <versioning>
+    <release>1.1-CD04</release>
+    <versions>
+      <version>1.1-CD04</version>
+    </versions>
+    <lastUpdated>20160504002918</lastUpdated>
+  </versioning>
+</metadata>
