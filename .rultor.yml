@@ -1,9 +1,9 @@
 architect:
 - jachinte
 decrypt:
-  settings.xml: "repo/settings.xml.asc"
-  pubring.gpg: "repo/pubring.gpg.asc"
-  secring.gpg: "repo/secring.gpg.asc"
+  settings.xml: "repo/.rultor/settings.xml.asc"
+  pubring.gpg: "repo/.rultor/pubring.gpg.asc"
+  secring.gpg: "repo/.rultor/secring.gpg.asc"
 env:
   MAVEN_OPTS: "-Xmx512m -XX:MaxPermSize=256m"
 release:
