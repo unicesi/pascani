@@ -5,7 +5,6 @@ settings.xml
 .project
 
 # Package Files
-*.jar
 *.war
 *.ear
 
