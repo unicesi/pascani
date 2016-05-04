@@ -119,16 +119,16 @@ class PascaniGenerator implements IGenerator {
 		val prerequisites = DeploymentTemplates.prerequisites("^" + packageName, projectPath)
 		val subsystems = DeploymentTemplates.subsystems("^" + packageName, "Execution", comps)
 		// Generate files
-		val deploymentFile = packageName + ".Deployment".prepareFileName + ".amelia"
-		val prerequisitesFile = packageName + ".Prerequisites".prepareFileName + ".amelia"
-		val monitorsFile = packageName + ".Execution".prepareFileName + ".amelia"
-		fsa.generateFile(deploymentFile, PascaniOutputConfigurationProvider::PASCANI_OUTPUT, deployment)
-		fsa.generateFile(prerequisitesFile, PascaniOutputConfigurationProvider::PASCANI_OUTPUT, prerequisites)
-		fsa.generateFile(monitorsFile, PascaniOutputConfigurationProvider::PASCANI_OUTPUT, subsystems)
+		fsa.generateFile("Deployment".prepareFileName(packageName), 
+			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, deployment)
+		fsa.generateFile("Prerequisites".prepareFileName(packageName),
+			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, prerequisites)
+		fsa.generateFile("Execution".prepareFileName(packageName),
+			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, subsystems)
 	}
 	
-	def prepareFileName(String qualifiedName) {
-		return qualifiedName.replaceAll("\\.", File.separator)
+	def prepareFileName(String fileName, String packageName) {
+		return (packageName + "." + fileName).replaceAll("\\.", File.separator) + ".amelia"
 	}
 	
 	def void infer(Monitor declaration, int initialPort, IFileSystemAccess fsa) {
