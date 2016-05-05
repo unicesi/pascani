@@ -49,10 +49,15 @@ class DeploymentTemplates {
 			
 			subsystem «subsystemName» {
 				
+				val Iterable<String> libpath = classpath + #['«"«"»project»/«"«"»project».jar']
+				val Iterable<String> errors = #["Connection refused"]
+				
 				on host {
 					«FOR c : components.keySet»
 						«c»: compilation;
-							run -r «components.get(c)» "«c»" -libpath classpath + #["monitors.jar"] -s "r" -m "run"
+							run -r «components.get(c)» "«c»" -libpath libpath -s "r" -m "run"... => [
+								errorTexts = errorTexts + errors
+							]
 					«ENDFOR»
 				}
 			
@@ -60,37 +65,38 @@ class DeploymentTemplates {
 		'''
 	}
 	
-	def static prerequisites(String packageName, String projectPath) {
+	def static prerequisites(String packageName, String projectPath, String projectName) {
 		'''
 			package «packageName»
 			
-			import org.amelia.dsl.lib.descriptors.Host
 			import java.util.List
+			import org.amelia.dsl.lib.descriptors.Host
 			
 			subsystem Prerequisites {
 				
 				param Host host = host("<hostname>", 21, 22, "<user>", "<password>", "<identifier>")
 				param String projectPath = "«projectPath»"
-				param String temporalDirectory = "/tmp/"
-				param String dependencies = 'dependencies'
+				param String project = "«projectName»"
+				param String root = "~/.pascani"
+				param String dependencies = "dependencies"
 				param List<String> classpath = #[
 					'«"«"»dependencies»/org.eclipse.xtext.xbase.lib-2.9.2.jar',
-					'«"«"»dependencies»/org.pascani.dsl.lib-1.0.0-20160502.201847-1.jar',
-					'«"«"»dependencies»/org.pascani.dsl.lib.sca-1.0.0-20160502.202247-1.jar'
+					'«"«"»dependencies»/org.pascani.dsl.lib-1.0.0-20160504.221718-2.jar',
+					'«"«"»dependencies»/org.pascani.dsl.lib.sca-1.0.0-20160504.221952-2.jar'
 				]
 				
 				val List<String> downloads = #[
 					"http://central.maven.org/maven2/org/eclipse/xtext/org.eclipse.xtext.xbase.lib/2.9.2/org.eclipse.xtext.xbase.lib-2.9.2.jar",
-					"https://oss.sonatype.org/content/repositories/snapshots/org/pascani/org.pascani.dsl.lib/1.0.0-SNAPSHOT/org.pascani.dsl.lib-1.0.0-20160502.201847-1.jar",
-					"https://oss.sonatype.org/content/repositories/snapshots/org/pascani/org.pascani.dsl.lib.sca/1.0.0-SNAPSHOT/org.pascani.dsl.lib.sca-1.0.0-20160502.202247-1.jar"
+					"https://oss.sonatype.org/content/repositories/snapshots/org/pascani/org.pascani.dsl.lib/1.0.0-SNAPSHOT/org.pascani.dsl.lib-1.0.0-20160504.221718-2.jar",
+					"https://oss.sonatype.org/content/repositories/snapshots/org/pascani/org.pascani.dsl.lib.sca/1.0.0-SNAPSHOT/org.pascani.dsl.lib.sca-1.0.0-20160504.221952-2.jar"
 				]
 				val List<String> downloadErrors = #["Connection refused"]
 				val Integer _timeout = 3600 * 1000
 				
 				on host {
 					prerequisites:
-						cmd 'mkdir -p «"«"»temporalDirectory»'
-						cd temporalDirectory
+						cmd 'mkdir -p «"«"»root»'
+						cd root
 						cmd 'mkdir -p «"«"»dependencies»'
 						cmd 'wget -c «"«"»downloads.get(0)» -P «"«"»dependencies»'... => [
 							errorTexts = downloadErrors
@@ -104,10 +110,11 @@ class DeploymentTemplates {
 							errorTexts = downloadErrors
 							withTimeout = _timeout
 						]
+						cmd 'rm -rf «"«"»root»/«"«"»project»/source'
 			
 					compilation: prerequisites;
-						scp '«"«"»projectPath»/pascani-gen' to '«"«"»temporalDirectory»/pascani-gen'
-						compile "pascani-gen" "monitors" -classpath classpath
+						scp '«"«"»projectPath»/pascani-gen' to '«"«"»root»/«"«"»project»/source'
+						compile '«"«"»project»/source' '«"«"»project»/«"«"»project»' -classpath classpath
 				}
 			}
 		'''

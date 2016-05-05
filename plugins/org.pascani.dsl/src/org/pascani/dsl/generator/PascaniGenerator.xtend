@@ -108,15 +108,16 @@ class PascaniGenerator implements IGenerator {
 		val monitors = getEObjectDescriptions(resource, PascaniPackage.eINSTANCE.monitor).map [ d |
 			d.getEObject(resource) as TypeDeclaration
 		]
-		(namespaces + monitors).toList.generateDeploymentArtifacts(projectPath, fsa)
+		(namespaces + monitors).toList.generateDeploymentArtifacts(projectPath, currentProject.name, fsa)
 	}
 	
-	def void generateDeploymentArtifacts(List<TypeDeclaration> decls, String projectPath, IFileSystemAccess fsa) {
+	def void generateDeploymentArtifacts(List<TypeDeclaration> decls, String projectPath, String projectName,
+		IFileSystemAccess fsa) {
 		var packageName = "deployment"
 		val comps = decls.toMap[m|m.name].mapValues[m|m.port]
 		// Contents
 		val deployment = DeploymentTemplates.deployment("^" + packageName, #["Execution"], "Deployment")
-		val prerequisites = DeploymentTemplates.prerequisites("^" + packageName, projectPath)
+		val prerequisites = DeploymentTemplates.prerequisites("^" + packageName, projectPath, projectName)
 		val subsystems = DeploymentTemplates.subsystems("^" + packageName, "Execution", comps)
 		// Generate files
 		fsa.generateFile("Deployment".prepareFileName(packageName), 
