@@ -3,9 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Bundle for runtime libraries
 Bundle-SymbolicName: org.pascani.dsl.lib.osgi
 Bundle-Version: 1.0.0
-Bundle-ClassPath: org.pascani.dsl.lib-1.0.0-SNAPSHOT-dependencies.jar,
- org.pascani.dsl.lib.compiler-1.0.0-SNAPSHOT-dependencies.jar,
- org.pascani.dsl.lib.sca-1.0.0-SNAPSHOT-dependencies.jar
 Bundle-Vendor: Miguel Jiménez
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.ctc.wstx.api,
@@ -817,3 +814,6 @@ Export-Package: com.ctc.wstx.api,
  org.terracotta.quartz,
  org.terracotta.quartz.collections,
  org.terracotta.quartz.wrappers
+Bundle-ClassPath: org.pascani.dsl.lib-dependencies.jar,
+ org.pascani.dsl.lib.compiler-dependencies.jar,
+ org.pascani.dsl.lib.sca-dependencies.jar
