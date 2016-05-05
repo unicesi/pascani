@@ -31,6 +31,7 @@
 	<!-- ${main.basedir} is the root directory. 
 		 Used for the missing-dependencies repository -->
 		<main.basedir>${project.basedir}</main.basedir>
+		<tycho-version>0.24.0</tycho-version>
 	</properties>
 	<modules>
 		<module>maven/org.pascani.tycho.parent</module>
@@ -177,12 +178,9 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.1</version>
-				<configuration>
-					<generateBackupPoms>false</generateBackupPoms>
-				</configuration>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-versions-plugin</artifactId>
+				<version>${tycho-version}</version>
 			</plugin>
 		</plugins>
 	</build>

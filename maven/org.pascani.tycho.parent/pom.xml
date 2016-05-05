@@ -31,7 +31,6 @@
 	<description>Pascani is a Domain Specific Language for specifying, compiling and deploying dynamic performance monitors to introspect (FraSCAti) SCA applications at runtime.</description>
 	<url>https://pascani.org</url>
 	<properties>
-		<tycho-version>0.24.0</tycho-version>
 		<xtextVersion>2.9.1</xtextVersion>
 		<frascatiVersion>1.4</frascatiVersion>
 		<maven.compiler.source>1.6</maven.compiler.source>
