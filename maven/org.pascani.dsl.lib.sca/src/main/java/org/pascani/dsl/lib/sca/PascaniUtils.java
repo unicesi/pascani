@@ -22,6 +22,7 @@ import static org.pascani.dsl.lib.sca.FrascatiUtils.eval;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +41,7 @@ import org.pascani.dsl.lib.events.TimeLapseEvent;
 import org.pascani.dsl.lib.infrastructure.ProbeProxy;
 import org.pascani.dsl.lib.util.Exceptions;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.io.Resources;
 
 /**
@@ -325,7 +327,62 @@ public class PascaniUtils {
 			throws IOException, ScriptException {
 		Boolean registered = registeredScripts.get(bindingUri);
 		if (registered == null || !registered) {
-			String fscript = Resources.toString(Resources.getResource("pascani.fscript"), Charset.defaultCharset());
+			ClassLoader loader = MoreObjects.firstNonNull(
+					Thread.currentThread().getContextClassLoader(),
+					PascaniUtils.class.getClassLoader());
+			URL url = loader.getResource("pascani.fscript");
+			if (url == null)
+				url = ClassLoader.getSystemResource("pascani.fscript");
+			String fscript = "";
+			if (url != null) {
+				fscript = Resources.toString(url, Charset.defaultCharset());
+				System.out.println("------ Pascani.fscript LOADED FROM RESOURCES ------");
+			} else {
+				System.out.println("------ Pascani.fscript NOT FOUND. USING BACKUP ------");
+				fscript = "" +
+						"function pascani-element-exists(selector) {\n" +
+						"	return size($selector) > 0;\n" +
+						"}\n" +
+						"action pascani-add-intent(parent, target, intentName, routingKey) {\n" +
+						"	-- 1. Create a new instance of the intent composite\n" +
+						"	clone = sca-new($intentName);\n" +
+						"	-- 2. Add the intent instance as a child of the target's parent\n" +
+						"	add-scachild($parent, $clone);\n" +
+						"	intent = $parent/scachild::$intentName;\n" +
+						"	-- 3. Change the name of the intent component to be the routing key\n" +
+						"	set-name($intent, $routingKey);\n" +
+						"	intent = $parent/scachild::$routingKey;\n" +
+						"	-- 4. Sets the routing key\n" +
+						"	routingKeyProp = $intent/scachild::probe/scaproperty::routingKey;\n" +
+						"	set-value($routingKeyProp, $routingKey);\n" +
+						"	-- 5. Add the REST binding to the Resumable interface, and then add the SCA intent\n" +
+						"	add-scaintent($target, $intent);\n" +
+						"	-- 6. Wire the event handler service\n" +
+						"	service = $intent/scachild::probe/scaservice::handler;\n" +
+						"	reference = $intent/scachild::primitiveIntentHandler/scareference::handler;\n" +
+						"	add-scawire($reference, $service);\n" +
+						"	-- 7. Clean things up\n" +
+						"	sca-remove($intentName); \n" +
+						"	set-state($intent, \"STARTED\");\n" +
+						"	set-state($parent, \"STARTED\");\n" +
+						"}\n" +
+						"action pascani-remove-intent(parent, target, routingKey) {\n" +
+						"	-- 1. Remove the SCA intent\n" +
+						"	intent = $parent/scachild::$routingKey;\n" +
+						"	remove-scaintent($target, $intent);\n" +
+						"	set-state($intent, \"STOPPED\");\n" +
+						"	set-state($parent, \"STOPPED\");\n" +
+						"	-- TODO: remove all SCA services? (intent)\n" +
+						"	-- 2. Remove the intent component from the target's parent\n" +
+						"	remove-scachild($parent, $intent);\n" +
+						"	set-state($parent, \"STARTED\");\n" +
+						"}\n" +
+						"action pascani-probe-set(parent, key_value) {\n" +
+						"	intent = $parent/scachild::$routingKey;\n" +
+						"	property = $intent/scachild::probe/scaproperty::property;\n" +
+						"	set-value($property, $key_value);\n" +
+						"}";
+			}
 			List<String> scripts = FrascatiUtils.registerScript(fscript, bindingUri);
 			registeredScripts.put(bindingUri, scripts.size() > 0);
 		}
