@@ -99,17 +99,14 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	@SuppressWarnings("unchecked")
 	public BasicNamespace(final String routingKey)
 			throws Exception {
-
 		this.variables = new HashMap<String, Serializable>();
 		this.context = PascaniRuntime.Context.NAMESPACE;
 		this.endPoint = new EndPoint();
 		this.producer = new RabbitMQProducer(endPoint,
 				declareQueue(routingKey), routingKey);
 		this.producer.acceptOnly(ChangeEvent.class);
-
 		this.server = new RabbitMQRpcServer(endPoint, routingKey,
 				PascaniRuntime.Context.NAMESPACE);
-
 		startRpcServer();
 	}
 
@@ -120,10 +117,8 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 		String queue = routingKey;
 		String exchange = PascaniRuntime.getEnvironment().get(
 				"namespaces_exchange");
-
 		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
 		this.endPoint.channel().queueBind(queue, exchange, routingKey);
-
 		return exchange;
 	}
 
@@ -148,15 +143,12 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	 */
 	protected boolean registerVariable(final String name,
 			Serializable initialValue, boolean overwrite) {
-
 		boolean registered = true;
-
 		if (!overwrite && this.variables.containsKey(name)) {
 			registered = false;
 		} else {
 			this.variables.put(name, initialValue);
 		}
-
 		return registered;
 	}
 
@@ -189,7 +181,6 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 		} else if (request.operation().equals(RpcOperation.IS_PAUSED)) {
 			response = isPaused();
 		}
-
 		return response;
 	}
 
@@ -211,7 +202,6 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	public Serializable setVariable(String variable, Serializable value) {
 		if (!this.variables.containsKey(variable))
 			return null;
-
 		if (!isPaused()) {
 			synchronized (this.variables) {
 				Serializable previousValue = this.variables.get(variable);

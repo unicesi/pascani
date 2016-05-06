@@ -52,11 +52,9 @@ public class EndPoint {
 	 *             {@link Connection#createChannel()}
 	 */
 	public EndPoint(final String uri) throws Exception {
-
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setAutomaticRecoveryEnabled(true);
 		factory.setUri(uri);
-
 		this.connection = factory.newConnection();
 		this.channel = this.connection.createChannel();
 	}

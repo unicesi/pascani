@@ -110,7 +110,6 @@ public class ProbeProxy implements Probe {
 	 */
 	public boolean cleanData(final long start, final long end,
 			final List<Class<? extends Event<?>>> eventTypes) {
-
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_CLEAN, start,
 				end, new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, false);
@@ -128,7 +127,6 @@ public class ProbeProxy implements Probe {
 	 */
 	public int count(final long start, final long end,
 			final List<Class<? extends Event<?>>> eventTypes) {
-
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_COUNT, start,
 				end, new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, 0);
@@ -147,7 +145,6 @@ public class ProbeProxy implements Probe {
 	 */
 	public int countAndClean(final long start, final long end,
 			final List<Class<? extends Event<?>>> eventTypes) {
-
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_COUNT_AND_CLEAN,
 				start, end,
 				new ArrayList<Class<? extends Event<?>>>(eventTypes));
@@ -167,7 +164,6 @@ public class ProbeProxy implements Probe {
 	@SuppressWarnings("unchecked")
 	public List<Event<?>> fetch(final long start, final long end,
 			final List<Class<? extends Event<?>>> eventTypes) {
-
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_FETCH, start,
 				end, new ArrayList<Class<? extends Event<?>>>(eventTypes));
 		byte[] response = makeActualCall(request, new ArrayList<Event<?>>());
@@ -187,7 +183,6 @@ public class ProbeProxy implements Probe {
 	@SuppressWarnings("unchecked")
 	public List<Event<?>> fetchAndClean(final long start, final long end,
 			final List<Class<? extends Event<?>>> eventTypes) {
-
 		RpcRequest request = new RpcRequest(RpcOperation.PROBE_FETCH_AND_CLEAN,
 				start, end,
 				new ArrayList<Class<? extends Event<?>>>(eventTypes));

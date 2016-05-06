@@ -51,7 +51,6 @@ public class RabbitMQRpcServer extends RpcServer {
 
 		@Override public byte[] handleCall(byte[] requestBody,
 				AMQP.BasicProperties replyProperties) {
-
 			RpcRequest request = SerializationUtils.deserialize(requestBody);
 			Serializable response = delegateHandling(request);
 			return SerializationUtils.serialize(response);
@@ -98,25 +97,19 @@ public class RabbitMQRpcServer extends RpcServer {
 	public RabbitMQRpcServer(final EndPoint endPoint, String routingKey,
 			final PascaniRuntime.Context context) throws IOException,
 			TimeoutException {
-
 		super(PascaniRuntime.getEnvironment().get("rpc_queue_prefix") + routingKey);
-
 		this.endPoint = endPoint;
-
 		final String queue = declareQueue(context, routingKey);
 		this.server = new InternalRpcServer(this.endPoint.channel(), queue);
 	}
 
 	private String declareQueue(final PascaniRuntime.Context context,
 			String routingKey) throws IOException {
-
 		String prefix = PascaniRuntime.getEnvironment().get("rpc_queue_prefix");
 		String queue = prefix + routingKey;
 		String exchange = PascaniRuntime.getEnvironment().get("rpc_exchange");
-
 		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
 		this.endPoint.channel().queueBind(queue, exchange, routingKey);
-
 		return queue;
 	}
 

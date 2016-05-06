@@ -82,14 +82,11 @@ public class LocalProbe implements Probe {
 	 */
 	public LocalProbe(final String routingKey,
 			final PascaniRuntime.Context context) throws Exception {
-		
 		this.context = context;
 		this.endPoint = new EndPoint();
 		createQueue(routingKey);
-		
 		this.server = new RabbitMQRpcServer(endPoint, routingKey, this.context);
 		this.probe = new BasicProbe(server);
-
 		registerProbeAsListener();
 	}
 
@@ -101,7 +98,6 @@ public class LocalProbe implements Probe {
 		String queue = routingKey;
 		String exchange = PascaniRuntime.getEnvironment()
 				.get("probes_exchange");
-
 		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
 		this.endPoint.channel().queueBind(queue, exchange, routingKey);
 	}
