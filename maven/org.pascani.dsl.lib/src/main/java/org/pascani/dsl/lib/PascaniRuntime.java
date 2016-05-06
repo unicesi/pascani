@@ -146,7 +146,8 @@ public class PascaniRuntime {
 		InputStream input = null;
 
 		try {
-			input = PascaniRuntime.class.getClassLoader().getResourceAsStream("pascani.properties");
+			input = PascaniRuntime.class.getClassLoader()
+					.getResourceAsStream("pascani.properties");
 			if (input != null)
 				config.load(input);
 		} catch (FileNotFoundException e) {

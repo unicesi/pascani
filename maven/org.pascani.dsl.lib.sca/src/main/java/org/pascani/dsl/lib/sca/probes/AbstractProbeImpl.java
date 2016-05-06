@@ -35,6 +35,22 @@ import org.pascani.dsl.lib.util.Resumable;
  */
 @Scope("COMPOSITE")
 public abstract class AbstractProbeImpl implements EventHandler, Resumable {
+	
+	/**
+	 * A SCA property used to set key-value pairs useful for initialization of
+	 * this probe.
+	 * <p>
+	 * The key-value pairs must follow this notation: key=value, without spaces.
+	 * <p>
+	 * Possible keys are:
+	 * <ul>
+	 * <li>probe: whether to use or not a local probe
+	 * <li>producer: whether to use or not an event producer
+	 * <li>routingkey: the routing key belonging to this probe
+	 * <li>pascani.*: Pascani properties. Where * can be replaced for a property
+	 * name
+	 */
+	protected String property = null;
 
 	/**
 	 * The unique name among all the {@link Probe} instances
@@ -44,17 +60,12 @@ public abstract class AbstractProbeImpl implements EventHandler, Resumable {
 	/**
 	 * Utility variable to reset the {@link Probe} instance
 	 */
-	protected Boolean resetProbe = false;
+	protected Boolean useProbe = false;
 
 	/**
 	 * Utility variable to reset the {@link AbstractProducer} instance
 	 */
-	protected Boolean resetProducer = false;
-
-	/**
-	 * The {@link Probe} exchange
-	 */
-	protected String exchange;
+	protected Boolean useProducer = false;
 
 	/**
 	 * The event producer sending events to the exchange as event occur
@@ -78,7 +89,6 @@ public abstract class AbstractProbeImpl implements EventHandler, Resumable {
 
 	public AbstractProbeImpl(final Class<? extends Event<?>>... acceptedTypes) {
 		this.acceptedTypes = acceptedTypes;
-		this.exchange = PascaniRuntime.getEnvironment().get("probes_exchange");
 	}
 
 	/*
@@ -95,11 +105,13 @@ public abstract class AbstractProbeImpl implements EventHandler, Resumable {
 	}
 
 	private void resetProbe() {
+		if (this.routingKey == null)
+			return;
 		try {
 			// shutdown in case it is already initialized
 			if (this.probe != null)
 				this.probe.shutdown();
-			this.probe = new LocalProbe(routingKey,
+			this.probe = new LocalProbe(this.routingKey,
 					PascaniRuntime.Context.PROBE);
 			this.probe.acceptOnly(this.acceptedTypes);
 		} catch (Exception e) {
@@ -108,11 +120,14 @@ public abstract class AbstractProbeImpl implements EventHandler, Resumable {
 	}
 
 	private void resetProducer() {
+		if (this.routingKey == null)
+			return;
 		try {
 			// shutdown in case it is already initialized
 			if (this.producer != null)
 				this.producer.shutdown();
-			this.producer = new RabbitMQProducer(this.exchange,
+			this.producer = new RabbitMQProducer(
+					PascaniRuntime.getEnvironment().get("probes_exchange"),
 					this.routingKey);
 			this.producer.acceptOnly(this.acceptedTypes);
 		} catch (Exception e) {
@@ -155,29 +170,29 @@ public abstract class AbstractProbeImpl implements EventHandler, Resumable {
 	public String routingKey() {
 		return this.routingKey;
 	}
-
-	@Property public void setRoutingKey(final String routingKey) {
-		this.routingKey = routingKey;
-
-		// This is done only the first time the routing key is set
-		// and in case it was set after updating properties
-		// resetProbe/resetProducer
-		if (this.resetProbe && this.probe == null)
+	
+	@Property public void setProperty(final String property) {
+		String[] data = property.split("=");
+		String name = data[0].trim();
+		String value = data[0].trim();
+		if (name.startsWith("pascani.")) {
+			System.setProperty(name, value);
+		} else if (name.equals("routingkey")) {
+			this.routingKey = value;
+			// This is done only the first time the routing key is set
+			// and in case it was set after updating properties
+			// resetProbe/resetProducer
+			if (this.useProbe && this.probe == null)
+				resetProbe();
+			if (this.useProducer && this.producer == null)
+				resetProducer();
+		} else if (name.equals("probe")) {
+			this.useProbe = Boolean.valueOf(value);
 			resetProbe();
-		if (this.resetProducer && this.producer == null)
+		} else if (name.equals("producer")) {
+			this.useProducer = Boolean.valueOf(value);
 			resetProducer();
-	}
-
-	@Property public void setResetProbe(final Boolean resetProbe) {
-		this.resetProbe = resetProbe;
-		if (this.resetProbe && this.routingKey != null)
-			resetProbe();
-	}
-
-	@Property public void setResetProducer(final Boolean resetProducer) {
-		this.resetProducer = resetProducer;
-		if (this.resetProducer && this.routingKey != null)
-			resetProducer();
+		}
 	}
 
 }

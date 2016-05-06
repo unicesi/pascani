@@ -31,12 +31,12 @@ import javax.script.ScriptException;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.pascani.dsl.lib.Event;
+import org.pascani.dsl.lib.PascaniRuntime;
 import org.pascani.dsl.lib.Probe;
 import org.pascani.dsl.lib.events.ExceptionEvent;
 import org.pascani.dsl.lib.events.InvokeEvent;
 import org.pascani.dsl.lib.events.ReturnEvent;
 import org.pascani.dsl.lib.events.TimeLapseEvent;
-import org.pascani.dsl.lib.infrastructure.AbstractProducer;
 import org.pascani.dsl.lib.infrastructure.ProbeProxy;
 import org.pascani.dsl.lib.util.Exceptions;
 
@@ -84,15 +84,14 @@ public class PascaniUtils {
 	}
 	
 	/**
-	 * Resets an existing {@link Probe} bound to the given target and routing
-	 * key, in the specified FraSCAti runtime.
+	 * Updates the given probe property, in the specified FraSCAti runtime.
 	 * 
 	 * @param target
 	 *            A FPath selector
-	 * @param routingKey
-	 *            A unique name (within the
-	 *            {@code org.pascani.dsl.lib.PascaniRuntime.Context#PROBE}
-	 *            context) for the new probe
+	 * @param propertyName
+	 *            The name of the property to update
+	 * @param propertyValue
+	 *            The new property value
 	 * @param bindingUri
 	 *            The URI where the FraSCAti runtime is running
 	 * @throws IOException
@@ -102,41 +101,13 @@ public class PascaniUtils {
 	 *             If there is a problem executing any of the scripts
 	 * @see FrascatiUtils#DEFAULT_BINDING_URI
 	 */
-	public static void resetProbe(String target, String routingKey,
-			URI bindingUri) throws IOException, ScriptException {
+	public static void setProbeProperty(String target, String propertyName, 
+			String propertyValue, URI bindingUri) throws IOException, ScriptException {
 		registerPascaniScripts(bindingUri);
 		String[] data = target.split("/");
 		String parent = data[0] + "/" + data[1];
-		eval("pascani-reset-probe(" + parent + ", \"" + routingKey + "\")",
-				bindingUri);
-	}
-
-	/**
-	 * Resets an existing {@link AbstractProducer} bound to the given target and
-	 * routing key, in the specified FraSCAti runtime.
-	 * 
-	 * @param target
-	 *            A FPath selector
-	 * @param routingKey
-	 *            A unique name (within the
-	 *            {@code org.pascani.dsl.lib.PascaniRuntime.Context#PROBE}
-	 *            context) for the new probe
-	 * @param bindingUri
-	 *            The URI where the FraSCAti runtime is running
-	 * @throws IOException
-	 *             If there is a problem loading the Pascani FScript procedures
-	 *             from the resources
-	 * @throws ScriptException
-	 *             If there is a problem executing any of the scripts
-	 * @see FrascatiUtils#DEFAULT_BINDING_URI
-	 */
-	public static void resetProducer(String target, String routingKey,
-			URI bindingUri) throws IOException, ScriptException {
-		registerPascaniScripts(bindingUri);
-		String[] data = target.split("/");
-		String parent = data[0] + "/" + data[1];
-		eval("pascani-reset-producer(" + parent + ", \"" + routingKey + "\")",
-				bindingUri);
+		String keyValue = propertyName + "=" + propertyValue;
+		eval("pascani-probe-set(" + parent + ", \"" + keyValue + "\")", bindingUri);
 	}
 
 	/**
@@ -169,9 +140,14 @@ public class PascaniUtils {
 			String intentName, boolean activateProducer, URI bindingUri)
 					throws IOException, ScriptException {
 		newIntent(target, routingKey, intentName, bindingUri);
-		resetProbe(target, routingKey, bindingUri);
+		for (String key: PascaniRuntime.getEnvironment().keySet()) {
+			setProbeProperty(target, "pascani." + key, 
+					PascaniRuntime.getEnvironment().get(key), bindingUri);
+		}
+		setProbeProperty(target, "routingkey", routingKey, bindingUri);
+		setProbeProperty(target, "probe", Boolean.TRUE.toString(), bindingUri);
 		if (activateProducer)
-			resetProducer(target, routingKey, bindingUri);
+			setProbeProperty(target, "producer", Boolean.TRUE.toString(), bindingUri);
 		return Exceptions.sneakyInitializer(ProbeProxy.class, routingKey);
 	}
 	

@@ -46,14 +46,8 @@ action pascani-remove-intent(parent, target, routingKey) {
 	set-state($parent, "STARTED");
 }
 
-action pascani-reset-probe(parent, routingKey) {
+action pascani-probe-set(parent, key_value) {
 	intent = $parent/scachild::$routingKey;
-	resetProbeProp = $intent/scachild::probe/scaproperty::resetProbe;
-	set-value($resetProbeProp, true);
-}
-
-action pascani-reset-producer(parent, routingKey) {
-	intent = $parent/scachild::$routingKey;
-	resetProducerProp = $intent/scachild::probe/scaproperty::resetProducer;
-	set-value($resetProducerProp, true);
+	property = $intent/scachild::probe/scaproperty::property;
+	set-value($property, $key_value);
 }
