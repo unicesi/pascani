@@ -90,6 +90,8 @@ public class PascaniUtils {
 	 * 
 	 * @param target
 	 *            A FPath selector
+	 * @param routingKey
+	 *            The probe's routing key
 	 * @param propertyName
 	 *            The name of the property to update
 	 * @param propertyValue
@@ -103,13 +105,15 @@ public class PascaniUtils {
 	 *             If there is a problem executing any of the scripts
 	 * @see FrascatiUtils#DEFAULT_BINDING_URI
 	 */
-	public static void setProbeProperty(String target, String propertyName, 
-			String propertyValue, URI bindingUri) throws IOException, ScriptException {
+	public static void setProbeProperty(String target, String routingKey, 
+			String propertyName, String propertyValue, URI bindingUri) 
+					throws IOException, ScriptException {
 		registerPascaniScripts(bindingUri);
 		String[] data = target.split("/");
 		String parent = data[0] + "/" + data[1];
 		String keyValue = propertyName + "=" + propertyValue;
-		eval("pascani-probe-set(" + parent + ", \"" + keyValue + "\")", bindingUri);
+		eval("pascani-probe-set(" + parent + ", \"" + routingKey + "\", \"" 
+				+ keyValue + "\")", bindingUri);
 	}
 
 	/**
@@ -143,13 +147,14 @@ public class PascaniUtils {
 					throws IOException, ScriptException {
 		newIntent(target, routingKey, intentName, bindingUri);
 		for (String key: PascaniRuntime.getEnvironment().keySet()) {
-			setProbeProperty(target, "pascani." + key, 
+			setProbeProperty(target, routingKey, "pascani." + key, 
 					PascaniRuntime.getEnvironment().get(key), bindingUri);
 		}
-		setProbeProperty(target, "routingkey", routingKey, bindingUri);
-		setProbeProperty(target, "probe", Boolean.TRUE.toString(), bindingUri);
+		setProbeProperty(target, routingKey, "routingkey", routingKey, bindingUri);
+		setProbeProperty(target, routingKey, "probe", Boolean.TRUE.toString(), bindingUri);
 		if (activateProducer)
-			setProbeProperty(target, "producer", Boolean.TRUE.toString(), bindingUri);
+			setProbeProperty(target, routingKey, "producer", 
+					Boolean.TRUE.toString(), bindingUri);
 		return Exceptions.sneakyInitializer(ProbeProxy.class, routingKey);
 	}
 	
@@ -336,9 +341,9 @@ public class PascaniUtils {
 			String fscript = "";
 			if (url != null) {
 				fscript = Resources.toString(url, Charset.defaultCharset());
-				System.out.println("------ Pascani.fscript LOADED FROM RESOURCES ------");
+				System.out.println("------ pascani.fscript LOADED FROM RESOURCES ------");
 			} else {
-				System.out.println("------ Pascani.fscript NOT FOUND. USING BACKUP ------");
+				System.out.println("------ pascani.fscript NOT FOUND. USING BACKUP ------");
 				fscript = "" +
 						"function pascani-element-exists(selector) {\n" +
 						"	return size($selector) > 0;\n" +
@@ -377,7 +382,7 @@ public class PascaniUtils {
 						"	remove-scachild($parent, $intent);\n" +
 						"	set-state($parent, \"STARTED\");\n" +
 						"}\n" +
-						"action pascani-probe-set(parent, key_value) {\n" +
+						"action pascani-probe-set(parent, routingKey, key_value) {\n" +
 						"	intent = $parent/scachild::$routingKey;\n" +
 						"	property = $intent/scachild::probe/scaproperty::property;\n" +
 						"	set-value($property, $key_value);\n" +
