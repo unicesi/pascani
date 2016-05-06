@@ -20,7 +20,7 @@
 <feature
       id="org.pascani.dsl.feature"
       label="Pascani DSL"
-      version="1.0.0"
+      version="1.0.0.qualifier"
       provider-name="Miguel Jiménez">
 
    <description url="https://gitub.com/unicesi/pascani">
