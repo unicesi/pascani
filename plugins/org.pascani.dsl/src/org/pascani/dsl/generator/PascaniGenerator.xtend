@@ -122,7 +122,7 @@ class PascaniGenerator implements IGenerator {
 		fsa.generateFile("Prerequisites".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::PASCANI_OUTPUT, 
 			DeploymentTemplates.prerequisites('''^«deploymentPackage»''', projectPath, projectName))
 		fsa.generateFile("Execution".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::PASCANI_OUTPUT, 
-			DeploymentTemplates.subsystems('''^«deploymentPackage»''', '''^«deploymentPackage»''', '''^«deploymentPackage».Execution''', comps))
+			DeploymentTemplates.subsystems('''^«deploymentPackage»''', '''^«deploymentPackage»''', '''Execution''', comps))
 		for (subsystem : comps.keySet) {
 			fsa.generateFile(subsystem.prepareFileName(subsystemsPackage), PascaniOutputConfigurationProvider::PASCANI_OUTPUT, 
 				DeploymentTemplates.subsystem('''^«subsystemsPackage»''', '''^«deploymentPackage»''', subsystem, comps.get(subsystem)))
