@@ -20,6 +20,7 @@ package org.pascani.dsl.lib.compiler.templates
 
 import java.util.Map
 import java.util.List
+import java.util.HashMap
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -30,7 +31,7 @@ class DeploymentTemplates {
 		'''
 			package «packageName»
 			
-			«subsystemNames.join("\n", [s|"includes " + s])»
+			«subsystemNames.join("\n", [s|'''includes «packageName».«s»'''])»
 			
 			deployment «deploymentName» {
 			
@@ -41,11 +42,18 @@ class DeploymentTemplates {
 		'''
 	}
 	
-	def static subsystems(String packageName, String subsystemName, Map<String, Integer> components) {
+	def static subsystem(String packageName, String prerequisitesPackage, String component, int port) {
+		val components = new HashMap()
+		components.put(component, port)
+		return subsystems(packageName, prerequisitesPackage, component, components)
+	}
+	
+	def static subsystems(String packageName, String prerequisitesPackage, String subsystemName,
+		Map<String, Integer> components) {
 		'''
 			package «packageName»
 			
-			includes «packageName».Prerequisites
+			includes «prerequisitesPackage».Prerequisites
 			
 			subsystem «subsystemName» {
 				

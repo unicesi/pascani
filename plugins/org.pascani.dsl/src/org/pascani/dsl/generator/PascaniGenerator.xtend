@@ -113,19 +113,20 @@ class PascaniGenerator implements IGenerator {
 	
 	def void generateDeploymentArtifacts(List<TypeDeclaration> decls, String projectPath, String projectName,
 		IFileSystemAccess fsa) {
-		var packageName = "deployment"
+		val deploymentPackage = "deployment"
+		val subsystemsPackage = "deployment.subsystems"
 		val comps = decls.toMap[m|m.name].mapValues[m|m.port]
-		// Contents
-		val deployment = DeploymentTemplates.deployment("^" + packageName, #["Execution"], "Deployment")
-		val prerequisites = DeploymentTemplates.prerequisites("^" + packageName, projectPath, projectName)
-		val subsystems = DeploymentTemplates.subsystems("^" + packageName, "Execution", comps)
 		// Generate files
-		fsa.generateFile("Deployment".prepareFileName(packageName), 
-			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, deployment)
-		fsa.generateFile("Prerequisites".prepareFileName(packageName),
-			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, prerequisites)
-		fsa.generateFile("Execution".prepareFileName(packageName),
-			PascaniOutputConfigurationProvider::PASCANI_OUTPUT, subsystems)
+		fsa.generateFile("Deployment".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::PASCANI_OUTPUT,
+			DeploymentTemplates.deployment('''^«deploymentPackage»''', #["Execution"], "Deployment"))
+		fsa.generateFile("Prerequisites".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::PASCANI_OUTPUT, 
+			DeploymentTemplates.prerequisites('''^«deploymentPackage»''', projectPath, projectName))
+		fsa.generateFile("Execution".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::PASCANI_OUTPUT, 
+			DeploymentTemplates.subsystems('''^«deploymentPackage»''', '''^«deploymentPackage»''', '''^«deploymentPackage».Execution''', comps))
+		for (subsystem : comps.keySet) {
+			fsa.generateFile(subsystem.prepareFileName(subsystemsPackage), PascaniOutputConfigurationProvider::PASCANI_OUTPUT, 
+				DeploymentTemplates.subsystem('''^«subsystemsPackage»''', '''^«deploymentPackage»''', subsystem, comps.get(subsystem)))
+		}
 	}
 	
 	def prepareFileName(String fileName, String packageName) {
