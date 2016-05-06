@@ -74,16 +74,12 @@ public class PascaniRuntime {
 	 * A map containing configuration variables (e.g., default queue and
 	 * exchange names)
 	 */
-	private static final Map<String, String> environment = new HashMap<String, String>();
+	private static Map<String, String> environment = null;
 
 	/**
 	 * The logger
 	 */
 	private final static Logger logger = LogManager.getLogger(PascaniRuntime.class);
-
-	static {
-		readProperties();
-	}
 	
 	/**
 	 * @param context
@@ -135,6 +131,10 @@ public class PascaniRuntime {
 	}
 
 	public static Map<String, String> getEnvironment() {
+		if (environment == null) {
+			environment = new HashMap<String, String>();
+			readProperties();
+		}
 		return environment;
 	}
 
