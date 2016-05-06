@@ -82,21 +82,21 @@ class DeploymentTemplates {
 			
 			subsystem Prerequisites {
 				
-				param Host host = host("<hostname>", 21, 22, "<user>", "<password>", "<identifier>")
+				param Host host = host("hostname", 21, 22, "user", "password", "identifier")
 				param String projectPath = "«projectPath»"
 				param String project = "«projectName»"
 				param String root = "~/.pascani"
 				param String dependencies = "dependencies"
 				param List<String> classpath = #[
 					'«"«"»dependencies»/org.eclipse.xtext.xbase.lib-2.9.2.jar',
-					'«"«"»dependencies»/org.pascani.dsl.lib-1.0.0-20160504.221718-2.jar',
-					'«"«"»dependencies»/org.pascani.dsl.lib.sca-1.0.0-20160504.221952-2.jar'
+					'«"«"»dependencies»/org.pascani.dsl.lib-1.0.0.jar',
+					'«"«"»dependencies»/org.pascani.dsl.lib.sca-1.0.0.jar'
 				]
 				
 				val List<String> downloads = #[
 					"http://central.maven.org/maven2/org/eclipse/xtext/org.eclipse.xtext.xbase.lib/2.9.2/org.eclipse.xtext.xbase.lib-2.9.2.jar",
-					"https://oss.sonatype.org/content/repositories/snapshots/org/pascani/org.pascani.dsl.lib/1.0.0-SNAPSHOT/org.pascani.dsl.lib-1.0.0-20160504.221718-2.jar",
-					"https://oss.sonatype.org/content/repositories/snapshots/org/pascani/org.pascani.dsl.lib.sca/1.0.0-SNAPSHOT/org.pascani.dsl.lib.sca-1.0.0-20160504.221952-2.jar"
+					"http://central.maven.org/maven2/org/pascani/org.pascani.dsl.lib/1.0.0/org.pascani.dsl.lib-1.0.0.jar",
+					"http://central.maven.org/maven2/org/pascani/org.pascani.dsl.lib.sca/1.0.0/org.pascani.dsl.lib.sca-1.0.0.jar"
 				]
 				val List<String> downloadErrors = #["Connection refused"]
 				val Integer _timeout = 3600 * 1000
@@ -118,6 +118,8 @@ class DeploymentTemplates {
 							errorTexts = downloadErrors
 							withTimeout = _timeout
 						]
+						cmd 'cp «"«"»classpath.get(1)» $FRASCATI_HOME/lib'
+						cmd 'cp «"«"»classpath.get(2)» $FRASCATI_HOME/lib'
 						cmd 'rm -rf «"«"»root»/«"«"»project»/source'
 			
 					compilation: prerequisites;
