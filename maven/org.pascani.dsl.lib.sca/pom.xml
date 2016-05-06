@@ -32,9 +32,6 @@
 	<properties>
 		<jar.name>${project.artifactId}-${project.version}</jar.name>
 		<bundle.dir>../../plugins/org.pascani.dsl.lib.osgi/</bundle.dir>
-	<!-- ${main.basedir} is the root directory. 
-		 Used for the missing-dependencies repository -->
-		<main.basedir>${project.basedir}/../..</main.basedir>
 	</properties>
 	
 	<profiles>

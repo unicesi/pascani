@@ -29,12 +29,6 @@
 	
 	<artifactId>org.pascani.dsl.ide</artifactId>
 	<name>Pascani Eclipse IDE plugin</name>
-
-	<properties>
-	<!-- ${main.basedir} is the root directory. 
-		 Used for the missing-dependencies repository -->
-		<main.basedir>${project.basedir}/../..</main.basedir>
-	</properties>
 	
 	<build>
 		<plugins>

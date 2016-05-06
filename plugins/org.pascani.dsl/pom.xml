@@ -29,12 +29,6 @@
 	
 	<artifactId>org.pascani.dsl</artifactId>
 	<name>Pascani Core Library</name>
-
-	<properties>
-	<!-- ${main.basedir} is the root directory. 
-		 Used for the missing-dependencies repository -->
-		<main.basedir>${project.basedir}/../..</main.basedir>
-	</properties>
 	
 	<build>
 		<plugins>

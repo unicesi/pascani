@@ -28,12 +28,10 @@
 	<url>https://pascani.org</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	<!-- ${main.basedir} is the root directory. 
-		 Used for the missing-dependencies repository -->
-		<main.basedir>${project.basedir}</main.basedir>
 		<tycho-version>0.24.0</tycho-version>
 	</properties>
 	<modules>
+		<module>missing</module>
 		<module>maven/org.pascani.tycho.parent</module>
 	</modules>
 	<profiles>
@@ -152,19 +150,6 @@
 			</build>
 		</profile>
 	</profiles>
-	<repositories>
-		<repository>
-			<id>missing-artifacts-repo</id>
-			<name>Missing Artifacts Repository</name>
-			<url>file://${main.basedir}/missing-artifacts</url>
-			<releases>
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<updatePolicy>never</updatePolicy>
-			</snapshots>
-		</repository>
-	</repositories>
 	<distributionManagement>
 		<repository>
 			<id>oss.sonatype.org</id>
