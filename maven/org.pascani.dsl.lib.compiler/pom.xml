@@ -91,23 +91,13 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>org.pascani.dsl.lib</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>*</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-		    </exclusions>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>org.pascani.dsl.lib.sca</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>*</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-		    </exclusions>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 	<build>
