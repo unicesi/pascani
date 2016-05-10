@@ -8,12 +8,15 @@ env:
   MAVEN_OPTS: "-Xmx512m -XX:MaxPermSize=256m"
 release:
   script: |
+    mvn validate -Pmissing-dependencies
     mvn org.eclipse.tycho:tycho-versions-plugin:set-version "-DnewVersion=${tag}"
     git commit -am "${tag}"
     mvn clean deploy -PPascani --settings /home/r/settings.xml
 merge:
-  script:
-    - "mvn clean install"
+  script: |
+    mvn validate -Pmissing-dependencies
+    mvn clean install
 deploy:
-  script:
-    - "mvn clean deploy"
+  script: |
+    mvn validate -Pmissing-dependencies
+    mvn clean deploy
