@@ -30,11 +30,25 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<tycho-version>0.24.0</tycho-version>
 	</properties>
-	<modules>
-		<module>missing</module>
-		<module>maven/org.pascani.tycho.parent</module>
-	</modules>
 	<profiles>
+		<profile>
+			<id>missing-dependencies</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<modules>
+				<module>missing</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>Pascani</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<modules>
+				<module>maven/org.pascani.tycho.parent</module>
+			</modules>
+		</profile>
 		<profile>
 			<id>doclint-java8-disable</id>
 			<activation>
