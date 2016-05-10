@@ -30,6 +30,12 @@ First of all, make sure to increase memory
 export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=256m"
 ```
 
+Then, install some missing dependencies in your local `.m2` repository (**only the first time**).
+
+```bash
+mvn validate -Pmissing-dependencies
+```
+
 And then run
 
 ```bash
