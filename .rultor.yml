@@ -6,17 +6,16 @@ decrypt:
   secring.gpg: "repo/.rultor/secring.gpg.asc"
 env:
   MAVEN_OPTS: "-Xmx512m -XX:MaxPermSize=256m"
+install:
+  - mvn validate -Pmissing-dependencies
 release:
   script: |
-    mvn validate -Pmissing-dependencies
     mvn org.eclipse.tycho:tycho-versions-plugin:set-version "-DnewVersion=${tag}"
     git commit -am "${tag}"
     mvn clean deploy -PPascani --settings /home/r/settings.xml
 merge:
   script: |
-    mvn validate -Pmissing-dependencies
     mvn clean install
 deploy:
   script: |
-    mvn validate -Pmissing-dependencies
     mvn clean deploy
