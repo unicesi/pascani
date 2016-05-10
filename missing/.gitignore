@@ -1,0 +1,17 @@
+# Local Files
+*.class
+.DS_Store
+.project
+.classpath
+
+# Package Files
+*.war
+*.ear
+
+# local directories
+target/
+bin/
+.settings/
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
