@@ -30,11 +30,12 @@ import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.xbase.ide.highlighting.XbaseHighlightingCalculator
 import org.pascani.dsl.pascani.CronExpression
 import org.pascani.dsl.pascani.EventEmitter
+import org.pascani.dsl.pascani.EventSpecifier
 import org.pascani.dsl.pascani.PascaniPackage
-import org.pascani.dsl.pascani.RelationalEventSpecifier
+import org.pascani.dsl.pascani.impl.AndEventSpecifierImpl
 import org.pascani.dsl.pascani.impl.CronExpressionImpl
 import org.pascani.dsl.pascani.impl.EventEmitterImpl
-import org.pascani.dsl.pascani.impl.RelationalEventSpecifierImpl
+import org.pascani.dsl.pascani.impl.OrEventSpecifierImpl
 import org.pascani.dsl.pascani.util.PascaniSwitch
 
 /**
@@ -47,7 +48,8 @@ class PascaniSemanticHighlightingCalculator extends XbaseHighlightingCalculator 
 		if (resource == null || resource.getParseResult() == null)
 			return;
 
-		val supported = newArrayList(RelationalEventSpecifierImpl, EventEmitterImpl, CronExpressionImpl)
+		val supported = newArrayList(AndEventSpecifierImpl, OrEventSpecifierImpl, 
+			EventEmitterImpl, CronExpressionImpl)
 		val switcher = new HighlightingSwitch(acceptor);
 		val iterator = EcoreUtil.getAllContents(resource, true);
 
@@ -75,8 +77,8 @@ class PascaniSemanticHighlightingCalculator extends XbaseHighlightingCalculator 
 			this.acceptor = acceptor;
 		}
 
-		override Void caseRelationalEventSpecifier(RelationalEventSpecifier object) {
-			val node = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.getRelationalEventSpecifier_Operator());
+		override Void caseEventSpecifier(EventSpecifier object) {
+			val node = getFirstFeatureNode(object, PascaniPackage.eINSTANCE.eventSpecifier_Operator);
 			highlightNode(node, PascaniHighlightingConfiguration.RELATIONAL_OP_ID);
 			return null;
 		}

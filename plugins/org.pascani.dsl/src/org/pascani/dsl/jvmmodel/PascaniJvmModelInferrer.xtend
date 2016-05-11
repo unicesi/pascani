@@ -60,13 +60,13 @@ import org.pascani.dsl.pascani.EventType
 import org.pascani.dsl.pascani.Handler
 import org.pascani.dsl.pascani.Monitor
 import org.pascani.dsl.pascani.Namespace
-import org.pascani.dsl.pascani.RelationalEventSpecifier
-import org.pascani.dsl.pascani.RelationalOperator
 import org.pascani.dsl.pascani.TypeDeclaration
 import org.quartz.Job
 import org.quartz.JobDataMap
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
+import org.pascani.dsl.pascani.OrEventSpecifier
+import org.pascani.dsl.pascani.AndEventSpecifier
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -283,53 +283,50 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		]
 	}
 
-	def String parseSpecifier(String changeEvent, RelationalEventSpecifier specifier, List<JvmMember> members) {
+	def String parseSpecifier(String changeEvent, EventSpecifier specifier, List<JvmMember> members) {
 		var left = ""
 		var right = ""
-
-		if (specifier.left instanceof RelationalEventSpecifier)
-			left = parseSpecifier(changeEvent, specifier.left as RelationalEventSpecifier, members)
-		else
-			left = parseSpecifier(changeEvent, specifier.left, members)
-
-		if (specifier.right instanceof RelationalEventSpecifier)
-			right = parseSpecifier(changeEvent, specifier.right as RelationalEventSpecifier, members)
-		else
-			right = parseSpecifier(changeEvent, specifier.right, members)
-
-		'''
-			«left» «parseSpecifierLogOp(specifier.operator)»
-			«right»
-		'''
-	}
-
-	// FIXME: reproduce explicit parentheses
-	def String parseSpecifier(String changeEvent, EventSpecifier specifier, List<JvmMember> members) {
-		val suffix = System.nanoTime
-		val op = parseSpecifierRelOp(specifier)
-		val bigDec = typeRef(BigDecimal).qualifiedName
-		members += specifier.value.toField("value" + suffix, specifier.value.inferredType) [
-			initializer = specifier.value
-		]
-		if (specifier.equal) {
-			'''«changeEvent».value().equals(this.value«suffix»)'''
-		} else if (specifier.percentage) {
-			'''
-				(new «bigDec»(«changeEvent».previousValue().toString()).subtract(
-				 new «bigDec»(«changeEvent».value().toString())
-				)).abs().doubleValue() «op» new «bigDec»(«changeEvent».previousValue().toString()).doubleValue() * (this.value«suffix» / 100.0)
-			'''
-		} else {
-			'''new «bigDec»(«changeEvent».value().toString()).doubleValue() «op» this.value«suffix»'''
+		switch (specifier) {
+			AndEventSpecifier: {
+				left = parseSpecifier(changeEvent, specifier.left, members)
+				right = parseSpecifier(changeEvent, specifier.right, members)
+				return '''
+					«left» &&
+					«right»
+				'''
+			}
+			OrEventSpecifier: {
+				left = parseSpecifier(changeEvent, specifier.left, members)
+				right = parseSpecifier(changeEvent, specifier.right, members)
+				return '''
+					«left» ||
+					«right»
+				'''
+			}
+			EventSpecifier: {
+				val suffix = System.nanoTime
+				val op = parseSpecifierRelOp(specifier)
+				val bigDec = typeRef(BigDecimal).qualifiedName
+				members += specifier.value.toField("value" + suffix, specifier.value.inferredType) [
+					initializer = specifier.value
+				]
+				return if (specifier.equal) {
+					'''«changeEvent».value().equals(this.value«suffix»)'''
+				} else if (specifier.percentage) {
+					'''
+						(new «bigDec»(«changeEvent».previousValue().toString()).subtract(
+						 new «bigDec»(«changeEvent».value().toString())
+						)).abs().doubleValue() «op» new «bigDec»(«changeEvent».previousValue().toString()).doubleValue() * (this.value«suffix» / 100.0)
+					'''
+				} else {
+					'''new «bigDec»(«changeEvent».value().toString()).doubleValue() «op» this.value«suffix»'''
+				}
+			}
 		}
 	}
 
 	def parseSpecifierRelOp(EventSpecifier specifier) {
-		if (specifier.isAbove) '''>''' else if (specifier.isBelow) '''<''' else if (specifier.isEqual) '''=='''
-	}
-
-	def parseSpecifierLogOp(RelationalOperator op) {
-		if (op.equals(RelationalOperator.OR)) '''||''' else if (op.equals(RelationalOperator.AND)) '''&&'''
+		if (specifier.above) '''>''' else if (specifier.below) '''<''' else if (specifier.equal) '''=='''
 	}
 
 	def JvmGenericType createJobClass(Handler handler) {
@@ -474,28 +471,19 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				members += e.emitter.specifier.toClass(names.get("Specifier")) [
 					val fields = new ArrayList<JvmMember>
 					val code = new ArrayList
-					
-					if (e.emitter.specifier instanceof RelationalEventSpecifier)
-						code.add(parseSpecifier(names.get("changeEvent"),
-								e.emitter.specifier as RelationalEventSpecifier, fields))
-					else
-						code.add(parseSpecifier(names.get("changeEvent"), e.emitter.specifier, fields))
-
+					code.add(parseSpecifier(names.get("changeEvent"), e.emitter.specifier, fields))
 					superTypes += specifierTypeRef
-					
 					members += fields
 					
 					members += e.emitter.specifier.toMethod("apply", typeRef(Boolean)) [
 						parameters += e.emitter.specifier.toParameter(names.get("changeEvent"), typeRef(ChangeEvent))
 						body = '''return «code.get(0)»;'''
 					]
-					
 					members += e.emitter.specifier.toMethod("equals", typeRef(boolean)) [
 						parameters += e.emitter.specifier.toParameter("object", typeRef(Object))
 						body = '''return false;''' // Don't care
 					]
 				]
-				
 				members += e.emitter.specifier.toMethod("getSpecifier", specifierTypeRef) [
 					annotations += annotationRef(Override)
 					body = '''return new «names.get("Specifier")»();'''

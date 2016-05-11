@@ -18,7 +18,6 @@
  */
 package org.pascani.dsl.ui.custom.highlighting
 
-import org.eclipse.swt.SWT
 import org.eclipse.swt.graphics.RGB
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfigurationAcceptor
 import org.eclipse.xtext.xbase.ui.highlighting.XbaseHighlightingConfiguration
@@ -44,8 +43,8 @@ class PascaniHighlightingConfiguration extends XbaseHighlightingConfiguration {
 	}
 
 	def relationalOperator() {
-		val textStyle = stringTextStyle().copy();
-		textStyle.setStyle(SWT.ITALIC);
+		val textStyle = defaultTextStyle().copy();
+		textStyle.setColor(new RGB(100, 100, 100));
 		return textStyle;
 	}
 

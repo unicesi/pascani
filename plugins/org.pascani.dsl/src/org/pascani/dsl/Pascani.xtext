@@ -86,7 +86,7 @@ EventDeclaration returns Event
 	;
 
 EventEmitter
-	:	eventType = EventType 'of' emitter = XExpression (=> specifier = RelationalEventSpecifier)?
+	:	eventType = EventType 'of' emitter = XExpression (=> specifier = AndEventSpecifier)?
 	|	cronExpression = XExpression
 	;
 	
@@ -97,18 +97,26 @@ enum EventType
 	|	exception
 	;
 
-RelationalEventSpecifier returns EventSpecifier
-	:	EventSpecifier ({RelationalEventSpecifier.left = current} operator = RelationalOperator right = EventSpecifier)*
+AndEventSpecifier returns EventSpecifier
+	:	OrEventSpecifier
+		(
+			{AndEventSpecifier.left = current} 
+			operator='and' right = OrEventSpecifier
+		)*
 	;
 
-enum RelationalOperator
-	:	and
-	|	or
+OrEventSpecifier returns EventSpecifier
+	:	SimpleEventSpecifier
+		(
+			{OrEventSpecifier.left = current} 
+			operator='or' right = SimpleEventSpecifier
+		)*
 	;
 
-EventSpecifier
-	:	(below ?= 'below' | above ?= 'above' | equal ?= 'equal' 'to') value = XExpression (percentage ?= '%%')?
-	|	'(' RelationalEventSpecifier ')'
+SimpleEventSpecifier returns EventSpecifier
+	:	(below ?= 'below' | above ?= 'above' | equal ?= 'equal' 'to') 
+		value = XExpression (percentage ?= '%%')?
+	|	'(' AndEventSpecifier ')'
 	;
 
 CronExpression

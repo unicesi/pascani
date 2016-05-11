@@ -22,10 +22,10 @@ import com.google.inject.Inject
 import java.io.Serializable
 import java.util.ArrayList
 import java.util.Arrays
-import java.util.List
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.validation.Check
@@ -34,6 +34,8 @@ import org.eclipse.xtext.xbase.XAssignment
 import org.eclipse.xtext.xbase.XBlockExpression
 import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.XbasePackage
+import org.eclipse.xtext.xbase.typesystem.references.LightweightTypeReference
+import org.pascani.dsl.lib.util.CronConstant
 import org.pascani.dsl.pascani.CronElement
 import org.pascani.dsl.pascani.CronElementList
 import org.pascani.dsl.pascani.CronExpression
@@ -53,10 +55,8 @@ import org.pascani.dsl.pascani.PascaniPackage
 import org.pascani.dsl.pascani.RangeCronElement
 import org.pascani.dsl.pascani.TerminalCronElement
 import org.pascani.dsl.pascani.TypeDeclaration
-import org.eclipse.xtext.EcoreUtil2
-import org.pascani.dsl.lib.util.CronConstant
-import org.eclipse.xtext.xbase.typesystem.references.LightweightTypeReference
-import org.pascani.dsl.pascani.RelationalEventSpecifier
+import org.pascani.dsl.pascani.AndEventSpecifier
+import org.pascani.dsl.pascani.OrEventSpecifier
 
 /**
  * This class contains custom validation rules. 
@@ -417,7 +417,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 	
 	def boolean errorOnSpecifier(EventSpecifier specifier, LightweightTypeReference emitterType) {
 		if (specifier != null) {
-			if (specifier instanceof RelationalEventSpecifier) {
+			if (specifier instanceof AndEventSpecifier || specifier instanceof OrEventSpecifier) {
 				return errorOnSpecifier(specifier.left, emitterType) 
 					|| errorOnSpecifier(specifier.right, emitterType)
 			} else if(!specifier.equal) {
