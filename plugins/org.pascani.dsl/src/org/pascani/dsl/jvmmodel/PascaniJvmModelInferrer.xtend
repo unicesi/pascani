@@ -307,20 +307,20 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	def String parseSpecifier(String changeEvent, EventSpecifier specifier, List<JvmMember> members) {
 		val suffix = System.nanoTime
 		val op = parseSpecifierRelOp(specifier)
-		val typeRef = typeRef(BigDecimal)
+		val bigDec = typeRef(BigDecimal).qualifiedName
 		members += specifier.value.toField("value" + suffix, specifier.value.inferredType) [
 			initializer = specifier.value
 		]
-		if (specifier.isPercentage) {
+		if (specifier.equal) {
+			'''«changeEvent».value().equals(this.value«suffix»)'''
+		} else if (specifier.percentage) {
 			'''
-				(new «typeRef.qualifiedName»(«changeEvent».previousValue().toString()).subtract(
-				 new «typeRef.qualifiedName»(«changeEvent».value().toString())
-				)).abs().doubleValue() «op» new «typeRef.qualifiedName»(«changeEvent».previousValue().toString()).doubleValue() * (this.value«suffix» / 100.0)
+				(new «bigDec»(«changeEvent».previousValue().toString()).subtract(
+				 new «bigDec»(«changeEvent».value().toString())
+				)).abs().doubleValue() «op» new «bigDec»(«changeEvent».previousValue().toString()).doubleValue() * (this.value«suffix» / 100.0)
 			'''
 		} else {
-			'''
-				new «typeRef.qualifiedName»(«changeEvent».value().toString()).doubleValue() «op» this.value«suffix»
-			'''
+			'''new «bigDec»(«changeEvent».value().toString()).doubleValue() «op» this.value«suffix»'''
 		}
 	}
 

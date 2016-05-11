@@ -55,6 +55,8 @@ import org.pascani.dsl.pascani.TerminalCronElement
 import org.pascani.dsl.pascani.TypeDeclaration
 import org.eclipse.xtext.EcoreUtil2
 import org.pascani.dsl.lib.util.CronConstant
+import org.eclipse.xtext.xbase.typesystem.references.LightweightTypeReference
+import org.pascani.dsl.pascani.RelationalEventSpecifier
 
 /**
  * This class contains custom validation rules. 
@@ -86,6 +88,8 @@ class PascaniValidator extends AbstractPascaniValidator {
 	public static val UNEXPECTED_EVENT_SPECIFIER = "pascani.issue.unexpectedEventSpecifier"
 	public static val UNEXPECTED_SPECIAL_CHARACTER = "pascani.issue.unexpectedSpecialCharacter"
 	public static val UNSUPPORTED_OPERATION = "pascani.issue.unsupportedOperation"
+	
+	static val numericalPrimitives = newArrayList('byte', 'short', 'int', 'long', 'float', 'double')
 
 	override boolean isLocallyUsed(EObject target, EObject containerToFindUsage) {
 		var isUsed = false;
@@ -398,28 +402,49 @@ class PascaniValidator extends AbstractPascaniValidator {
 
 	@Check
 	def checkEventSpecifier(EventSpecifier specifier) {
-		val List<Object> numericalPrimitives = newArrayList('byte', 'short', 'int', 'long', 'float', 'double')
-		val actualType = specifier.value.actualType
-		val superTypes = actualType.allSuperTypes.map[t|t.canonicalName]
-		val isNumerical = superTypes.contains(Number.simpleName) || numericalPrimitives.map [e |
-			actualType.canonicalName.equals(e)
-		].reduce[e, v|e || v]
-		if (!isNumerical) {
-			error("Only numerical expressions are allowed in value specifiers, instead " + actualType.canonicalName +
-				" was found", PascaniPackage.Literals.EVENT_SPECIFIER__VALUE, INVALID_PARAMETER_TYPE)
+		if (!specifier.equal) {
+			val actualType = specifier.value.actualType
+			val superTypes = actualType.allSuperTypes.map[t|t.canonicalName]
+			val isNumerical = superTypes.contains(Number.simpleName) || numericalPrimitives.map [e |
+				actualType.canonicalName.equals(e)
+			].exists[v|v]
+			if (!isNumerical) {
+				error("Only numerical expressions are allowed in this event specifier, instead " + actualType.canonicalName +
+					" was found", PascaniPackage.Literals.EVENT_SPECIFIER__VALUE, INVALID_PARAMETER_TYPE)
+			}
 		}
+	}
+	
+	def boolean errorOnSpecifier(EventSpecifier specifier, LightweightTypeReference emitterType) {
+		if (specifier != null) {
+			if (specifier instanceof RelationalEventSpecifier) {
+				return errorOnSpecifier(specifier.left, emitterType) 
+					|| errorOnSpecifier(specifier.right, emitterType)
+			} else if(!specifier.equal) {
+				val superTypes = emitterType.allSuperTypes.map[t|t.canonicalName]
+				val isNumerical = superTypes.contains(Number.simpleName) || numericalPrimitives.map [e |
+					emitterType.canonicalName.equals(e)
+				].exists[v|v]
+				return !isNumerical
+			}
+		}
+		return false
 	}
 	
 	@Check
 	def checkEventEmitter(EventEmitter emitter) {
 		val emitterType = emitter.emitter.actualType
-
 		if (emitter.eventType.equals(EventType.CHANGE)) {
 			// TODO: validate emitter comes from a namespace
 			if (emitterType.getSuperType(Serializable) == null) {
 				error("The emitter type must be Serializable",
 					PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
 			}
+			if (errorOnSpecifier(emitter.specifier, emitterType)) {
+				error('''The emitter must be of type numerical to use the event specifiers above and below''',
+					PascaniPackage.Literals.EVENT_EMITTER__SPECIFIER, INVALID_PARAMETER_TYPE)
+			}
+			
 		} else {
 			if (emitter.specifier != null) {
 				error("Only change events are allowed to use value specifiers",
