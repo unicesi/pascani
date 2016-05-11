@@ -39,7 +39,7 @@ mvn validate -Pmissing-dependencies
 And then run
 
 ```bash
-mvn install
+mvn install -PPascani
 ```
 
 ### Questions?
