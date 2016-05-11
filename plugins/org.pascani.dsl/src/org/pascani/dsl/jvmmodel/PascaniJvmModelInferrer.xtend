@@ -434,12 +434,15 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 									bindingUri = «typeRef(FrascatiUtils)».DEFAULT_BINDING_URI;
 								final String intentName = «typeRef(PascaniUtils)».intentName(this.«names.get("type")»);
 								«typeRef(PascaniUtils)».newIntent(«names.get("emitter")», routingKey, intentName, bindingUri);
-								«typeRef(PascaniUtils)».setProbeProperty(«names.get("emitter")», "routingkey", routingKey, bindingUri);
+								«typeRef(PascaniUtils)».setProbeProperty(«names.get("emitter")», routingKey, "routingkey",
+									routingKey, bindingUri);
 								if (useProbe) {
-									«typeRef(PascaniUtils)».setProbeProperty(«names.get("emitter")», "probe", Boolean.TRUE.toString(), bindingUri);
+									«typeRef(PascaniUtils)».setProbeProperty(«names.get("emitter")», routingKey, "probe",
+										Boolean.TRUE.toString(), bindingUri);
 									this.«names.get("probe")» = new «typeRef(ProbeProxy)»(routingKey);
 								}
-								«typeRef(PascaniUtils)».setProbeProperty(«names.get("emitter")», "producer", Boolean.TRUE.toString(), bindingUri);
+								«typeRef(PascaniUtils)».setProbeProperty(«names.get("emitter")», routingKey, "producer",
+									Boolean.TRUE.toString(), bindingUri);
 							«ELSE»
 								if (useProbe)
 									this.«names.get("probe")» = new «typeRef(ProbeProxy)»(routingKey);
