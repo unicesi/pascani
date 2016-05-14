@@ -1,7 +1,8 @@
-node_modules
-.DS_Store
-dist
-*.log
+node_modules/
+bower_components/
+dist/
 coverage
+.DS_Store
+*.log
 .idea
 npm-debug.log

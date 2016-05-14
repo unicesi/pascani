@@ -1,0 +1,27 @@
+{
+	"name": "pascani-dashboard",
+	"description": "A web dashboard to report unified and hierarchical monitoring data with distinct levels of depth",
+	"main": "server.js",
+	"authors": [
+		"Miguel Jiménez"
+	],
+	"license": "LGPL-3.0",
+	"keywords": [
+		"monitoring",
+		"sca",
+		"frascati",
+		"pascani",
+		"amelia"
+	],
+	"homepage": "https://github.com/unicesi/pascani",
+	"ignore": [
+		"**/.*",
+		"node_modules",
+		"bower_components",
+		"test",
+		"tests"
+	],
+	"dependencies": {
+		"metro": "^3.0.14"
+	}
+}
