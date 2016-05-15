@@ -4,6 +4,8 @@ import React, {Component} from 'react';
 import AppBar from './layout/AppBar'
 import Sidebar from './layout/Sidebar'
 import SidebarItem from './layout/SidebarItem'
+import ReactPanels from './layout/ReactPanels'
+import ReactPanel from './layout/ReactPanel'
 import styles from './styles/App.css';
 
 import Turtles from './panels/Turtles';
@@ -21,7 +23,7 @@ class App extends Component {
 		return (
 			<span>
 				<AppBar>
-					<a href="">Ejemplo</a>
+					<a href="">Ejemplo 1</a>
 				</AppBar>
 				<div className="page-content">
 					<div className="flex-grid no-responsive-future v100" styles="height: 100%;">
@@ -45,7 +47,11 @@ class App extends Component {
 							</div>
 
 							<div className="cell colspan2 bg-white">
-								<Turtles />
+								<ReactPanels>
+									<ReactPanel>
+										<Turtles />
+									</ReactPanel>
+								</ReactPanels>
 							</div>
 
 						</div>
