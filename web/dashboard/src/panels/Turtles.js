@@ -37,7 +37,7 @@ class Turtles extends Component {
 			return require(`../svg/${name}.svg`)
 		};
 		const items = this.data.turtles.value().map(x =>
-			<div key={x.id} className="list">
+			<div key={x.id} className="list" onClick={this.props.add}>
 				<img className="list-icon" src={icon("package")} />
 				<span className="list-title">{x.name}</span>
 			</div>

@@ -58,7 +58,7 @@ class App extends Component {
 					<div id="main-content" className="bg-white v100">
 						<ReactPanels ref="panels">
 							<ReactPanel width="thin">
-								<Turtles />
+								<Turtles add={this.add} />
 							</ReactPanel>
 						</ReactPanels>
 					</div>
