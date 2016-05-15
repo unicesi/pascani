@@ -15,9 +15,11 @@ export default class AppBar extends Component {
 	}
 
 	render() {
-		const children = isArray(this.props.children) ? 
-			this.props.children.map(this.renderChild) : 
-			this.renderChild(this.props.children, 0);
+		const children = !this.props.children ?
+			undefined :
+			isArray(this.props.children) ? 
+				this.props.children.map(this.renderChild) : 
+				this.renderChild(this.props.children, 0);
 		return (
 			<div className="app-bar fixed-top navy" data-role="appbar">
 				<a href="" className="app-bar-element">
