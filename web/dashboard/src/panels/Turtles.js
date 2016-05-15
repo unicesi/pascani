@@ -42,14 +42,19 @@ class Turtles extends Component {
 				<span className="list-title">{x.name}</span>
 			</div>
 		);
+		const button = {
+			margin: 0
+		};
 		return (
-			<div>
-				<form onSubmit={this.handleSubmit}>
-					<div className="input-control text">
+			<div className="grid">
+				<form className="row cells4 padding10" onSubmit={this.handleSubmit}>
+					<div className="cell colspan3 input-control text">
 						<img src={icon("manager")} className="prepend-icon" />
 						<input type="text" ref={(ref) => this.nameInput = ref} />
 					</div>
-					<input type="submit" value="Submit" />
+					<div className="cell">
+						<input type="submit" value="Submit" style={button} />
+					</div>
 				</form>
 				<div className="listview">
 					{items}
