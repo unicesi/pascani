@@ -1,10 +1,11 @@
 'use strict';
 
-var path = require('path');
-var webpack = require('webpack');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var StatsPlugin = require('stats-webpack-plugin');
+const path = require('path');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const BowerWebpackPlugin = require("bower-webpack-plugin");
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const StatsPlugin = require('stats-webpack-plugin');
 
 module.exports = {
     entry: [
@@ -17,6 +18,13 @@ module.exports = {
     },
     plugins: [
         new webpack.optimize.OccurenceOrderPlugin(),
+        new BowerWebpackPlugin({
+            excludes: /.*\.less/
+        }),
+        new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery"
+        }),
         new HtmlWebpackPlugin({
             template: 'src/index.tpl.html',
             inject: 'body',
@@ -51,6 +59,9 @@ module.exports = {
         }, {
             test: /\.css$/,
             loader: ExtractTextPlugin.extract('style', 'css?modules&localIdentName=[name]---[local]---[hash:base64:5]!postcss')
+        }, {
+            test: /\.(woff|svg|ttf|eot)([\?]?.*)$/,
+            loader: "file-loader?name=[name].[ext]"
         }]
     },
     postcss: [
