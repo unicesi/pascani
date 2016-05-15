@@ -16,45 +16,51 @@ class App extends Component {
 		super(props);
 	}
 
+	add = (e) => {
+		e.preventDefault();
+		const props = {
+			width: 'regular',
+			closeBtn: <a href="#">Close</a>,
+			expandBtn: <a href="#">Expand</a>,
+			collapseBtn: <a href="#">Collapse</a>,
+		};
+		this.refs.panels.push(
+			<ReactPanel {...props} />
+		);
+	}
+
 	render() {
 		const icon = (name) => {
 			return require(`./svg/${name}.svg`)
 		}
 		return (
 			<span>
-				<AppBar>
-					<a href="">Ejemplo 1</a>
-				</AppBar>
+				<AppBar />
 				<div className="page-content">
-					<div className="flex-grid no-responsive-future v100" styles="height: 100%;">
-						<div className="row cells12 v100">
-							
-							<div id="sidebar-container" className="cell">
-								<Sidebar>
-									<SidebarItem active={true} text="Monitors"
-										icon={icon("fine_print")} />
-									<SidebarItem text="Namespaces"
-										icon={icon("combo_chart")} />
-								</Sidebar>
-								<Sidebar bottom={true}>
-									<SidebarItem text="Issue Management"
-										link="https://github.com/unicesi/pascani"
-										icon={icon("faq")} />
-									<SidebarItem text="Documentation"
-										link="https://github.com/unicesi/pascani"
-										icon={icon("reading")} />
-								</Sidebar>
-							</div>
-
-							<div className="cell colspan2 bg-white">
-								<ReactPanels>
-									<ReactPanel>
-										<Turtles />
-									</ReactPanel>
-								</ReactPanels>
-							</div>
-
-						</div>
+					<div id="sidebar-container" className="v100">
+						<Sidebar>
+							<SidebarItem text="Monitors"
+								icon={icon("fine_print")}
+								onClick={this.add} />
+							<SidebarItem text="Namespaces"
+								icon={icon("combo_chart")}
+								onClick={this.add} />
+						</Sidebar>
+						<Sidebar bottom={true}>
+							<SidebarItem text="Issue Management"
+								link="https://github.com/unicesi/pascani"
+								icon={icon("faq")} />
+							<SidebarItem text="Documentation"
+								link="https://github.com/unicesi/pascani"
+								icon={icon("reading")} />
+						</Sidebar>
+					</div>
+					<div id="main-content" className="bg-white v100">
+						<ReactPanels ref="panels">
+							<ReactPanel width="thin">
+								<Turtles />
+							</ReactPanel>
+						</ReactPanels>
 					</div>
 				</div>
 			</span>

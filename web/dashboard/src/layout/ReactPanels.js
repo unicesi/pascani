@@ -16,10 +16,12 @@ class ReactPanels extends Component {
 	}
 
 	componentDidMount() {
-		if(isArray(this.props.children)) {
-			this.props.children.map(this.push);
-		} else {
-			this.push(this.props.children);
+		if (this.props.children) {
+			if(isArray(this.props.children)) {
+				this.props.children.map(this.push);
+			} else {
+				this.push(this.props.children);
+			}
 		}
 	}
 
@@ -38,6 +40,8 @@ class ReactPanels extends Component {
 	}
 
 	renderPanel = (panel, i) => {
+		if (!panel)
+			return;
 		const active = this.state.activePanel.props.id === panel.props.id;
 		const key = active ? "active" : panel.props.id;
 		return React.cloneElement(panel, {
@@ -80,7 +84,7 @@ class ReactPanels extends Component {
 
 	render() {
 		return (
-			<div className="panels">
+			<div className="react-panels">
 				{this.state.panels.map(this.renderPanel)}
 			</div>
 		);

@@ -68,7 +68,7 @@ class ReactPanel extends Component {
 			+ (this.props.active ? " active" : "")
 			+ (this.state.expanded ? " expanded" : "");
 		return (
-			<section id={this.props.id} className={"panel " + classes}>
+			<section id={this.props.id} className={"react-panel " + classes}>
 				{buttons}
 				{this.props.children}
 			</section>
