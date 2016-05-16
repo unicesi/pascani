@@ -1,0 +1,65 @@
+.react-panels,
+.react-panel {
+	height: 100%;
+}
+.react-panels {
+	font-size: 0;
+	overflow-x: auto;
+	position: relative;
+	white-space: nowrap;
+	width: auto;
+}
+.react-panel {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	display: inline-block;
+	position: relative;
+	vertical-align: top;
+}
+.react-panel.floating {
+	position: absolute;
+}
+.react-panel.thin {
+	width: 350px;
+}
+.react-panel.regular {
+	width: 400px;
+}
+.react-panel.medium {
+	width: 500px;
+}
+.react-panel.wide {
+	width: 700px;
+}
+.react-panel.expanded {
+	width: 100%;
+}
+.react-panel {
+	background-color: #fafafa;
+	border-right: 1px solid #ddd;
+	font-size: 13px;
+}
+.react-panel.floating {
+	background-color: #eee;
+	border-right: 1px solid #ccc;
+}
+.react-panel .close,
+.react-panel .collapse,
+.react-panel .expand {
+	background-position: center center;
+	background-repeat: no-repeat;
+	cursor: pointer;
+	display: inline-block;
+	height: 20px;
+	width: 20px;
+}
+.react-panel .close {
+	background-image: url('../img/close.png');
+}
+.react-panel .collapse {
+	background-image: url('../img/collapse.png');
+}
+.react-panel .expand {
+	background-image: url('../img/expand.png');
+}

@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom'
 import ReactPanel from './ReactPanel';
 import update from 'react-addons-update';
-import isArray from 'isarray'
+import isArray from 'isarray';
+import styles from '../styles/react-panels.css';
 
 class ReactPanels extends Component {
 

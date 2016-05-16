@@ -6,10 +6,18 @@ html {
 	padding: 0;
 }
 
-/**/
+a {
+	outline: 0;
+}
+
+.v100 {
+	height: 100%;
+}
 
 #sidebar-container {
+	border-right: 2px solid #eee;
 	float: left;
+	position: relative;
 	width: 16%;
 }
 
@@ -17,16 +25,6 @@ html {
 	float: left;
 	width: 84%;
 }
-
-.v100 {
-	height: 100%;
-}
-
-a {
-	outline: 0;
-}
-
-/* CUSTOM */
 
 .app-bar .icon,
 .app-bar .icon img{
@@ -60,11 +58,20 @@ div[class^=hint]::before {
 	border-color: transparent;
 }
 
-#sidebar-container {
-	border-right: 2px solid #eee;
-	flex: 0 0 220px; 
+.brandname {
+	font-weight: bold;
+}
+
+.page-content {
+	padding-top: 3.125rem;
+	min-height: 100%;
 	height: 100%;
-	position: relative;
+}
+
+.table .input-control.checkbox {
+	line-height: 1;
+	min-height: 0;
+	height: auto;
 }
 
 .sidebar {
@@ -112,85 +119,4 @@ div[class^=hint]::before {
 .listview-outlook .list:active,
 .listview-outlook .list:focus {
 	outline: 0;
-}
-
-/* /CUSTOM */
-
-.brandname {
-	font-weight: bold;
-}
-
-.page-content {
-	padding-top: 3.125rem;
-	min-height: 100%;
-	height: 100%;
-}
-
-.table .input-control.checkbox {
-	line-height: 1;
-	min-height: 0;
-	height: auto;
-}
-
-@media screen and (max-width: 800px){
-	#cell-sidebar {
-		flex-basis: 52px;
-	}
-
-	#cell-content {
-		flex-basis: calc(100% - 52px);
-	}
-}
-
-
-/**/
-
-.react-panels,
-.react-panel {
-	height: 100%;
-}
-
-.react-panels {
-	font-size: 0;
-	overflow-x: auto;
-	position: relative;
-	white-space: nowrap;
-	width: auto;
-}
-
-.react-panel {
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	box-sizing: border-box;
-	display: inline-block;
-	position: relative;
-	vertical-align: top;
-}
-.react-panel.floating {
-	position: absolute;
-}
-.react-panel.thin {
-	width: 350px;
-}
-.react-panel.regular {
-	width: 400px;
-}
-.react-panel.medium {
-	width: 500px;
-}
-.react-panel.wide {
-	width: 700px;
-}
-.react-panel.expanded {
-	width: 100%;
-}
-
-.react-panel {
-	background-color: #fafafa;
-	border-right: 1px solid #DDDDDD;
-	font-size: 13px;
-}
-.react-panel.floating {
-	background-color: #eee;
-	border-right: 1px solid #ccc;
 }

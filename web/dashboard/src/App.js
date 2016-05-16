@@ -6,7 +6,7 @@ import Sidebar from './layout/Sidebar'
 import SidebarItem from './layout/SidebarItem'
 import ReactPanels from './layout/ReactPanels'
 import ReactPanel from './layout/ReactPanel'
-import styles from './styles/App.css';
+import styles from './styles/app.css';
 
 import Turtles from './panels/Turtles';
 
