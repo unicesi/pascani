@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom'
+import ReactDOM from 'react-dom';
+
+require("../img/close.png");
+require("../img/expand.png");
+require("../img/collapse.png");
 
 class ReactPanel extends Component {
 
@@ -44,58 +48,42 @@ class ReactPanel extends Component {
 		this.props.onBeforeClose(this);
 	}
 
-	handleClose = (e) => {
-		e.preventDefault();
+	close = () => {
 		this.props.closePanel(this);
+		this.setState({ expanded: false });
 	}
 
-	handleExpand = (e) => {
-		e.preventDefault();
+	expand = () => {
 		this.setState({ expanded: true });
 		this.props.claimActiveState(this);
 	}
 
-	handleCollapse = (e) => {
-		e.preventDefault();
+	collapse = () => {
 		this.setState({ expanded: false });
 		this.props.claimActiveState(this);
 	}
 
+	handlePanelClick = (e) => {
+		if (e.target.className.indexOf("close") > -1) {
+			this.close();
+		} else if (e.target.className.indexOf("expand") > -1) {
+			this.expand();
+		} else if (e.target.className.indexOf("collapse") > -1) {
+			this.collapse();
+		}
+	}
+
 	render() {
-		const buttons = this.bindEventHandlers();
-		const classes = `${this.props.width}` 
+		const classes = `${this.props.width}`
 			+ (this.props.floating ? " floating" : "")
 			+ (this.props.active ? " active" : "")
 			+ (this.state.expanded ? " expanded" : "");
 		return (
-			<section id={this.props.id} className={"react-panel " + classes}>
-				{buttons}
+			<section id={this.props.id} className={"react-panel " + classes}
+				onClick={this.handlePanelClick}>
 				{this.props.children}
 			</section>
 		);
-	}
-
-	bindEventHandlers = () => {
-		const buttons = [];
-		if (this.props.closeBtn) {
-			buttons.push(React.cloneElement(this.props.closeBtn, {
-				key: 'closeBtn',
-				onClick: this.handleClose
-			}));
-		}
-		if (this.props.expandBtn) {
-			buttons.push(React.cloneElement(this.props.expandBtn, {
-				key: 'expandBtn',
-				onClick: this.handleExpand
-			}));
-		}
-		if (this.props.collapseBtn) {
-			buttons.push(React.cloneElement(this.props.collapseBtn, {
-				key: 'collapseBtn',
-				onClick: this.handleCollapse
-			}));
-		}
-		return buttons;
 	}
 
 }
