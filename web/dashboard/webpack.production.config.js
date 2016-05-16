@@ -61,7 +61,10 @@ module.exports = {
             loader: ExtractTextPlugin.extract('style', 'css?modules&localIdentName=[name]---[local]---[hash:base64:5]!postcss')
         }, {
             test: /\.(woff|svg|ttf|eot)([\?]?.*)$/,
-            loader: "file-loader?name=[name].[ext]"
+            loader: "file-loader?name=fonts/[name].[ext]"
+        }, {
+            test: /\.(png|jpg|jpeg|gif)([\?]?.*)$/,
+            loader: "file-loader?name=img/[name].[ext]"
         }]
     },
     postcss: [

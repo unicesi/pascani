@@ -51,6 +51,9 @@ module.exports = {
 			test: /\.(woff|svg|ttf|eot)([\?]?.*)$/,
 			loader: "file-loader?name=fonts/[name].[ext]"
 		}, {
+			test: /\.(png|jpg|jpeg|gif)([\?]?.*)$/,
+			loader: "file-loader?name=img/[name].[ext]"
+		}, {
 			test: /\.(css)([\?]?.*)$/,
 			loader: "file-loader?name=css/[name].[ext]"
 		}]
