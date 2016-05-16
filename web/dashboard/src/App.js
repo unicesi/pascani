@@ -20,16 +20,25 @@ class App extends Component {
 		e.preventDefault();
 		const props = {
 			width: 'regular',
-			closeBtn: <a href="#">Close</a>,
-			expandBtn: <a href="#">Expand</a>,
-			collapseBtn: <a href="#">Collapse</a>,
 		};
 		this.refs.panels.push(
-			<ReactPanel {...props} />
+			<ReactPanel {...props}>
+				<header>
+					<nav>
+						<a className="close"></a>
+						<a className="expand"></a>
+						<a className="collapse"></a>
+					</nav>
+				</header>
+				<div>
+					<h3>Hello world!</h3>
+				</div>
+			</ReactPanel>
 		);
 	}
 
 	render() {
+		const url = "https://github.com/unicesi/pascani";
 		const icon = (name) => {
 			return require(`./svg/${name}.svg`)
 		}
@@ -39,20 +48,12 @@ class App extends Component {
 				<div className="page-content">
 					<div id="sidebar-container" className="v100">
 						<Sidebar>
-							<SidebarItem text="Monitors"
-								icon={icon("fine_print")}
-								onClick={this.add} />
-							<SidebarItem text="Namespaces"
-								icon={icon("combo_chart")}
-								onClick={this.add} />
+							<SidebarItem text="Monitors" icon={icon("fine_print")} onClick={this.add} />
+							<SidebarItem text="Namespaces" icon={icon("combo_chart")} onClick={this.add} />
 						</Sidebar>
 						<Sidebar bottom={true}>
-							<SidebarItem text="Issue Management"
-								link="https://github.com/unicesi/pascani"
-								icon={icon("faq")} />
-							<SidebarItem text="Documentation"
-								link="https://github.com/unicesi/pascani"
-								icon={icon("reading")} />
+							<SidebarItem text="Issue Management" link={url} icon={icon("faq")} />
+							<SidebarItem text="Documentation" link={url} icon={icon("reading")} />
 						</Sidebar>
 					</div>
 					<div id="main-content" className="bg-white v100">
