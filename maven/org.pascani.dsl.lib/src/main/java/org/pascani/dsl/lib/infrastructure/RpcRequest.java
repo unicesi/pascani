@@ -63,4 +63,11 @@ public final class RpcRequest implements Serializable {
 	public Serializable getParameter(int index) {
 		return this.parameters[index];
 	}
+	
+	/**
+	 * @return the number of parameters in this RPC request
+	 */
+	public final int length() {
+		return this.parameters.length;
+	}
 }

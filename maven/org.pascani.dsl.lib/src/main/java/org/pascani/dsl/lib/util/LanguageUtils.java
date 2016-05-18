@@ -16,26 +16,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani project. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.scoping
+package org.pascani.dsl.lib.util;
 
-import org.eclipse.xtext.xbase.scoping.batch.ImplicitlyImportedFeatures
-import org.pascani.dsl.lib.sca.ComponentExtensions
-import org.pascani.dsl.lib.sca.FrascatiUtils
-import org.pascani.dsl.lib.sca.PascaniUtils
-import org.pascani.dsl.lib.sca.FluentFPath
-import org.pascani.dsl.lib.util.LanguageUtils
+import java.io.Serializable;
+import java.util.Map;
 
 /**
+ * Language utilities
+ * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-class PascaniImplicitlyImportedFeatures extends ImplicitlyImportedFeatures {
-
-	override protected getStaticImportClasses() {
-		return (super.getStaticImportClasses() + #[PascaniUtils, FrascatiUtils, LanguageUtils]).toList
-	}
-
-	override protected getExtensionClasses() {
-		return (super.getExtensionClasses() + #[ComponentExtensions, FluentFPath]).toList
+public class LanguageUtils {
+	
+	public static <T extends Serializable> TaggedValue<T> tag(T value, Map<String, String> tags) {
+		return new TaggedValue<T>(value, tags);
 	}
 
 }

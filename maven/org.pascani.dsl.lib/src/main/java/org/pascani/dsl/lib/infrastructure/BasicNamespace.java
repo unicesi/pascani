@@ -29,6 +29,7 @@ import org.pascani.dsl.lib.events.ChangeEvent;
 import org.pascani.dsl.lib.infrastructure.rabbitmq.EndPoint;
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQProducer;
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQRpcServer;
+import org.pascani.dsl.lib.util.TaggedValue;
 
 /**
  * This implementation provides the basic functionality of a Namespace; that is,
@@ -69,10 +70,10 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 
 	/**
 	 * A map containing the variables defined in this namespace, with their
-	 * corresponding current values
+	 * corresponding current (possibly tagged) values
 	 */
-	private final Map<String, Serializable> variables;
-	
+	private final Map<String, Map<Map<String, String>, Serializable>> variables;
+
 	/**
 	 * The variable representing the current state (stopped or not)
 	 */
@@ -96,14 +97,13 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	 *             {@link RabbitMQRpcServer#RabbitMQRpcServer(EndPoint, String, PascaniRuntime.Context)}
 	 *             for more information.
 	 */
-	@SuppressWarnings("unchecked")
-	public BasicNamespace(final String routingKey)
-			throws Exception {
-		this.variables = new HashMap<String, Serializable>();
+	@SuppressWarnings("unchecked") public BasicNamespace(
+			final String routingKey) throws Exception {
+		this.variables = new HashMap<String, Map<Map<String,String>,Serializable>>();
 		this.context = PascaniRuntime.Context.NAMESPACE;
 		this.endPoint = new EndPoint();
-		this.producer = new RabbitMQProducer(endPoint,
-				declareQueue(routingKey), routingKey);
+		this.producer = new RabbitMQProducer(endPoint, declareQueue(routingKey),
+				routingKey);
 		this.producer.acceptOnly(ChangeEvent.class);
 		this.server = new RabbitMQRpcServer(endPoint, routingKey,
 				PascaniRuntime.Context.NAMESPACE);
@@ -115,8 +115,8 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 		// then create a binding between the queue and the configured namespace
 		// exchange.
 		String queue = routingKey;
-		String exchange = PascaniRuntime.getEnvironment().get(
-				"namespaces_exchange");
+		String exchange = PascaniRuntime.getEnvironment()
+				.get("namespaces_exchange");
 		this.endPoint.channel().queueDeclare(queue, false, true, true, null);
 		this.endPoint.channel().queueBind(queue, exchange, routingKey);
 		return exchange;
@@ -128,6 +128,8 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	}
 
 	/**
+	 * TODO: Allow to initialize variables with tags
+	 * 
 	 * Registers a new variable with an initial value. If {@code overwrite} is
 	 * {@code true} and the variable is already registered, its value is
 	 * updated, otherwise no change is performed.
@@ -147,7 +149,8 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 		if (!overwrite && this.variables.containsKey(name)) {
 			registered = false;
 		} else {
-			this.variables.put(name, initialValue);
+			this.variables.put(name, new HashMap<Map<String, String>, Serializable>());
+			this.variables.get(name).put(new HashMap<String, String>(), initialValue);
 		}
 		return registered;
 	}
@@ -158,16 +161,19 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	 * @see pascani.lang.infrastructure.RpcRequestHandler#handle(pascani.lang.
 	 * infrastructure.RpcRequest)
 	 */
+	@SuppressWarnings("unchecked")
 	public Serializable handle(RpcRequest request) {
 		Serializable response = null;
 		String variable = (String) request.getParameter(0);
-		
 		// Namespace operations
 		if (request.operation().equals(RpcOperation.NAMESPACE_GET_VARIABLE)) {
-			response = getVariable(variable);
-		} else if (request.operation().equals(
-				RpcOperation.NAMESPACE_SET_VARIABLE)) {
-
+			if (request.length() == 1)
+				response = getVariable(variable);
+			else if (request.length() == 2)
+				response = getVariable(variable,
+						(Map<String, String>) request.getParameter(1));
+		} else if (request.operation()
+				.equals(RpcOperation.NAMESPACE_SET_VARIABLE)) {
 			Serializable value = request.getParameter(1);
 			response = setVariable(variable, value);
 		}
@@ -190,7 +196,17 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	 * @see pascani.lang.infrastructure.Namespace#getVariable(java.lang.String)
 	 */
 	public Serializable getVariable(String variable) {
-		return this.variables.get(variable);
+		return getVariable(variable, new HashMap<String, String>());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.pascani.dsl.lib.infrastructure.Namespace#getVariable(java.lang.
+	 * String, java.util.Map)
+	 */
+	public Serializable getVariable(String variable, Map<String, String> tags) {
+		return this.variables.get(variable).get(tags);
 	}
 
 	/*
@@ -202,19 +218,25 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	public Serializable setVariable(String variable, Serializable value) {
 		if (!this.variables.containsKey(variable))
 			return null;
+		Map<String, String> tags = new HashMap<String, String>();
+		Serializable actualNewValue = value;
+		if (value instanceof TaggedValue<?>) {
+			TaggedValue<?> taggedValue = (TaggedValue<?>) value;
+			tags = taggedValue.tags();
+			actualNewValue = taggedValue.value();
+		}
 		if (!isPaused()) {
 			synchronized (this.variables) {
-				Serializable previousValue = this.variables.get(variable);
+				Serializable previousValue = this.variables.get(variable).get(tags);
 				ChangeEvent event = new ChangeEvent(UUID.randomUUID(),
 						previousValue, value, variable);
-
-				this.variables.put(variable, value);
+				this.variables.get(variable).put(tags, actualNewValue);
 				this.producer.produce(event);
 			}
 		}
-		return getVariable(variable);
+		return getVariable(variable, tags);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -223,7 +245,7 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	public void pause() {
 		this.paused = true;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -232,7 +254,7 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	public void resume() {
 		this.paused = false;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -241,7 +263,7 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	public boolean isPaused() {
 		return this.paused;
 	}
-	
+
 	/**
 	 * Shutdowns connections
 	 * 
