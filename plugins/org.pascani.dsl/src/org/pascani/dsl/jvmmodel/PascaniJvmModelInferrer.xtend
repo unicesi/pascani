@@ -621,15 +621,18 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						'''
 					]
 					methods += namespace.toMethod("getVariable", typeRef(Serializable)) [
+						visibility = JvmVisibility.PRIVATE
 						parameters += namespace.toParameter("variable", typeRef(String))
 						body = '''return this.«namespace.name»Proxy.getVariable(variable);'''
 					]
 					methods += namespace.toMethod("getVariable", typeRef(Serializable)) [
+						visibility = JvmVisibility.PRIVATE
 						parameters += namespace.toParameter("variable", typeRef(String))
 						parameters += namespace.toParameter("tags", typeRef(Map, typeRef(String), typeRef(String)))
 						body = '''return this.«namespace.name»Proxy.getVariable(variable, tags);'''
 					]
 					methods += namespace.toMethod("setVariable", typeRef(void)) [
+						visibility = JvmVisibility.PRIVATE
 						parameters += namespace.toParameter("variable", typeRef(String))
 						parameters += namespace.toParameter("value", typeRef(Serializable))
 						body = '''this.«namespace.name»Proxy.setVariable(variable, value);'''
