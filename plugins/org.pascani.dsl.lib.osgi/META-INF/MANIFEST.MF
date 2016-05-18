@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Bundle for runtime libraries
 Bundle-SymbolicName: org.pascani.dsl.lib.osgi
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.1.2.qualifier
 Bundle-Vendor: Miguel Jiménez
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.ctc.wstx.api,
