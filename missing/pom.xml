@@ -227,6 +227,24 @@
 							</arguments>
 						</configuration>
 					</execution>
+					<execution>
+						<id>install-frascati-model-2.0.1.2</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>mvn</executable>
+							<arguments>
+								<argument>install:install-file</argument>
+								<argument>-Dfile=${basedir}/files/frascati-model-2.0.1.2.jar</argument>
+								<argument>-DgroupId=org.eclipse.stp.sca.domainmodel</argument>
+								<argument>-DartifactId=frascati-model</argument>
+								<argument>-Dversion=2.0.1.2</argument>
+								<argument>-Dpackaging=jar</argument>
+							</arguments>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
