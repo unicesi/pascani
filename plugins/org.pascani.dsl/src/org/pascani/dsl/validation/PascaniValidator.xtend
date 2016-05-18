@@ -441,7 +441,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 					PascaniPackage.Literals.EVENT_EMITTER__EMITTER, INVALID_PARAMETER_TYPE)
 			}
 			if (errorOnSpecifier(emitter.specifier, emitterType)) {
-				error('''The emitter must be of type numerical to use the event specifiers above and below''',
+				error('''Event specifiers 'above' and 'below' are only allowed for numerical emitters''',
 					PascaniPackage.Literals.EVENT_EMITTER__SPECIFIER, INVALID_PARAMETER_TYPE)
 			}
 			
