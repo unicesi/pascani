@@ -67,6 +67,8 @@ import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
 import org.pascani.dsl.pascani.OrEventSpecifier
 import org.pascani.dsl.pascani.AndEventSpecifier
+import org.pascani.dsl.lib.util.TaggedValue
+import java.util.Map
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -567,7 +569,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				val methods = new ArrayList
 				val nestedTypes = new ArrayList
 				documentation = namespace.documentation
-				
 				for (e : namespace.body.expressions) {
 					switch (e) {
 						Namespace case e.name != null: {
@@ -588,14 +589,20 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							val name = e.fullyQualifiedName.toString
 							val type = e.type // ?: inferredType(e.right)
 							val cast = if(type != null) "(" + type.simpleName + ")"
-
 							methods += e.toMethod(e.name, type) [
 								body = '''return «cast» getVariable("«name»");'''
 							]
-
+							methods += e.toMethod(e.name, type) [
+								parameters += e.toParameter("tags", typeRef(Map, typeRef(String), typeRef(String)))
+								body = '''return «cast» getVariable("«name»", tags);'''
+							]
 							if (e.isWriteable) {
 								methods += e.toMethod(e.name, typeRef(Void.TYPE)) [
 									parameters += e.toParameter(e.name, type)
+									body = '''setVariable("«name»", «e.name»);'''
+								]
+								methods += e.toMethod(e.name, typeRef(Void.TYPE)) [
+									parameters += e.toParameter(e.name, typeRef(TaggedValue, type))
 									body = '''setVariable("«name»", «e.name»);'''
 								]
 							}
@@ -616,6 +623,11 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					methods += namespace.toMethod("getVariable", typeRef(Serializable)) [
 						parameters += namespace.toParameter("variable", typeRef(String))
 						body = '''return this.«namespace.name»Proxy.getVariable(variable);'''
+					]
+					methods += namespace.toMethod("getVariable", typeRef(Serializable)) [
+						parameters += namespace.toParameter("variable", typeRef(String))
+						parameters += namespace.toParameter("tags", typeRef(Map, typeRef(String), typeRef(String)))
+						body = '''return this.«namespace.name»Proxy.getVariable(variable, tags);'''
 					]
 					methods += namespace.toMethod("setVariable", typeRef(void)) [
 						parameters += namespace.toParameter("variable", typeRef(String))
