@@ -19,6 +19,8 @@
 package org.pascani.dsl.lib.infrastructure;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.logging.log4j.LogManager;
@@ -98,7 +100,20 @@ public class NamespaceProxy implements Namespace {
 	public Serializable getVariable(String variable) {
 		RpcRequest request = new RpcRequest(
 				RpcOperation.NAMESPACE_GET_VARIABLE, variable);
-
+		byte[] response = makeActualCall(request, null);
+		return (Serializable) SerializationUtils6.deserialize(response);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.pascani.dsl.lib.infrastructure.Namespace#getVariable(java.lang.
+	 * String, java.util.Map)
+	 */
+	public Serializable getVariable(String variable, Map<String, String> tags) {
+		HashMap<String, String> serializableMap = new HashMap<String, String>(tags);
+		RpcRequest request = new RpcRequest(RpcOperation.NAMESPACE_GET_VARIABLE,
+				variable, serializableMap);
 		byte[] response = makeActualCall(request, null);
 		return (Serializable) SerializationUtils6.deserialize(response);
 	}
@@ -112,7 +127,6 @@ public class NamespaceProxy implements Namespace {
 	public Serializable setVariable(String variable, Serializable value) {
 		RpcRequest request = new RpcRequest(
 				RpcOperation.NAMESPACE_SET_VARIABLE, variable, value);
-
 		byte[] response = makeActualCall(request, null);
 		return SerializationUtils.deserialize(response);
 	}
