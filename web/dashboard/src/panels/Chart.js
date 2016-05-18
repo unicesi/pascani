@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
-import Highcharts from 'highcharts';
+import Highcharts from 'highcharts/highstock';
 
 class Chart extends Component {
 
@@ -16,7 +16,7 @@ class Chart extends Component {
 				module(Highcharts);
 			});
 		}
-		this.chart = new Constructor(
+		this.chart = new Highcharts[this.props.type || "Chart"](
 			this.props.container, 
 			this.props.options
 		);

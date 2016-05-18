@@ -20,7 +20,7 @@ class App extends Component {
 	add = (e) => {
 		e.preventDefault();
 		const props = {
-			width: 'regular',
+			width: 'wide',
 		};
 		const options = {
 			xAxis: {
