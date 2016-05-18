@@ -23,7 +23,7 @@ class Chart extends Component {
 	}
 
 	//Destroy chart before unmount.
-	componentWillUnmount: function () {
+	componentWillUnmount() {
 		this.chart.destroy();
 	}
 
