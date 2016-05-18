@@ -42,6 +42,9 @@ And then run
 mvn install -PPascani
 ```
 
+#### Compiling the Pascani dashboard
+If you are interested in compiling and running the Pascani dashboard, please follow the instructions [here](web/dashboard/README.md).
+
 ### Questions?
 
 If you have any questions about Pascani, or something doesn't work as expected, please [submit an issue here](https://github.com/unicesi/pascani/issues/new).
