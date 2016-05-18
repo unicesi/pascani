@@ -19,6 +19,7 @@
 package org.pascani.dsl.lib.infrastructure;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.pascani.dsl.lib.util.Resumable;
 
@@ -36,6 +37,18 @@ public interface Namespace extends Resumable {
 	 * @return the current value of the specified variable
 	 */
 	public Serializable getVariable(String variable);
+
+	/**
+	 * Gets the current value of the specified variable that matches the given
+	 * tags. If the given variable name is not found, null is returned.
+	 * 
+	 * @param variable
+	 *            The name of the variable
+	 * @param tags
+	 *            The map containing the value tags
+	 * @return the current value of the specified variable
+	 */
+	public Serializable getVariable(String variable, Map<String, String> tags);
 
 	/**
 	 * Updates the current value of the specified variable. If the given
