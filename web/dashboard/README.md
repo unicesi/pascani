@@ -4,16 +4,7 @@ This dashboard allows to visualize monitoring variables from a [rethinkdb](https
 
 ## Prerequisites
 
-In order to build and run the Pascani dashboard, you must have [Node](https://nodejs.org) installed in your system. You also have to install the following packages:
-- rimraf
-- webpack
-- eslint
-- jscs
-
-To install them just run (`sudo` may be required):
-```
-npm install -g rimraf webpack eslint jscs
-```
+In order to build and run the Pascani dashboard, you must have [Node](https://nodejs.org) installed in your system.
 
 ## Compiling From Sources
 
@@ -24,7 +15,7 @@ npm install
 ## Running the dashboard
 
 ```
-npm start
+npm run start
 ```
 
 You can now access the dashboard from your browser at http://0.0.0.0:3000
