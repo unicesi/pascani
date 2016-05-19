@@ -18,18 +18,13 @@
  */
 package org.pascani.dsl.lib;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.pascani.dsl.lib.infrastructure.AbstractProducer;
 import org.pascani.dsl.lib.infrastructure.BasicNamespace;
 import org.pascani.dsl.lib.infrastructure.Monitor;
+import org.pascani.dsl.lib.util.ConfigProperties;
 import org.pascani.dsl.lib.util.LocalEventProducer;
 
 import com.google.common.eventbus.EventBus;
@@ -75,11 +70,6 @@ public class PascaniRuntime {
 	 * exchange names)
 	 */
 	private static Map<String, String> environment = null;
-
-	/**
-	 * The logger
-	 */
-	private final static Logger logger = LogManager.getLogger(PascaniRuntime.class);
 	
 	/**
 	 * @param context
@@ -132,76 +122,22 @@ public class PascaniRuntime {
 
 	public static Map<String, String> getEnvironment() {
 		if (environment == null) {
-			environment = new HashMap<String, String>();
-			readProperties();
+			ConfigProperties config = new ConfigProperties("pascani.properties",
+					"pascani.", defaultProps());
+			environment = config.readProperties();
 		}
 		return environment;
 	}
-
-	/**
-	 * Reads configuration properties
-	 */
-	private static void readProperties() {
-		Properties config = new Properties();
-		InputStream input = null;
-
-		try {
-			input = PascaniRuntime.class.getClassLoader()
-					.getResourceAsStream("pascani.properties");
-			if (input != null)
-				config.load(input);
-		} catch (FileNotFoundException e) {
-			logger.warn("No configuration file was found");
-		} catch (IOException e) {
-			logger.error("Error loading configuration file");
-		} finally {
-			setPropertiesFromSystem(config);
-			setDefaultProperties(config);
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					logger.error("Error closing stream of configuration file", e);
-				}
-			}
-		}
-
-		for (Object key : config.keySet()) {
-			String name = (String) key;
-			environment.put(name, config.getProperty(name));
-		}
-	}
 	
-	private static void setPropertiesFromSystem(Properties execProps) {
-		Properties systemProps = System.getProperties();
-
-		if(systemProps.containsKey("pascani.uri"))
-			execProps.put("uri", systemProps.getProperty("pascani.uri"));
-		if(systemProps.containsKey("pascani.probes_exchange"))
-			execProps.put("probes_exchange", systemProps.getProperty("pascani.probes_exchange"));
-		if(systemProps.containsKey("pascani.namespaces_exchange"))
-			execProps.put("namespaces_exchange", systemProps.getProperty("pascani.namespaces_exchange"));
-		if(systemProps.containsKey("pascani.monitors_exchange"))
-			execProps.put("monitors_exchange", systemProps.getProperty("pascani.monitors_exchange"));
-		if(systemProps.containsKey("pascani.rpc_exchange"))
-			execProps.put("rpc_exchange", systemProps.getProperty("pascani.rpc_exchange"));
-		if(systemProps.containsKey("pascani.rpc_queue_prefix"))
-			execProps.put("rpc_queue_prefix", systemProps.getProperty("pascani.rpc_queue_prefix"));
-	}
-	
-	private static void setDefaultProperties(Properties execProps) {
-		if(!execProps.containsKey("uri"))
-			execProps.put("uri", "amqp://guest:guest@localhost:5672");
-		if(!execProps.containsKey("probes_exchange"))
-			execProps.put("probes_exchange", "probes_exchange");
-		if(!execProps.containsKey("namespaces_exchange"))
-			execProps.put("namespaces_exchange", "namespaces_exchange");
-		if(!execProps.containsKey("monitors_exchange"))
-			execProps.put("monitors_exchange", "monitors_exchange");
-		if(!execProps.containsKey("rpc_exchange"))
-			execProps.put("rpc_exchange", "rpc_exchange");
-		if(!execProps.containsKey("rpc_queue_prefix"))
-			execProps.put("rpc_queue_prefix", "rpc_");
+	public static Map<String, String> defaultProps() {
+		Map<String, String> defaultProps = new HashMap<String, String>();
+		defaultProps.put("uri", "amqp://guest:guest@localhost:5672");
+		defaultProps.put("probes_exchange", "probes_exchange");
+		defaultProps.put("namespaces_exchange", "namespaces_exchange");
+		defaultProps.put("monitors_exchange", "monitors_exchange");
+		defaultProps.put("rpc_exchange", "rpc_exchange");
+		defaultProps.put("rpc_queue_prefix", "rpc_");
+		return defaultProps;
 	}
 
 	/**
