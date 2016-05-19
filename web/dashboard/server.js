@@ -2,17 +2,19 @@
 
 const path = require('path');
 const express = require('express');
+const logger = require('./logger');
+const ngrok = require('ngrok');
 const webpack = require('webpack');
 const webpackMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 const config = require('./webpack.config.js');
 const RethinkdbWebsocketServer = require('rethinkdb-websocket-server');
 
-const isDeveloping = process.env.NODE_ENV !== 'production';
-const port = isDeveloping ? 3000 : process.env.PORT;
+const isDev = process.env.NODE_ENV !== 'production';
+const port = isDev ? 3000 : process.env.PORT;
 const app = express();
 
-if (isDeveloping) {
+if (isDev) {
 	const compiler = webpack(config);
 	const middleware = webpackMiddleware(compiler, {
 		publicPath: config.output.publicPath,
@@ -44,7 +46,17 @@ const server = app.listen(port, '0.0.0.0', function onStart(err) {
 	if (err) {
 		console.log(err);
 	}
-	console.info('🌎  Listening on port %s. Open up http://0.0.0.0:%s/ in your browser.', port, port);
+	// Connect to ngrok in dev mode
+	if (isDev) {
+		ngrok.connect(port, (innerErr, url) => {
+			if (innerErr) {
+				return logger.error(innerErr);
+			}
+			logger.appStarted(port, url);
+		});
+	} else {
+		logger.appStarted(port);
+	}
 });
 
 // Configure rethinkdb-websocket-server to listen on the /db path and proxy
