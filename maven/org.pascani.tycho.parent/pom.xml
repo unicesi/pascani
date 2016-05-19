@@ -41,6 +41,7 @@
 		<module>../org.pascani.dsl.lib</module>
 		<module>../org.pascani.dsl.lib.compiler</module>
 		<module>../org.pascani.dsl.lib.sca</module>
+		<module>../org.pascani.dsl.dbmapper</module>
 		<module>../../plugins/org.pascani.dsl</module>
 		<module>../../plugins/org.pascani.dsl.ide</module>
 		<module>../../plugins/org.pascani.dsl.lib.osgi</module>
