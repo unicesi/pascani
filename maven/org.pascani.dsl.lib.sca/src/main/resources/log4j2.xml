@@ -19,7 +19,7 @@
 -->
 <Configuration status="WARN">
 	<Appenders>
-		<RollingFile name="RollingFile" filename="logs/pascani.log"
+		<RollingFile name="RollingFile" filename="logs/pascani-sca.log"
 			filepattern="${logPath}/%d{yyyyMMddHHmmss}-fargo.log">
 			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n" />
 			<Policies>
