@@ -28,6 +28,10 @@
 	
 	<artifactId>org.pascani.dsl.dbmapper</artifactId>
 	<name>Namespace DB Mapper</name>
+	
+	<properties>
+		<jar.name>${project.artifactId}-${project.version}</jar.name>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -56,4 +60,71 @@
 			<version>2.3</version>
 		</dependency>
 	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.3</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+            				<additionalparam>${javadoc.opts}</additionalparam>
+          				</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.6</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<descriptors>
+						<descriptor>src/main/resources/assembly/jar.xml</descriptor>
+					</descriptors>
+					<archive>
+						<manifest>
+							<mainClass>org.pascani.dsl.dbmapper.Main</mainClass>
+						</manifest>
+					</archive>
+					<finalName>${jar.name}-dependencies</finalName>
+        			<appendAssemblyId>false</appendAssemblyId>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
