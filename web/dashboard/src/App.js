@@ -33,15 +33,14 @@ class App extends Component {
 		this.refs.panels.push(
 			<ReactPanel {...props}>
 				<header>
-					<nav>
-						<a className="close"></a>
-						<a className="expand"></a>
-						<a className="collapse"></a>
+					<nav className="place-right">
+						<a className="close" title="Close this panel"></a>
 					</nav>
+					<h3>Namespace variable</h3>
 				</header>
-				<div>
+				<section>
 					<Chart container="chart" options={options} />
-				</div>
+				</section>
 			</ReactPanel>
 		);
 	}
@@ -67,8 +66,13 @@ class App extends Component {
 					</div>
 					<div id="main-content" className="bg-white v100">
 						<ReactPanels ref="panels">
-							<ReactPanel width="thin">
-								<Turtles add={this.add} />
+							<ReactPanel>
+								<header>
+									<h3 className="no-margin">Turtles</h3>
+								</header>
+								<section>
+									<Turtles add={this.add} />
+								</section>
 							</ReactPanel>
 						</ReactPanels>
 					</div>

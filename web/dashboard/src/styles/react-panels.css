@@ -14,6 +14,8 @@
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 	display: inline-block;
+	overflow-x: hidden;
+	overflow-y: auto;
 	position: relative;
 	vertical-align: top;
 }
@@ -36,13 +38,33 @@
 	width: 100%;
 }
 .react-panel {
-	background-color: #fafafa;
-	border-right: 1px solid #ddd;
+	background-color: transparent;
 	font-size: 13px;
 }
 .react-panel.floating {
 	background-color: #eee;
-	border-right: 1px solid #ccc;
+}
+
+.react-panel .dragbar {
+	background-color: #ddd;
+	bottom: 0;
+	cursor: col-resize;
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 2px;
+}
+
+/* Internal layout */
+
+.react-panel > header {
+	padding: 20px;
+}
+.react-panel > section {
+	padding: 0 20px 20px 20px;
+}
+.react-panel > section .grid {
+	margin: 0;
 }
 .react-panel .close,
 .react-panel .collapse,
@@ -52,6 +74,7 @@
 	cursor: pointer;
 	display: inline-block;
 	height: 20px;
+	margin-left: 5px;
 	width: 20px;
 }
 .react-panel .close {

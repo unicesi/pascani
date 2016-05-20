@@ -47,7 +47,7 @@ class Turtles extends Component {
 		};
 		return (
 			<div className="grid">
-				<form className="row padding10" onSubmit={this.handleSubmit}>
+				<form className="row padding10 no-padding-top no-padding-left no-padding-right" onSubmit={this.handleSubmit}>
 					<div className="cell input-control text">
 						<img src={icon("manager")} className="prepend-icon" />
 						<input type="text" ref={(ref) => this.nameInput = ref} />
