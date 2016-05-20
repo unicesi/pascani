@@ -19,6 +19,7 @@
 package org.pascani.dsl.dbmapper;
 
 import org.pascani.dsl.lib.Event;
+import org.pascani.dsl.lib.PascaniRuntime;
 import org.pascani.dsl.lib.PascaniRuntime.Context;
 import org.pascani.dsl.lib.infrastructure.AbstractConsumer;
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQConsumer;
@@ -68,8 +69,10 @@ public class EventSerializer {
 	 *             if something bad happens! @see {@link RabbitMQConsumer}
 	 */
 	public EventSerializer(final String exchange, final String routingKey,
-			final Class<? extends Event<?>> eventType,
-			final DbInterface db) throws Exception {
+			final Class<? extends Event<?>> eventType, final DbInterface db)
+			throws Exception {
+		PascaniRuntime.getRuntimeInstance(Context.LIBRARY)
+				.registerEventListener(this);
 		final String tag = "dbmapper-" + eventType.getCanonicalName();
 		this.consumer = new RabbitMQConsumer(exchange, routingKey, tag,
 				Context.LIBRARY);
@@ -86,7 +89,7 @@ public class EventSerializer {
 	 * @param event
 	 *            The event to save
 	 */
-	@Subscribe private void receiveEvent(final Event<?> event) {
+	@Subscribe public void receiveEvent(final Event<?> event) {
 		if (this.eventType.isInstance(event)) {
 			try {
 				this.db.save(event);
