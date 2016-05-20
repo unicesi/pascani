@@ -36,7 +36,7 @@ public class RethinkdbMapper implements DbInterface {
 	/**
 	 * The Singleton to use to interact with the RethinkDB Driver
 	 */
-	public static final RethinkDB r = RethinkDB.r;
+	private static final RethinkDB r = RethinkDB.r;
 
 	/**
 	 * The connection to the Rethinkdb database
