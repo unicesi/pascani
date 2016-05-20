@@ -81,7 +81,7 @@ public class RethinkdbMapper implements DbInterface {
 		String data = mapper.toJson(event);
 		r.db(this.props.get("database"))
 		 .table(this.props.get("database_table"))
-		 .insert(data)
+		 .insert(r.json(data))
 		 .run(this.connection);
 	}
 
