@@ -47,16 +47,17 @@ const server = app.listen(port, '0.0.0.0', function onStart(err) {
 		console.log(err);
 	}
 	// Connect to ngrok in dev mode
-	if (isDev) {
-		ngrok.connect(port, (innerErr, url) => {
-			if (innerErr) {
-				return logger.error(innerErr);
-			}
-			logger.appStarted(port, url);
-		});
-	} else {
-		logger.appStarted(port);
-	}
+	// if (isDev) {
+	// 	ngrok.connect(port, (innerErr, url) => {
+	// 		if (innerErr) {
+	// 			return logger.error(innerErr);
+	// 		}
+	// 		logger.appStarted(port, url);
+	// 	});
+	// } else {
+	// 	logger.appStarted(port);
+	// }
+	logger.appStarted(port);
 });
 
 // Configure rethinkdb-websocket-server to listen on the /db path and proxy
