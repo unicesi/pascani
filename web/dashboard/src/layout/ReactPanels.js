@@ -64,7 +64,7 @@ class ReactPanels extends Component {
 		});
 		this.setState({
 			activePanel: _panel,
-			panels: this.state.panels.concat([_panel])
+			panels: update(this.state.panels, {$push: [_panel]})
 		});
 	}
 
