@@ -43,7 +43,7 @@ public class ChangeEvent extends Event<Serializable> {
 	/**
 	 * The new value of the variable
 	 */
-	private final Serializable newValue;
+	private final Serializable value;
 
 	/**
 	 * The variable whose value has changed
@@ -66,7 +66,7 @@ public class ChangeEvent extends Event<Serializable> {
 			final String variable) {
 		super(transactionId);
 		this.previousValue = previousValue;
-		this.newValue = newValue;
+		this.value = newValue;
 		this.variable = variable;
 	}
 
@@ -79,7 +79,7 @@ public class ChangeEvent extends Event<Serializable> {
 	}
 
 	@Override public Serializable value() {
-		return this.newValue;
+		return this.value;
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class ChangeEvent extends Event<Serializable> {
 		sb.append(this.identifier + "\t");
 		sb.append(this.variable + "\t");
 		sb.append(this.previousValue + "\t");
-		sb.append(this.newValue + "\t");
+		sb.append(this.value + "\t");
 		sb.append(this.timestamp + "\t");
 
 		return sb.toString();
