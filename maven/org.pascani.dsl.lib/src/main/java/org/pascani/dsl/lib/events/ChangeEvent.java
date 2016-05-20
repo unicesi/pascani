@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import org.pascani.dsl.lib.Event;
+import org.pascani.dsl.lib.util.Transient;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -36,6 +37,7 @@ public class ChangeEvent extends Event<Serializable> {
 	/**
 	 * The value of the variable before the change
 	 */
+	@Transient
 	private final Serializable previousValue;
 
 	/**
