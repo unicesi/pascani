@@ -34,6 +34,7 @@ class ReactPanel extends Component {
 
 	state = {
 		expanded: false,
+		width: undefined,
 	}
 
 	constructor(props) {
@@ -42,6 +43,28 @@ class ReactPanel extends Component {
 
 	componentWillMount() {
 		this.props.onBeforeOpen(this);
+	}
+
+	onMouseDown = (e) => {
+		e.stopPropagation();
+		e.preventDefault();
+		// only left mouse button
+		if (e.button !== 0) return;
+		document.addEventListener('mousemove', this.onMouseMove);
+		document.addEventListener('mouseup', this.onMouseUp);
+	}
+
+	onMouseMove = (e) => {
+		e.stopPropagation();
+		e.preventDefault();
+		const offset = $(this.refs.container).offset();
+		this.setState({ width: e.pageX - offset.left + 1 });
+	}
+
+	onMouseUp = (e) => {
+		e.stopPropagation();
+		e.preventDefault();
+		document.removeEventListener('mousemove', this.onMouseMove);
 	}
 
 	componentWillUnmount() {
@@ -74,14 +97,18 @@ class ReactPanel extends Component {
 	}
 
 	render() {
-		const classes = `${this.props.width}`
+		const classes = (!this.state.width ? `${this.props.width}` : '')
 			+ (this.props.floating ? " floating" : "")
 			+ (this.props.active ? " active" : "")
 			+ (this.state.expanded ? " expanded" : "");
+		const style = {};
+		if (this.state.width)
+			style.width = `${this.state.width}px`;
 		return (
 			<section id={this.props.id} className={"react-panel " + classes}
-				onClick={this.handlePanelClick}>
+				onClick={this.handlePanelClick} style={style} ref="container">
 				{this.props.children}
+				<div className="dragbar" onMouseDown={this.onMouseDown}></div>
 			</section>
 		);
 	}
