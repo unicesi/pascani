@@ -30,10 +30,21 @@ import com.google.gson.FieldAttributes;
  */
 public class TransientExclusionStrategy implements ExclusionStrategy {
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.google.gson.ExclusionStrategy#shouldSkipClass(java.lang.Class)
+	 */
 	@Override public boolean shouldSkipClass(Class<?> clazz) {
 		return false;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.google.gson.ExclusionStrategy#shouldSkipField(com.google.gson.
+	 * FieldAttributes)
+	 */
 	@Override public boolean shouldSkipField(FieldAttributes field) {
 		return field.getAnnotation(Transient.class) != null;
 	}
