@@ -18,9 +18,16 @@
  */
 package org.pascani.dsl.dbmapper;
 
+import java.util.UUID;
+
+import org.pascani.dsl.dbmapper.typeadapters.TransientExclusionStrategy;
+import org.pascani.dsl.dbmapper.typeadapters.UUIDDeserializer;
+import org.pascani.dsl.dbmapper.typeadapters.UUIDInstanceCreator;
+import org.pascani.dsl.dbmapper.typeadapters.UUIDSerializer;
 import org.pascani.dsl.lib.Event;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
@@ -33,7 +40,16 @@ public class JsonEventMapper {
 	private final Gson gson;
 
 	public JsonEventMapper() {
-		this.gson = new Gson();
+		this.gson = buildGson();
+	}
+
+	private Gson buildGson() {
+		GsonBuilder builder = new GsonBuilder();
+		builder.registerTypeAdapter(UUID.class, new UUIDInstanceCreator());
+		builder.registerTypeAdapter(UUID.class, new UUIDSerializer());
+		builder.registerTypeAdapter(UUID.class, new UUIDDeserializer());
+		builder.setExclusionStrategies(new TransientExclusionStrategy());
+		return builder.create();
 	}
 
 	/**
@@ -44,7 +60,7 @@ public class JsonEventMapper {
 	 * @return The Json representation of the given event
 	 */
 	public <T extends Event<?>> String toJson(T event) {
-		return gson.toJson(event.value());
+		return gson.toJson(event);
 	}
 
 	/**
