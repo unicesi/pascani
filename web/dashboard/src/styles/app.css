@@ -6,6 +6,12 @@ html {
 	padding: 0;
 }
 
+#logo {
+	display: block;
+	margin: 50px auto;
+	width: 75%;
+}
+
 a {
 	outline: 0;
 }
@@ -14,7 +20,12 @@ a {
 	height: 100%;
 }
 
+.page-content {
+	padding-top: 0 !important;
+}
+
 #sidebar-container {
+	background: #32353D;
 	border-right: 2px solid #eee;
 	float: left;
 	position: relative;
@@ -80,21 +91,22 @@ div[class^=hint]::before {
 }
 
 .sidebar li {
-	color: gray;
+	color: #6CBEC2;
+	padding-left: 10px;
 }
 
 .sidebar li:hover {
-	background-color: #eee;
+	background-color: #6CBEC2;
 	color: black;
 }
 
 .sidebar li.active {
-	background-color: #eee;
+	background-color: #6CBEC2;
 	color: black;
 }
 
 .sidebar li a {
-	padding: .8rem 1rem .625rem 3.75rem;
+	padding: .8rem 1rem .625rem 2.85rem;
 }
 
 .sidebar li a,

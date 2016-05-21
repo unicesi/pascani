@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 import Highcharts from 'highcharts/highstock';
+import styles from '../styles/charts.css';
 
 class Chart extends Component {
 
@@ -27,9 +28,18 @@ class Chart extends Component {
 		this.chart.destroy();
 	}
 
+	resize = (width) => {
+		console.log(this.chart, width)
+		width = width || $(this.props.container).parent().width();
+		const chart = $(this.props.container).highcharts();
+		chart.setSize(width, chart.chartHeight, false);
+	}
+
 	//Create the div which the chart will be rendered to.
 	render() {
-		return React.createElement('div', { id: this.props.container });
+		return (
+			<div id={this.props.container} className="chart"></div>
+		);
 	}
 
 }

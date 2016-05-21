@@ -14,6 +14,7 @@ class ReactPanel extends Component {
 		id: undefined,
 		onBeforeOpen: (panel) => {},
 		onBeforeClose: (panel) => {},
+		onResize: (width) => {},
 		claimActiveState: (panel) => {},
 		closePanel: (panel) => {},
 	}
@@ -21,13 +22,11 @@ class ReactPanel extends Component {
 	static propTypes = {
 		active: React.PropTypes.bool,
 		floating: React.PropTypes.bool,
-		width: React.PropTypes.oneOfType([
-			React.PropTypes.string,
-			React.PropTypes.number,
-		]),
+		width: React.PropTypes.string,
 		id: React.PropTypes.string,
 		onBeforeOpen: React.PropTypes.func,
 		onBeforeClose: React.PropTypes.func,
+		onResize: React.PropTypes.func,
 		claimActiveState: React.PropTypes.func,
 		closePanel: React.PropTypes.func,
 	}
@@ -58,7 +57,9 @@ class ReactPanel extends Component {
 		e.stopPropagation();
 		e.preventDefault();
 		const offset = $(this.refs.container).offset();
-		this.setState({ width: e.pageX - offset.left + 1 });
+		const width = e.pageX - offset.left + 1;
+		this.setState({ width: width });
+		this.props.onResize(width);
 	}
 
 	onMouseUp = (e) => {
@@ -87,6 +88,8 @@ class ReactPanel extends Component {
 	}
 
 	handlePanelClick = (e) => {
+		if(typeof e.target.className.indexOf !== "function")
+			return;
 		if (e.target.className.indexOf("close") > -1) {
 			this.close();
 		} else if (e.target.className.indexOf("expand") > -1) {

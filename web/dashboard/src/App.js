@@ -1,13 +1,15 @@
 import React, {Component} from 'react';
 
 // Layout & Styles
-import AppBar from './layout/AppBar'
-import Sidebar from './layout/Sidebar'
-import SidebarItem from './layout/SidebarItem'
-import ReactPanels from './layout/ReactPanels'
-import ReactPanel from './layout/ReactPanel'
+import AppBar from './layout/AppBar';
+import Sidebar from './layout/Sidebar';
+import SidebarItem from './layout/SidebarItem';
+import ReactPanels from './layout/ReactPanels';
+import ReactPanel from './layout/ReactPanel';
 import styles from './styles/app.css';
 
+import Monitors from './panels/Monitors';
+import Namespaces from './panels/Namespaces';
 import Turtles from './panels/Turtles';
 import Chart from './panels/Chart';
 
@@ -19,9 +21,6 @@ class App extends Component {
 
 	add = (e) => {
 		e.preventDefault();
-		const props = {
-			width: 'wide',
-		};
 		const options = {
 			xAxis: {
 				categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -31,15 +30,41 @@ class App extends Component {
 			}]
 		};
 		this.refs.panels.push(
+			this.panelTemplate(
+				{
+					width: 'wide'
+				},
+				"Namespace variable", 
+				<Chart container="chart" options={options} />
+			)
+		);
+	}
+
+	openNamespaces = (e) => {
+		e.preventDefault();
+		const namespaces = <Namespaces parent={this.refs.panels} />;
+		const panel = this.panelTemplate({}, "Namespaces", namespaces);
+		this.refs.panels.push(panel);
+	}
+
+	openMonitors = (e) => {
+		e.preventDefault();
+		const monitors = <Monitors parent={this.refs.panels} />;
+		const panel = this.panelTemplate({}, "Monitors", monitors);
+		this.refs.panels.push(panel);
+	}
+
+	panelTemplate = (props, title, children) => {
+		return (
 			<ReactPanel {...props}>
 				<header>
 					<nav className="place-right">
 						<a className="close" title="Close this panel"></a>
 					</nav>
-					<h3>Namespace variable</h3>
+					<h3>{title}</h3>
 				</header>
 				<section>
-					<Chart container="chart" options={options} />
+					{children}
 				</section>
 			</ReactPanel>
 		);
@@ -52,12 +77,12 @@ class App extends Component {
 		}
 		return (
 			<span>
-				<AppBar />
 				<div className="page-content">
 					<div id="sidebar-container" className="v100">
+						<img id="logo" src={require("./img/pascani.png")} />
 						<Sidebar>
-							<SidebarItem text="Monitors" icon={icon("fine_print")} onClick={this.add} />
-							<SidebarItem text="Namespaces" icon={icon("combo_chart")} onClick={this.add} />
+							<SidebarItem text="Monitors" icon={icon("fine_print")} onClick={this.openMonitors} />
+							<SidebarItem text="Namespaces" icon={icon("combo_chart")} onClick={this.openNamespaces} />
 						</Sidebar>
 						<Sidebar bottom={true}>
 							<SidebarItem text="Issue Management" link={url} icon={icon("faq")} />
@@ -65,16 +90,7 @@ class App extends Component {
 						</Sidebar>
 					</div>
 					<div id="main-content" className="bg-white v100">
-						<ReactPanels ref="panels">
-							<ReactPanel>
-								<header>
-									<h3 className="no-margin">Turtles</h3>
-								</header>
-								<section>
-									<Turtles add={this.add} />
-								</section>
-							</ReactPanel>
-						</ReactPanels>
+						<ReactPanels ref="panels" />
 					</div>
 				</div>
 			</span>
