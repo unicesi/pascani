@@ -3,6 +3,7 @@
 const express = require('express');
 const logger = require('./logger');
 const ngrok = require('ngrok');
+const rethinkdbConfig = require('../rethinkdb.config');
 const RethinkdbWebsocketServer = require('rethinkdb-websocket-server');
 
 const frontend = require('./middlewares/frontendMiddleware');
@@ -49,7 +50,7 @@ const server = app.listen(port, (err) => {
 RethinkdbWebsocketServer.listen({
 	httpServer: server,
 	httpPath: '/db',
-	dbHost: 'localhost',
-	dbPort: 28015,
+	dbHost: rethinkdbConfig.host,
+	dbPort: rethinkdbConfig.port,
 	unsafelyAllowAnyQuery: true,
 });
