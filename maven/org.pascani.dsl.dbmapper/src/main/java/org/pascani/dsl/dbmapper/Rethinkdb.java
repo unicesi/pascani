@@ -18,11 +18,17 @@
  */
 package org.pascani.dsl.dbmapper;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.pascani.dsl.lib.Event;
+import org.pascani.dsl.lib.events.ChangeEvent;
+import org.pascani.dsl.lib.events.NewMonitorEvent;
+import org.pascani.dsl.lib.events.NewNamespaceEvent;
 import org.pascani.dsl.lib.util.ConfigProperties;
 
 import com.rethinkdb.RethinkDB;
@@ -31,7 +37,7 @@ import com.rethinkdb.net.Connection;
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class RethinkdbMapper implements DbInterface {
+public class Rethinkdb implements DbInterface {
 
 	/**
 	 * The Singleton to use to interact with the RethinkDB Driver
@@ -51,11 +57,11 @@ public class RethinkdbMapper implements DbInterface {
 	/**
 	 * The Json<->Event mapper
 	 */
-	private final JsonEventMapper mapper;
+	private final JsonUtility jsonUtility;
 
-	public RethinkdbMapper() {
+	public Rethinkdb() {
 		this.props = readConfigProperties();
-		this.mapper = new JsonEventMapper();
+		this.jsonUtility = new JsonUtility();
 	}
 
 	/**
@@ -66,7 +72,6 @@ public class RethinkdbMapper implements DbInterface {
 		defaultProps.put("hostname", "localhost");
 		defaultProps.put("port", "28015");
 		defaultProps.put("database", "test");
-		defaultProps.put("database_table", "default");
 		ConfigProperties config = new ConfigProperties("rethinkdb.properties",
 				"rethinkdb.", defaultProps);
 		return config.readProperties();
@@ -78,11 +83,73 @@ public class RethinkdbMapper implements DbInterface {
 	 * @see org.pascani.dsl.dbmapper.DbInterface#save(org.pascani.dsl.lib.Event)
 	 */
 	public <T extends Event<?>> void save(T event) throws Exception {
-		String data = mapper.toJson(event);
+		// TODO: do not insert duplicate monitors, namespaces, variables & usings
+		long createdAt = new Date().getTime();
+		Map<String, Object> eventData = null;
+		String table = null;
+		if (event instanceof ChangeEvent) {
+			eventData = toJson((ChangeEvent) event);
+			table = "values";
+		} else if (event instanceof NewMonitorEvent) {
+			NewMonitorEvent e = (NewMonitorEvent) event;
+			eventData = toJson(e);
+			table = "monitors";
+			List<Map<String, Object>> maps = new ArrayList<Map<String, Object>>();
+			for (String namespace : e.namespaces()) {
+				Map<String, Object> data = new HashMap<String, Object>();
+				data.put("createdAt", createdAt);
+				data.put("monitor", e.value());
+				data.put("namespace", namespace);
+				maps.add(data);
+			}
+			r.db(this.props.get("database"))
+			 .table("monitors_namespaces")
+			 .insert(maps)
+			 .run(this.connection);
+		} else if (event instanceof NewNamespaceEvent) {
+			NewNamespaceEvent e = (NewNamespaceEvent) event;
+			eventData = toJson(e);
+			table = "namespaces";
+			List<Map<String, Object>> maps = new ArrayList<Map<String, Object>>();
+			for (String variable : e.variables()) {
+				Map<String, Object> data = new HashMap<String, Object>();
+				data.put("createdAt", createdAt);
+				data.put("name", variable);
+				data.put("namespace", e.value());
+				maps.add(data);
+			}
+			r.db(this.props.get("database"))
+			 .table("variables")
+			 .insert(maps)
+			 .run(this.connection);
+		}
+		
 		r.db(this.props.get("database"))
-		 .table(this.props.get("database_table"))
-		 .insert(r.json(data))
+		 .table(table)
+		 .insert(eventData)
 		 .run(this.connection);
+	}
+	
+	private Map<String, Object> toJson(ChangeEvent e) {
+		Map<String, Object> vars = new HashMap<String, Object>();
+		vars.put("createdAt", e.timestamp());
+		vars.put("variable", e.variable());
+		vars.put("value", jsonUtility.toJson(e.value()));
+		return vars;
+	}
+	
+	private Map<String, Object> toJson(NewMonitorEvent e) {
+		Map<String, Object> vars = new HashMap<String, Object>();
+		vars.put("createdAt", e.timestamp());
+		vars.put("name", e.value());
+		return vars;
+	}
+	
+	private Map<String, Object> toJson(NewNamespaceEvent e) {
+		Map<String, Object> vars = new HashMap<String, Object>();
+		vars.put("createdAt", e.timestamp());
+		vars.put("name", e.value());
+		return vars;
 	}
 
 	/*

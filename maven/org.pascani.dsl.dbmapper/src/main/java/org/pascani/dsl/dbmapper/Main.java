@@ -18,26 +18,59 @@
  */
 package org.pascani.dsl.dbmapper;
 
+import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.osoa.sca.annotations.Scope;
+import org.pascani.dsl.lib.PascaniRuntime;
+import org.pascani.dsl.lib.events.ChangeEvent;
+import org.pascani.dsl.lib.events.NewMonitorEvent;
+import org.pascani.dsl.lib.events.NewNamespaceEvent;
 
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class Main {
+@Scope("COMPOSITE")
+public class Main implements Runnable {
 
 	private static final Logger logger = LogManager.getLogger(Main.class);
 
 	public static void main(String[] args) {
-		ChangeEventDbMapper mapper;
+		Main main = new Main();
+		main.run();
+	}
+
+	public void run() {
+		Map<String, String> env = PascaniRuntime.getEnvironment();
+		String namespaces = env.get("namespaces_exchange");
+		String monitors = env.get("monitors_exchange");
+		DbInterface db = new Rethinkdb();
 		try {
-			mapper = new ChangeEventDbMapper();
-			mapper.run();
+			EventSerializer[] serializers = {
+				new EventSerializer(namespaces, "#", ChangeEvent.class, db),
+				new EventSerializer(namespaces, "org.pascani.deployment", NewNamespaceEvent.class, db),
+				new EventSerializer(monitors, "org.pascani.deployment", NewMonitorEvent.class, db)
+			};
+			addShutdownHook(serializers);
 		} catch (Exception e) {
-			logger.error("Error initializing class "
-					+ ChangeEventDbMapper.class.getCanonicalName(), e);
+			logger.error("Error initializing class " + this.getClass().getCanonicalName(), e);
 			e.printStackTrace();
 		}
+	}
+
+	private void addShutdownHook(final EventSerializer... serializers) {
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override public void run() {
+				try {
+					for (EventSerializer serializer : serializers) {
+						serializer.shutdown();
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 
 }

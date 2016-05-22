@@ -32,14 +32,14 @@ import com.google.gson.GsonBuilder;
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class JsonEventMapper {
+public class JsonUtility {
 
 	/**
 	 * The instance to convert from/to json
 	 */
 	private final Gson gson;
 
-	public JsonEventMapper() {
+	public JsonUtility() {
 		this.gson = buildGson();
 	}
 
@@ -53,27 +53,27 @@ public class JsonEventMapper {
 	}
 
 	/**
-	 * Converts an event to Json format
+	 * Converts an object to Json format
 	 * 
-	 * @param event
-	 *            The event to convert to Json
-	 * @return The Json representation of the given event
+	 * @param obj
+	 *            The object to convert to Json
+	 * @return The Json representation of the given object
 	 */
-	public <T extends Event<?>> String toJson(T event) {
-		return gson.toJson(event);
+	public String toJson(Object obj) {
+		return gson.toJson(obj);
 	}
 
 	/**
-	 * Converts an event from Json format to Object
+	 * Converts an object from Json format to Object
 	 * 
 	 * @param json
-	 *            The Json representation of the desired event
-	 * @param eventType
-	 *            The event type
+	 *            The Json representation of the desired object
+	 * @param type
+	 *            The object type
 	 * @return An Object representation of the given Json data
 	 */
-	public <T extends Event<?>> T fromJson(String json, Class<T> eventType) {
-		return gson.fromJson(json, eventType);
+	public <T extends Event<?>> T fromJson(String json, Class<T> type) {
+		return gson.fromJson(json, type);
 	}
 
 }

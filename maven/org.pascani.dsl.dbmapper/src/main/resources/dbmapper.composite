@@ -27,7 +27,7 @@
 		<service name="r">
 			<interface.java interface="java.lang.Runnable" />
 		</service>
-		<implementation.java class="org.pascani.dsl.dbmapper.ChangeEventDbMapper" />
+		<implementation.java class="org.pascani.dsl.dbmapper.Main" />
 	</component>
 
 </composite>
