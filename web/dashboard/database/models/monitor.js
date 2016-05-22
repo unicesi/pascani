@@ -9,5 +9,5 @@ const Monitor = thinky.createModel("monitors", {
 
 module.exports = Monitor;
 
-const Namepace = require('./namespace');
-Monitor.hasMany(Namepace, "namespaces", "id", "monitorId");
+const Namespace = require('./namespace');
+Monitor.hasAndBelongsToMany(Namespace, "namespaces", "id", "id");

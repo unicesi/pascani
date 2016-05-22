@@ -8,3 +8,6 @@ const Namespace = thinky.createModel("namespaces", {
 });
 
 module.exports = Namespace;
+
+const Monitor = require('./monitor');
+Namespace.hasAndBelongsToMany(Monitor, "monitors", "id", "id");
