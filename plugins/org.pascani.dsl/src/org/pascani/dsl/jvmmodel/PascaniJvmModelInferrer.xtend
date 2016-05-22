@@ -69,6 +69,12 @@ import org.pascani.dsl.pascani.OrEventSpecifier
 import org.pascani.dsl.pascani.AndEventSpecifier
 import org.pascani.dsl.lib.util.TaggedValue
 import java.util.Map
+import org.pascani.dsl.lib.PascaniRuntime
+import org.pascani.dsl.lib.infrastructure.AbstractProducer
+import org.pascani.dsl.lib.events.NewMonitorEvent
+import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQProducer
+import com.google.common.collect.Lists
+import org.pascani.dsl.lib.events.NewNamespaceEvent
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -229,7 +235,26 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				'''
 			]
 			methods += monitor.toMethod("run", typeRef(void)) [
-				body = ''''''
+				val usings = monitor.usings.map[u|'''"«u.fullyQualifiedName»"'''].join(", ")
+				val periodicEvents = events.filter[e|e.periodical].map[e|'''"«e.name»"'''].join(", ")
+				val nonPeriodicEvents = events.filter[e|!e.periodical].map[e|'''"«e.name»"'''].join(", ")
+				body = '''
+					String exchange = «typeRef(PascaniRuntime)».getEnvironment().get("monitors_exchange");
+					String routingKey = "org.pascani.deployment";
+					try {
+						«typeRef(AbstractProducer)» producer = new «typeRef(RabbitMQProducer)»(exchange, routingKey);
+						«typeRef(NewMonitorEvent)» event = new «typeRef(NewMonitorEvent)»(
+							«typeRef(UUID)».randomUUID(), 
+							"«monitor.fullyQualifiedName»", 
+							«typeRef(Lists)».<String>newArrayList(«usings»), 
+							«typeRef(Lists)».<String>newArrayList(«periodicEvents»), 
+							«typeRef(Lists)».<String>newArrayList(«nonPeriodicEvents»));
+						producer.produce(event);
+						producer.shutdown();
+					} catch (Exception e) {
+						«typeRef(org.pascani.dsl.lib.util.Exceptions)».sneakyThrow(e);
+					}
+				'''
 			]
 			methods += monitor.toMethod("initialize", typeRef(void)) [
 				visibility = JvmVisibility::PRIVATE
@@ -511,7 +536,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		val namespaceImpl = namespace.toClass(namespace.fullyQualifiedName + "Namespace") [
 			if (!isPreIndexingPhase) {
 				val List<XVariableDeclaration> declarations = getVariableDeclarations(namespace)
-				
 				// More information on the Scope annotation: http://mail-archive.ow2.org/frascati/2011-02/msg00001.html
 				annotations += annotationRef(Scope, "COMPOSITE")
 				superTypes += typeRef(BasicNamespace)
@@ -535,7 +559,21 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					'''
 				]
 				members += namespace.toMethod("run", typeRef(void)) [
-					body = ''''''
+					val variables = declarations.map[d|'''"«d.fullyQualifiedName»"'''].join(",\n")
+					body = '''
+					String exchange = «typeRef(PascaniRuntime)».getEnvironment().get("namespaces_exchange");
+					String routingKey = "org.pascani.deployment";
+					try {
+						«typeRef(AbstractProducer)» producer = new «typeRef(RabbitMQProducer)»(exchange, routingKey);
+						«typeRef(NewNamespaceEvent)» event = new «typeRef(NewNamespaceEvent)»(«typeRef(UUID)».randomUUID(), 
+							"«namespace.fullyQualifiedName»", 
+							«typeRef(Lists)».<String>newArrayList(«variables»));
+						producer.produce(event);
+						producer.shutdown();
+					} catch (Exception e) {
+						«typeRef(org.pascani.dsl.lib.util.Exceptions)».sneakyThrow(e);
+					}
+					'''
 				]
 			}
 		]
