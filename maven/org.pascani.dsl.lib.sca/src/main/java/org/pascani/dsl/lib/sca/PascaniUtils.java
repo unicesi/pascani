@@ -30,7 +30,6 @@ import java.util.Map;
 
 import javax.script.ScriptException;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.pascani.dsl.lib.Event;
 import org.pascani.dsl.lib.PascaniRuntime;
 import org.pascani.dsl.lib.Probe;
@@ -358,8 +357,8 @@ public class PascaniUtils {
 						"	set-name($intent, $routingKey);\n" +
 						"	intent = $parent/scachild::$routingKey;\n" +
 						"	-- 4. Sets the routing key\n" +
-						"	routingKeyProp = $intent/scachild::probe/scaproperty::routingKey;\n" +
-						"	set-value($routingKeyProp, $routingKey);\n" +
+						"	property = $intent/scachild::probe/scaproperty::property;\n" +
+						"	set-value($property, concat(\"routingkey=\", $routingKey));\n" +
 						"	-- 5. Add the REST binding to the Resumable interface, and then add the SCA intent\n" +
 						"	add-scaintent($target, $intent);\n" +
 						"	-- 6. Wire the event handler service\n" +
@@ -404,7 +403,7 @@ public class PascaniUtils {
 	 */
 	public static <T> T bindService(Map<String, Object> properties,
 			Class<T> clazz) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 	}
 
 }

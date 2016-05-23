@@ -15,8 +15,8 @@ action pascani-add-intent(parent, target, intentName, routingKey) {
 	intent = $parent/scachild::$routingKey;
 	
 	-- 4. Sets the routing key
-	routingKeyProp = $intent/scachild::probe/scaproperty::routingKey;
-	set-value($routingKeyProp, $routingKey);
+	property = $intent/scachild::probe/scaproperty::property;
+	set-value($property, concat("routingkey=", $routingKey));
 
 	-- 5. Add the REST binding to the Resumable interface, and then add the SCA intent
 	add-scaintent($target, $intent);
