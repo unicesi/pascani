@@ -83,7 +83,9 @@ public class Influxdb implements DbInterface {
 			ChangeEvent e = (ChangeEvent) event;
 			TaggedValue<Serializable> taggedValue = TaggedValue
 					.instanceFrom(e.value(), Serializable.class);
-			if (taggedValue.value() instanceof Number) {
+			if (taggedValue.value() instanceof Number
+					|| taggedValue.value() instanceof Boolean
+					|| taggedValue.value() instanceof String) {
 				point = makeRequestString(e, taggedValue.value(),
 						taggedValue.tags());
 			} else if (taggedValue.value() instanceof Range<?>) {
@@ -116,8 +118,12 @@ public class Influxdb implements DbInterface {
 			Range<?> range = (Range<?>) value;
 			point.addField("start", (Number) range.lowerEndpoint());
 			point.addField("end", (Number) range.upperEndpoint());
-		} else {
+		} else if (value instanceof Number) {
 			point.addField("value", (Number) value);
+		} else if (value instanceof Boolean) {
+			point.addField("value", (Boolean) value);
+		} else if (value instanceof String) {
+			point.addField("value", (String) value);
 		}
 		return point.build();
 	}
