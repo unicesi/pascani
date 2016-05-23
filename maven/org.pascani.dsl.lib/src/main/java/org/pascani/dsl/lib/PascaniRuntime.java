@@ -135,6 +135,7 @@ public class PascaniRuntime {
 		defaultProps.put("probes_exchange", "probes_exchange");
 		defaultProps.put("namespaces_exchange", "namespaces_exchange");
 		defaultProps.put("monitors_exchange", "monitors_exchange");
+		defaultProps.put("logs_exchange", "logs_exchange");
 		defaultProps.put("rpc_exchange", "rpc_exchange");
 		defaultProps.put("rpc_queue_prefix", "rpc_");
 		return defaultProps;

@@ -25,6 +25,7 @@ import java.lang.annotation.Target;
 
 /**
  * Fields annotated with this annotation will be exclude from serialization
+ * (when using RethinkDB)
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */

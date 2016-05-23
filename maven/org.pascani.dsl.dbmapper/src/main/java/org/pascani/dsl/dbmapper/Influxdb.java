@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +32,9 @@ import org.influxdb.dto.Point;
 import org.influxdb.dto.Point.Builder;
 import org.pascani.dsl.lib.Event;
 import org.pascani.dsl.lib.events.ChangeEvent;
+import org.pascani.dsl.lib.events.LogEvent;
+import org.pascani.dsl.lib.events.NewMonitorEvent;
+import org.pascani.dsl.lib.events.NewNamespaceEvent;
 import org.pascani.dsl.lib.util.ConfigProperties;
 import org.pascani.dsl.lib.util.TaggedValue;
 
@@ -79,35 +83,77 @@ public class Influxdb implements DbInterface {
 	 */
 	@Override public <T extends Event<?>> void save(T event) throws Exception {
 		Point point = null;
-		if (event instanceof ChangeEvent) {
-			ChangeEvent e = (ChangeEvent) event;
-			TaggedValue<Serializable> taggedValue = TaggedValue
-					.instanceFrom(e.value(), Serializable.class);
-			if (taggedValue.value() instanceof Number
-					|| taggedValue.value() instanceof Boolean
-					|| taggedValue.value() instanceof String) {
-				point = makeRequestString(e, taggedValue.value(),
-						taggedValue.tags());
-			} else if (taggedValue.value() instanceof Range<?>) {
-				Range<?> range = (Range<?>) taggedValue.value();
-				Class<?> clazz = range.hasLowerBound()
-						? range.lowerEndpoint().getClass()
-						: range.upperEndpoint().getClass();
-				if (Number.class.isAssignableFrom(clazz)) {
-					point = makeRequestString(e, taggedValue.value(),
-							taggedValue.tags());
-				} else {
-					logger.warn(
-							"Not supported type " + clazz.getCanonicalName());
-				}
-			} else {
-				logger.warn("Not supported type "
-						+ taggedValue.value().getClass().getCanonicalName());
-			}
-		}
+		
+		if (event instanceof ChangeEvent)
+			point = handle((ChangeEvent) event);
+		else if (event instanceof NewMonitorEvent)
+			point = handle((NewMonitorEvent) event);
+		else if (event instanceof NewNamespaceEvent)
+			point = handle((NewNamespaceEvent) event);
+		else if (event instanceof LogEvent)
+			point = handle((LogEvent) event);
+		
 		if (point != null) {
 			this.influxDB.write(this.props.get("database"), "default", point);
 		}
+	}
+	
+	private Point handle(LogEvent e) {
+		Builder builder = Point.measurement("log")
+				.tag("type", "log")
+				.addField("level", e.level())
+				.addField("logger", e.logger())
+				.addField("message", e.value() + "")
+				.time(e.timestamp(), TimeUnit.MILLISECONDS);
+		return builder.build();
+	}
+	
+	private Point handle(NewMonitorEvent e) {
+		Builder builder = Point.measurement("log")
+				.tag("type", "monitor")
+				.addField("level", Level.CONFIG.getName())
+				.addField("logger", e.value() + "")
+				.addField("message", "Monitor " + e.value() + " has been deployed")
+				.time(e.timestamp(), TimeUnit.MILLISECONDS);
+		return builder.build();
+	}
+	
+	private Point handle(NewNamespaceEvent e) {
+		Builder builder = Point.measurement("log")
+				.tag("type", "namespace")
+				.addField("level", Level.CONFIG.getName())
+				.addField("logger", e.value() + "")
+				.addField("message", "Namespace " + e.value() + " has been deployed")
+				.time(e.timestamp(), TimeUnit.MILLISECONDS);
+		return builder.build();
+	}
+	
+	private Point handle(ChangeEvent e) {
+		Point point = null;
+		TaggedValue<Serializable> taggedValue = TaggedValue
+				.instanceFrom(e.value(), Serializable.class);
+		if (taggedValue.value() instanceof Number
+				|| taggedValue.value() instanceof Boolean
+				|| taggedValue.value() instanceof String) {
+			point = makeRequestString(e, taggedValue.value(),
+					taggedValue.tags());
+		} else if (taggedValue.value() instanceof Range<?>) {
+			Range<?> range = (Range<?>) taggedValue.value();
+			Class<?> clazz = range.hasLowerBound()
+					? range.lowerEndpoint().getClass()
+					: range.upperEndpoint().getClass();
+			if (Number.class.isAssignableFrom(clazz)) {
+				point = makeRequestString(e, taggedValue.value(),
+						taggedValue.tags());
+			} else {
+				logger.warn(
+						"Not supported type " + clazz.getCanonicalName());
+			}
+		} else {
+			logger.warn("Not supported type "
+					+ taggedValue.value().getClass().getCanonicalName());
+		}
+		return point;
 	}
 
 	private Point makeRequestString(ChangeEvent e, Serializable value,

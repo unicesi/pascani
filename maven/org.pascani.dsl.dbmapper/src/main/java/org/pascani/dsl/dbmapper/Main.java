@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import org.osoa.sca.annotations.Scope;
 import org.pascani.dsl.lib.PascaniRuntime;
 import org.pascani.dsl.lib.events.ChangeEvent;
+import org.pascani.dsl.lib.events.LogEvent;
 import org.pascani.dsl.lib.events.NewMonitorEvent;
 import org.pascani.dsl.lib.events.NewNamespaceEvent;
 
@@ -45,13 +46,14 @@ public class Main implements Runnable {
 		Map<String, String> env = PascaniRuntime.getEnvironment();
 		String namespaces = env.get("namespaces_exchange");
 		String monitors = env.get("monitors_exchange");
+		String logs = env.get("logs_exchange");
 		DbInterface db = new Influxdb();
-		DbInterface fake = new Fakedb();
 		try {
 			EventSerializer[] serializers = {
 				new EventSerializer(namespaces, "#", ChangeEvent.class, db),
-				new EventSerializer(namespaces, "org.pascani.deployment", NewNamespaceEvent.class, fake),
-				new EventSerializer(monitors, "org.pascani.deployment", NewMonitorEvent.class, fake)
+				new EventSerializer(namespaces, "org.pascani.deployment", NewNamespaceEvent.class, db),
+				new EventSerializer(monitors, "org.pascani.deployment", NewMonitorEvent.class, db),
+				new EventSerializer(logs, "", LogEvent.class, db)
 			};
 			addShutdownHook(serializers);
 		} catch (Exception e) {

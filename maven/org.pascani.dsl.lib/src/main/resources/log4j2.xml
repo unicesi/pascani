@@ -17,9 +17,9 @@
  You should have received a copy of the GNU Lesser General Public License
  along with The Pascani project. If not, see http://www.gnu.org/licenses/
 -->
-<Configuration status="WARN">
+<Configuration status="WARN" packages="org.pascani.dsl.lib.util.log4j2">
 	<Appenders>
-		<RollingFile name="RollingFile" filename="logs/pascani-lib.log"
+		<RollingFile name="RollingFile" filename="logs/pascani.log"
 			filepattern="${logPath}/%d{yyyyMMddHHmmss}-fargo.log">
 			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n" />
 			<Policies>
@@ -27,10 +27,12 @@
 			</Policies>
 			<DefaultRolloverStrategy max="20" />
 		</RollingFile>
+		<Pascani name="RuntimeLibrary" />
 	</Appenders>
 	<Loggers>
 		<Root level="info">
 			<AppenderRef ref="RollingFile" />
+			<AppenderRef ref="RuntimeLibrary" />
 		</Root>
 	</Loggers>
 </Configuration>
