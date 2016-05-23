@@ -94,7 +94,7 @@ public class EventSerializer {
 			try {
 				this.db.save(event);
 			} catch (Exception e) {
-				logger.error("Error saving event in the database", e);
+				logger.error(e.getMessage(), "Error saving event in the database", e);
 			}
 		}
 	}

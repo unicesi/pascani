@@ -23,6 +23,7 @@ import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -78,10 +79,13 @@ public final class PascaniAppender extends AbstractAppender {
 	@Override public void append(LogEvent event) {
 		readLock.lock();
 		try {
+			String thrown = event.getThrown() == null ? ""
+					: ExceptionUtils.getStackTrace(event.getThrown());
 			org.pascani.dsl.lib.events.LogEvent e = new org.pascani.dsl.lib.events.LogEvent(
 					UUID.randomUUID(), event.getLoggerName(),
 					event.getLevel().name(),
-					event.getMessage().getFormattedMessage());
+					event.getMessage().getFormattedMessage(), thrown,
+					event.getSource() + "");
 			producer.produce(e);
 		} catch (Exception ex) {
 			if (!ignoreExceptions()) {

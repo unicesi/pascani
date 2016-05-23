@@ -82,9 +82,9 @@ public class ConfigProperties {
 			if (input != null)
 				config.load(input);
 		} catch (FileNotFoundException e) {
-			logger.warn("No configuration file was found");
+			logger.warn("No configuration file was found", e);
 		} catch (IOException e) {
-			logger.error("Error loading configuration file");
+			logger.error("Error loading configuration file", e);
 		} finally {
 			setPropertiesFromSystem(config);
 			setDefaultProperties(config);

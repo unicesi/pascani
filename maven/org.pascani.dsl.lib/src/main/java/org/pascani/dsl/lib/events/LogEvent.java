@@ -42,6 +42,10 @@ public class LogEvent extends Event<Serializable> {
 	 * The log level (ERROR, WARN, INFO, ...)
 	 */
 	private final String level;
+	
+	private final String cause;
+	
+	private final String source;
 
 	/**
 	 * The log message
@@ -49,11 +53,13 @@ public class LogEvent extends Event<Serializable> {
 	private final String message;
 
 	public LogEvent(UUID transactionId, final String logger, final String level,
-			final String message) {
+			final String message, final String cause, final String source) {
 		super(transactionId);
 		this.logger = logger;
 		this.level = level;
 		this.message = message;
+		this.cause = cause;
+		this.source = source;
 	}
 
 	@Override public Serializable value() {
@@ -67,6 +73,14 @@ public class LogEvent extends Event<Serializable> {
 	public final String level() {
 		return this.level;
 	}
+	
+	public final String cause() {
+		return this.cause;
+	}
+	
+	public final String source() {
+		return this.source;
+	}
 
 	/**
 	 * Returns the string representation of this event for logging purposes.
@@ -78,7 +92,9 @@ public class LogEvent extends Event<Serializable> {
 		sb.append(this.identifier + "\t");
 		sb.append(this.logger + "\t");
 		sb.append(this.level + "\t");
-		sb.append(this.message + "\t");
+		sb.append("message=" + this.message + "\t");
+		sb.append("cause=" + this.cause + "\t");
+		sb.append("source=" + this.source + "\t");
 		sb.append(value());
 		return sb.toString();
 	}

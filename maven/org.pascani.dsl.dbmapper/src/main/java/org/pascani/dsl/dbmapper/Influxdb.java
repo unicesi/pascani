@@ -104,6 +104,8 @@ public class Influxdb implements DbInterface {
 				.addField("level", e.level())
 				.addField("logger", e.logger())
 				.addField("message", e.value() + "")
+				.addField("cause", e.cause())
+				.addField("source", e.source())
 				.time(e.timestamp(), TimeUnit.MILLISECONDS);
 		return builder.build();
 	}
@@ -114,6 +116,7 @@ public class Influxdb implements DbInterface {
 				.addField("level", Level.CONFIG.getName())
 				.addField("logger", e.value() + "")
 				.addField("message", "Monitor " + e.value() + " has been deployed")
+				.addField("source", e.value() + "")
 				.time(e.timestamp(), TimeUnit.MILLISECONDS);
 		return builder.build();
 	}
@@ -124,6 +127,7 @@ public class Influxdb implements DbInterface {
 				.addField("level", Level.CONFIG.getName())
 				.addField("logger", e.value() + "")
 				.addField("message", "Namespace " + e.value() + " has been deployed")
+				.addField("source", e.value() + "")
 				.time(e.timestamp(), TimeUnit.MILLISECONDS);
 		return builder.build();
 	}

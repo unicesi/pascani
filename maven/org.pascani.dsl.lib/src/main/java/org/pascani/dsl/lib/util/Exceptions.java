@@ -37,7 +37,7 @@ public class Exceptions {
 			Constructor<T> constructor = clazz.getConstructor(parameterTypes);
 			return constructor.newInstance(arguments);
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 			e.printStackTrace();
 		}
 		return null;
@@ -70,7 +70,7 @@ public class Exceptions {
 	public static RuntimeException sneakyThrow(Throwable t) {
 		if (t == null)
 			throw new NullPointerException("t");
-		logger.error(t);
+		logger.error(t.getMessage(), t);
 		Exceptions.<RuntimeException> sneakyThrow0(t);
 		return null;
 	}

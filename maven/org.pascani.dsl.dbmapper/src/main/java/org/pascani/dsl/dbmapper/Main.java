@@ -57,7 +57,7 @@ public class Main implements Runnable {
 			};
 			addShutdownHook(serializers);
 		} catch (Exception e) {
-			logger.error("Error initializing class " + this.getClass().getCanonicalName(), e);
+			logger.error(e.getMessage(), e);
 			e.printStackTrace();
 		}
 	}
