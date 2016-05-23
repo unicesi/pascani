@@ -23,32 +23,33 @@ import org.pascani.dsl.lib.Event;
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public interface DbInterface {
+public class Fakedb implements DbInterface {
 
-	/**
-	 * Stores the given event in the database
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param event
-	 *            The {@link Event} to store
-	 * @throws Exception
-	 *             If something bad happens!
+	 * @see org.pascani.dsl.dbmapper.DbInterface#save(org.pascani.dsl.lib.Event)
 	 */
-	public <T extends Event<?>> void save(T event) throws Exception;
+	@Override public <T extends Event<?>> void save(T event) throws Exception {
+		System.out.println("SAVE (fake database): " + event);
+	}
 
-	/**
-	 * Opens connection with the database
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @throws Exception
-	 *             If something bad happens!
+	 * @see org.pascani.dsl.dbmapper.DbInterface#openConnection()
 	 */
-	public void openConnection() throws Exception;
+	@Override public void openConnection() throws Exception {
+		System.out.println("OPEN CONNECTION (fake database)");
+	}
 
-	/**
-	 * Closes connection with the database
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @throws Exception
-	 *             If something bad happens!
+	 * @see org.pascani.dsl.dbmapper.DbInterface#closeConnection()
 	 */
-	public void closeConnection() throws Exception;
+	@Override public void closeConnection() throws Exception {
+		System.out.println("CLOSE CONNECTION (fake database)");
+	}
 
 }

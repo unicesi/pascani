@@ -106,8 +106,8 @@ public class EventSerializer {
 	 *             If something bad happens!
 	 */
 	public void shutdown() throws Exception {
-		this.db.closeConnection();
 		this.consumer.shutdown();
+		this.db.closeConnection();
 	}
 
 }

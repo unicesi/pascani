@@ -45,12 +45,13 @@ public class Main implements Runnable {
 		Map<String, String> env = PascaniRuntime.getEnvironment();
 		String namespaces = env.get("namespaces_exchange");
 		String monitors = env.get("monitors_exchange");
-		DbInterface db = new Rethinkdb();
+		DbInterface db = new Influxdb();
+		DbInterface fake = new Fakedb();
 		try {
 			EventSerializer[] serializers = {
 				new EventSerializer(namespaces, "#", ChangeEvent.class, db),
-				new EventSerializer(namespaces, "org.pascani.deployment", NewNamespaceEvent.class, db),
-				new EventSerializer(monitors, "org.pascani.deployment", NewMonitorEvent.class, db)
+				new EventSerializer(namespaces, "org.pascani.deployment", NewNamespaceEvent.class, fake),
+				new EventSerializer(monitors, "org.pascani.deployment", NewMonitorEvent.class, fake)
 			};
 			addShutdownHook(serializers);
 		} catch (Exception e) {

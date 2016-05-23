@@ -95,7 +95,7 @@ public class TaggedValue<T extends Serializable> implements Serializable {
 	 *            The tag value
 	 * @return {@code this} tagged value
 	 */
-	public TaggedValue<T> tag(String key, String value) {
+	public TaggedValue<T> with(String key, String value) {
 		this.tags.put(key, value);
 		return this;
 	}

@@ -81,7 +81,7 @@ public class Rethinkdb implements DbInterface {
 	 * 
 	 * @see org.pascani.dsl.dbmapper.DbInterface#save(org.pascani.dsl.lib.Event)
 	 */
-	public <T extends Event<?>> void save(T event) throws Exception {
+	@Override public <T extends Event<?>> void save(T event) throws Exception {
 		// TODO: do not insert duplicate monitors, namespaces, variables & usings
 		long createdAt = new Date().getTime();
 		Map<String, Object> eventData = null;
@@ -154,19 +154,9 @@ public class Rethinkdb implements DbInterface {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.pascani.dsl.dbmapper.DbInterface#retrieve(java.util.Map)
-	 */
-	public <T extends Event<?>> T retrieve(Map<String, String> params)
-			throws Exception {
-		throw new UnsupportedOperationException("Not implemented yet!");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see org.pascani.dsl.dbmapper.DbInterface#openConnection()
 	 */
-	public void openConnection() throws Exception {
+	@Override public void openConnection() throws Exception {
 		this.connection = r.connection().hostname(this.props.get("hostname"))
 				.port(Integer.parseInt(this.props.get("port"))).connect();
 	}
@@ -176,7 +166,7 @@ public class Rethinkdb implements DbInterface {
 	 * 
 	 * @see org.pascani.dsl.dbmapper.DbInterface#closeConnection()
 	 */
-	public void closeConnection() throws Exception {
+	@Override public void closeConnection() throws Exception {
 		this.connection.close();
 	}
 
