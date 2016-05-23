@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.pascani.dsl.lib.Event;
 import org.pascani.dsl.lib.events.ChangeEvent;
 import org.pascani.dsl.lib.events.NewMonitorEvent;
@@ -159,7 +158,7 @@ public class Rethinkdb implements DbInterface {
 	 */
 	public <T extends Event<?>> T retrieve(Map<String, String> params)
 			throws Exception {
-		throw new NotImplementedException("Not implemented yet!");
+		throw new UnsupportedOperationException("Not implemented yet!");
 	}
 
 	/*
