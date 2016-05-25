@@ -85,7 +85,7 @@ public class Rethinkdb implements DbInterface {
 	 */
 	@Override public <T extends Event<?>> void save(T event) throws Exception {
 		// TODO: do not insert duplicate monitors, namespaces, variables & usings
-		long createdAt = new Date().getTime();
+		long timetamp = new Date().getTime();
 		Map<String, Object> eventData = null;
 		String table = null;
 		if (event instanceof ChangeEvent) {
@@ -98,7 +98,7 @@ public class Rethinkdb implements DbInterface {
 			List<Map<String, Object>> maps = new ArrayList<Map<String, Object>>();
 			for (String namespace : e.namespaces()) {
 				Map<String, Object> data = new HashMap<String, Object>();
-				data.put("createdAt", createdAt);
+				data.put("timetamp", timetamp);
 				data.put("monitor", e.value());
 				data.put("namespace", namespace);
 				maps.add(data);
@@ -114,7 +114,7 @@ public class Rethinkdb implements DbInterface {
 			List<Map<String, Object>> maps = new ArrayList<Map<String, Object>>();
 			for (String variable : e.variables()) {
 				Map<String, Object> data = new HashMap<String, Object>();
-				data.put("createdAt", createdAt);
+				data.put("timetamp", timetamp);
 				data.put("name", variable);
 				data.put("namespace", e.value());
 				maps.add(data);
@@ -133,7 +133,7 @@ public class Rethinkdb implements DbInterface {
 	
 	private Map<String, Object> toJson(ChangeEvent e) {
 		Map<String, Object> vars = new HashMap<String, Object>();
-		vars.put("createdAt", e.timestamp());
+		vars.put("timetamp", e.timestamp());
 		vars.put("variable", e.variable());
 		vars.put("value", jsonUtility.toJson(e.value()));
 		return vars;
@@ -141,14 +141,14 @@ public class Rethinkdb implements DbInterface {
 	
 	private Map<String, Object> toJson(NewMonitorEvent e) {
 		Map<String, Object> vars = new HashMap<String, Object>();
-		vars.put("createdAt", e.timestamp());
+		vars.put("timetamp", e.timestamp());
 		vars.put("name", e.value());
 		return vars;
 	}
 	
 	private Map<String, Object> toJson(NewNamespaceEvent e) {
 		Map<String, Object> vars = new HashMap<String, Object>();
-		vars.put("createdAt", e.timestamp());
+		vars.put("timetamp", e.timestamp());
 		vars.put("name", e.value());
 		return vars;
 	}
