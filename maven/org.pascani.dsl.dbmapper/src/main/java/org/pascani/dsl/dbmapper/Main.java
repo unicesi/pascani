@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.osoa.sca.annotations.Scope;
+import org.pascani.dsl.dbmapper.databases.ElasticSearch;
 import org.pascani.dsl.lib.PascaniRuntime;
 import org.pascani.dsl.lib.events.ChangeEvent;
 import org.pascani.dsl.lib.events.LogEvent;
@@ -47,7 +48,7 @@ public class Main implements Runnable {
 		String namespaces = env.get("namespaces_exchange");
 		String monitors = env.get("monitors_exchange");
 		String logs = env.get("logs_exchange");
-		DbInterface db = new Influxdb();
+		DbInterface db = new ElasticSearch();
 		try {
 			EventSerializer[] serializers = {
 				new EventSerializer(namespaces, "#", ChangeEvent.class, db),
