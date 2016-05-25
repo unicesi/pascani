@@ -40,9 +40,9 @@ public class EventSerializer {
 	private final AbstractConsumer consumer;
 
 	/**
-	 * The object mediating communication with the database
+	 * The objects mediating communication with the databases
 	 */
-	private final DbInterface db;
+	private final DbInterface[] dbs;
 
 	/**
 	 * The type of event this listener subscribes to
@@ -69,17 +69,18 @@ public class EventSerializer {
 	 *             if something bad happens! @see {@link RabbitMQConsumer}
 	 */
 	public EventSerializer(final String exchange, final String routingKey,
-			final Class<? extends Event<?>> eventType, final DbInterface db)
+			final Class<? extends Event<?>> eventType, final DbInterface... dbs)
 			throws Exception {
 		PascaniRuntime.getRuntimeInstance(Context.LIBRARY)
 				.registerEventListener(this);
 		final String tag = "dbmapper-" + eventType.getCanonicalName();
 		this.consumer = new RabbitMQConsumer(exchange, routingKey, tag,
 				Context.LIBRARY);
-		this.db = db;
+		this.dbs = dbs;
 		this.eventType = eventType;
 		// Open connection and start consuming events
-		this.db.openConnection();
+		for (final DbInterface db : this.dbs)
+			db.openConnection();
 		this.consumer.start();
 	}
 
@@ -91,10 +92,13 @@ public class EventSerializer {
 	 */
 	@Subscribe public void receiveEvent(final Event<?> event) {
 		if (this.eventType.isInstance(event)) {
-			try {
-				this.db.save(event);
-			} catch (Exception e) {
-				logger.error(e.getMessage(), "Error saving event in the database", e);
+			for (final DbInterface db : this.dbs) {
+				try {
+					db.save(event);
+				} catch (Exception e) {
+					logger.error(e.getMessage(),
+							"Error saving event in the database", e);
+				}
 			}
 		}
 	}
@@ -107,7 +111,8 @@ public class EventSerializer {
 	 */
 	public void shutdown() throws Exception {
 		this.consumer.shutdown();
-		this.db.closeConnection();
+		for (final DbInterface db : this.dbs)
+			db.closeConnection();
 	}
 
 }
