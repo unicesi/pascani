@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani project. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.dbmapper;
+package org.pascani.dsl.dbmapper.databases;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.pascani.dsl.dbmapper.DbInterface;
+import org.pascani.dsl.dbmapper.JsonUtility;
 import org.pascani.dsl.lib.Event;
 import org.pascani.dsl.lib.events.ChangeEvent;
 import org.pascani.dsl.lib.events.NewMonitorEvent;

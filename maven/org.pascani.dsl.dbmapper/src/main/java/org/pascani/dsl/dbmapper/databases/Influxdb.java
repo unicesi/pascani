@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with The Pascani project. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.pascani.dsl.dbmapper;
+package org.pascani.dsl.dbmapper.databases;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -24,12 +24,11 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Point;
 import org.influxdb.dto.Point.Builder;
+import org.pascani.dsl.dbmapper.DbInterface;
 import org.pascani.dsl.lib.Event;
 import org.pascani.dsl.lib.events.ChangeEvent;
 import org.pascani.dsl.lib.events.LogEvent;
@@ -44,11 +43,6 @@ import com.google.common.collect.Range;
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class Influxdb implements DbInterface {
-
-	/**
-	 * The logger
-	 */
-	private static final Logger logger = LogManager.getLogger(Influxdb.class);
 
 	/**
 	 * The Influxdb configuration properties
@@ -83,7 +77,7 @@ public class Influxdb implements DbInterface {
 	 */
 	@Override public <T extends Event<?>> void save(T event) throws Exception {
 		Point point = null;
-		
+
 		if (event instanceof ChangeEvent)
 			point = handle((ChangeEvent) event);
 		else if (event instanceof NewMonitorEvent)
@@ -92,46 +86,43 @@ public class Influxdb implements DbInterface {
 			point = handle((NewNamespaceEvent) event);
 		else if (event instanceof LogEvent)
 			point = handle((LogEvent) event);
-		
+
 		if (point != null) {
 			this.influxDB.write(this.props.get("database"), "default", point);
 		}
 	}
-	
+
 	private Point handle(LogEvent e) {
-		Builder builder = Point.measurement("log")
-				.tag("type", "log")
-				.addField("level", e.level())
-				.addField("logger", e.logger())
+		Builder builder = Point.measurement("log").tag("type", "log")
+				.addField("level", e.level()).addField("logger", e.logger())
 				.addField("message", e.value() + "")
-				.addField("cause", e.cause())
-				.addField("source", e.source())
+				.addField("cause", e.cause()).addField("source", e.source())
 				.time(e.timestamp(), TimeUnit.MILLISECONDS);
 		return builder.build();
 	}
-	
+
 	private Point handle(NewMonitorEvent e) {
-		Builder builder = Point.measurement("log")
-				.tag("type", "monitor")
+		Builder builder = Point.measurement("log").tag("type", "monitor")
 				.addField("level", Level.CONFIG.getName())
 				.addField("logger", e.value() + "")
-				.addField("message", "Monitor " + e.value() + " has been deployed")
+				.addField("message",
+						"Monitor " + e.value() + " has been deployed")
 				.addField("source", e.value() + "")
 				.time(e.timestamp(), TimeUnit.MILLISECONDS);
 		return builder.build();
 	}
-	
+
 	private Point handle(NewNamespaceEvent e) {
-		Builder builder = Point.measurement("log")
-				.tag("type", "namespace")
+		Builder builder = Point.measurement("log").tag("type", "namespace")
 				.addField("level", Level.CONFIG.getName())
 				.addField("logger", e.value() + "")
-				.addField("message", "Namespace " + e.value() + " has been deployed")
+				.addField("message",
+						"Namespace " + e.value() + " has been deployed")
 				.addField("source", e.value() + "")
 				.time(e.timestamp(), TimeUnit.MILLISECONDS);
 		return builder.build();
 	}
-	
+
 	private Point handle(ChangeEvent e) {
 		Point point = null;
 		TaggedValue<Serializable> taggedValue = TaggedValue
@@ -150,11 +141,11 @@ public class Influxdb implements DbInterface {
 				point = makeRequestString(e, taggedValue.value(),
 						taggedValue.tags());
 			} else {
-				logger.warn(
+				System.out.println(
 						"Not supported type " + clazz.getCanonicalName());
 			}
 		} else {
-			logger.warn("Not supported type "
+			System.out.println("Not supported type "
 					+ taggedValue.value().getClass().getCanonicalName());
 		}
 		return point;
