@@ -211,8 +211,11 @@ public class CSVExport implements DbInterface {
 		data.put("variable", e.variable());
 		if (value instanceof Range<?>) {
 			Range<?> range = (Range<?>) value;
-			data.put("start", (Number) range.lowerEndpoint() + "");
-			data.put("end", (Number) range.upperEndpoint() + "");
+			Number start = (Number) range.lowerEndpoint();
+			Number end = (Number) range.upperEndpoint();
+			data.put("start", start + "");
+			data.put("end", end + "");
+			data.put("value", (end.doubleValue() - start.doubleValue()) + "");
 		} else if (value instanceof Number) {
 			data.put("value", (Number) value + "");
 		} else if (value instanceof Boolean) {

@@ -44,7 +44,7 @@ import com.mashape.unirest.http.Unirest;
 public class ElasticSearch implements DbInterface {
 
 	/**
-	 * The Influxdb configuration properties
+	 * The ElasticSearch configuration properties
 	 */
 	private final Map<String, String> props;
 
@@ -160,11 +160,15 @@ public class ElasticSearch implements DbInterface {
 	private Map<String, String> toData(ChangeEvent e, Serializable value,
 			Map<String, String> tags) {
 		Map<String, String> data = new HashMap<String, String>();
+		renameTags(tags, "value", "start", "end", "timestamp");
 		data.putAll(tags);
 		if (value instanceof Range<?>) {
 			Range<?> range = (Range<?>) value;
-			data.put("start", (Number) range.lowerEndpoint() + "");
-			data.put("end", (Number) range.upperEndpoint() + "");
+			Number start = (Number) range.lowerEndpoint();
+			Number end = (Number) range.upperEndpoint();
+			data.put("start", start + "");
+			data.put("end", end + "");
+			data.put("value", (end.doubleValue() - start.doubleValue()) + "");
 		} else if (value instanceof Number) {
 			data.put("value", (Number) value + "");
 		} else if (value instanceof Boolean) {
@@ -174,6 +178,19 @@ public class ElasticSearch implements DbInterface {
 		}
 		data.put("timestamp", e.timestamp() + "");
 		return data;
+	}
+	
+	private void renameTags(Map<String, String> tags, String... reserved) {
+		for (String key : reserved) {
+			if (tags.containsKey(key)) {
+				String value = tags.remove(key);
+				int i = 1;
+				String proposal = key + i;
+				while (tags.containsKey(proposal))
+					proposal = key + ++i;
+				tags.put(proposal, value);
+			}
+		}
 	}
 
 	/*

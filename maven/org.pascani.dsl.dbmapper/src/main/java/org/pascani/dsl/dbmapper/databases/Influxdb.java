@@ -157,8 +157,11 @@ public class Influxdb implements DbInterface {
 				.time(e.timestamp(), TimeUnit.MILLISECONDS);
 		if (value instanceof Range<?>) {
 			Range<?> range = (Range<?>) value;
-			point.addField("start", (Number) range.lowerEndpoint());
-			point.addField("end", (Number) range.upperEndpoint());
+			Number start = (Number) range.lowerEndpoint();
+			Number end = (Number) range.upperEndpoint();
+			point.addField("start", start + "");
+			point.addField("end", end + "");
+			point.addField("value", (end.doubleValue() - start.doubleValue()) + "");
 		} else if (value instanceof Number) {
 			point.addField("value", (Number) value);
 		} else if (value instanceof Boolean) {

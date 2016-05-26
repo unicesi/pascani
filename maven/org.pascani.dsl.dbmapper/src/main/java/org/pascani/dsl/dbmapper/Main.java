@@ -23,7 +23,8 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.osoa.sca.annotations.Scope;
-import org.pascani.dsl.dbmapper.databases.CSVExport;
+import org.pascani.dsl.dbmapper.databases.ElasticSearch;
+import org.pascani.dsl.dbmapper.databases.FNordMetric;
 import org.pascani.dsl.lib.PascaniRuntime;
 import org.pascani.dsl.lib.events.ChangeEvent;
 import org.pascani.dsl.lib.events.LogEvent;
@@ -48,13 +49,13 @@ public class Main implements Runnable {
 		String namespaces = env.get("namespaces_exchange");
 		String monitors = env.get("monitors_exchange");
 		String logs = env.get("logs_exchange");
-		DbInterface[] dbs = { new CSVExport("./csv", 1) };
+		DbInterface[] dbs = { new ElasticSearch(), new FNordMetric() };
 		try {
 			EventSerializer[] serializers = {
 				new EventSerializer(namespaces, "#", ChangeEvent.class, dbs),
-				new EventSerializer(namespaces, "org.pascani.deployment", NewNamespaceEvent.class, dbs),
-				new EventSerializer(monitors, "org.pascani.deployment", NewMonitorEvent.class, dbs),
-				new EventSerializer(logs, "", LogEvent.class, dbs)
+				new EventSerializer(namespaces, "org.pascani.deployment", NewNamespaceEvent.class, dbs[0]),
+				new EventSerializer(monitors, "org.pascani.deployment", NewMonitorEvent.class, dbs[0]),
+				new EventSerializer(logs, "", LogEvent.class, dbs[0])
 			};
 			addShutdownHook(serializers);
 		} catch (Exception e) {
