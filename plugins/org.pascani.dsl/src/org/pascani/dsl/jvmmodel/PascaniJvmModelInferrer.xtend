@@ -461,6 +461,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 									bindingUri = «typeRef(FrascatiUtils)».DEFAULT_BINDING_URI;
 								final String intentName = «typeRef(PascaniUtils)».intentName(this.«names.get("type")»);
 								«typeRef(PascaniUtils)».newIntent(«names.get("emitter")», routingKey, intentName, bindingUri);
+								«prefix»addShutdownHook(routingKey);
 								«typeRef(PascaniUtils)».setProbeProperty(«names.get("emitter")», routingKey, "routingkey",
 									routingKey, bindingUri);
 								if (useProbe) {
@@ -478,23 +479,39 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						this.«names.get("consumer")» = initializeConsumer(context, routingKey, consumerTag«IF isChangeEvent», variable«ENDIF»);
 						this.«names.get("consumer")».start();
 					} catch(Exception e) {
-						«org.pascani.dsl.lib.util.Exceptions.canonicalName».sneakyThrow(e);
+						«typeRef(org.pascani.dsl.lib.util.Exceptions)».sneakyThrow(e);
 					}
 				'''
 			]
+			if (!isProxy && !isChangeEvent) {
+				members += e.emitter.toMethod(prefix + "addShutdownHook", typeRef(void)) [
+					parameters += e.emitter.toParameter("routingKey", typeRef(String))
+					body = '''
+						Runtime.getRuntime().addShutdownHook(new Thread() {
+							public void run() {
+								try {
+									«PascaniUtils».removeProbe(«names.get("emitter")», routingKey, bindingUri);
+								} catch (Exception e) {
+									«typeRef(org.pascani.dsl.lib.util.Exceptions)».sneakyThrow(e);
+								}
+							}
+						});
+					'''
+				]	
+			}
 			members += e.emitter.toMethod("getType", eventClassRef) [
 				annotations += annotationRef(Override)
 				body = '''return this.«names.get("type")»;'''
 			]
 			
 			members += e.emitter.toMethod("getProbe", typeRef(ProbeProxy)) [
-					annotations += annotationRef(Override)
-					body = '''return «IF(isChangeEvent)»null«ELSE»this.«names.get("probe")»«ENDIF»;'''
+				annotations += annotationRef(Override)
+				body = '''return «IF(isChangeEvent)»null«ELSE»this.«names.get("probe")»«ENDIF»;'''
 			]
 			
 			members += e.emitter.toMethod("getConsumer", typeRef(AbstractConsumer)) [
-					annotations += annotationRef(Override)
-					body = '''return this.«names.get("consumer")»;'''
+				annotations += annotationRef(Override)
+				body = '''return this.«names.get("consumer")»;'''
 			]
 
 			if (e.emitter.specifier != null) {
@@ -504,7 +521,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					code.add(parseSpecifier(names.get("changeEvent"), e.emitter.specifier, fields))
 					superTypes += specifierTypeRef
 					members += fields
-					
 					members += e.emitter.specifier.toMethod("apply", typeRef(Boolean)) [
 						parameters += e.emitter.specifier.toParameter(names.get("changeEvent"), typeRef(ChangeEvent))
 						body = '''return «code.get(0)»;'''
