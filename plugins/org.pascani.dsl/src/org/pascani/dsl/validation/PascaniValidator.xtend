@@ -29,13 +29,10 @@ import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.validation.Check
-import org.eclipse.xtext.xbase.XAbstractFeatureCall
-import org.eclipse.xtext.xbase.XAssignment
 import org.eclipse.xtext.xbase.XBlockExpression
-import org.eclipse.xtext.xbase.XVariableDeclaration
-import org.eclipse.xtext.xbase.XbasePackage
 import org.eclipse.xtext.xbase.typesystem.references.LightweightTypeReference
 import org.pascani.dsl.lib.util.CronConstant
+import org.pascani.dsl.pascani.AndEventSpecifier
 import org.pascani.dsl.pascani.CronElement
 import org.pascani.dsl.pascani.CronElementList
 import org.pascani.dsl.pascani.CronExpression
@@ -51,12 +48,12 @@ import org.pascani.dsl.pascani.Model
 import org.pascani.dsl.pascani.Monitor
 import org.pascani.dsl.pascani.Namespace
 import org.pascani.dsl.pascani.NthCronElement
+import org.pascani.dsl.pascani.OrEventSpecifier
 import org.pascani.dsl.pascani.PascaniPackage
 import org.pascani.dsl.pascani.RangeCronElement
 import org.pascani.dsl.pascani.TerminalCronElement
 import org.pascani.dsl.pascani.TypeDeclaration
-import org.pascani.dsl.pascani.AndEventSpecifier
-import org.pascani.dsl.pascani.OrEventSpecifier
+import org.pascani.dsl.pascani.VariableDeclaration
 
 /**
  * This class contains custom validation rules. 
@@ -93,7 +90,6 @@ class PascaniValidator extends AbstractPascaniValidator {
 
 	override boolean isLocallyUsed(EObject target, EObject containerToFindUsage) {
 		var isUsed = false;
-
 		if (containerToFindUsage instanceof XBlockExpression) {
 			if (containerToFindUsage.eContainer instanceof Namespace) {
 				/*
@@ -101,80 +97,9 @@ class PascaniValidator extends AbstractPascaniValidator {
 				 * usage is not checked
 				 */
 				isUsed = true
-			} else if (containerToFindUsage.eContainer instanceof Monitor) {
-				val expressions = containerToFindUsage.expressions.map [ expression |
-					if (expression instanceof Handler) {
-						(expression.body as XBlockExpression).expressions
-					} else if(expression instanceof XBlockExpression) {
-						expression.expressions
-					} else {
-						newArrayList(expression)
-					}
-				].flatten.toList.filter[ expression |
-					!expression.equals(target)
-				]
-				isUsed = expressions.exists [ expression |
-					switch (expression) {
-						XAssignment: isLocallyUsed(target, expression)
-						XAbstractFeatureCall: isLocallyUsed(target, expression)
-						XVariableDeclaration: isLocallyUsed(target, expression)
-						Event: isLocallyUsed(target, expression)
-						default: false // TODO: cover more cases
-					}
-				]
 			}
 		}
-
 		return isUsed || super.isLocallyUsed(target, containerToFindUsage)
-	}
-
-	def boolean isLocallyUsed(EObject target, Event event) {
-		// event x raised on type of <emitter> using <probe>
-		var isUsed = if (event.emitter != null) {
-			isLocallyUsed(target, event.emitter.emitter)
-		} else {
-			false
-		}
-		return isUsed
-	}
-	
-	def boolean isLocallyUsed(EObject target, XAssignment expression) {
-		val feature = expression.feature.qualifiedName
-		val isUsed = target.fullyQualifiedName.toString.equals(feature)
-
-		return isUsed
-	}
-
-	def boolean isLocallyUsed(EObject target, XVariableDeclaration expression) {
-		val right = expression.right
-		var isUsed = false
-
-		switch (right) {
-			// var|val v = target.method(...)
-			// var|val v = method(..., target, ...)
-			XAbstractFeatureCall: isUsed = isLocallyUsed(target, right)
-		}
-
-		return isUsed
-	}
-
-	def boolean isLocallyUsed(EObject target, XAbstractFeatureCall expression) {
-		val String feature = expression.feature.qualifiedName
-		val String simpleName = expression.actualReceiver.toString
-
-		// target.method(...)
-		var isUsed = feature.equals(target.fullyQualifiedName.toString)
-		isUsed = isUsed || simpleName.equals(target.fullyQualifiedName.lastSegment)
-
-		// object.method(..., target, ...)
-		if (!isUsed) {
-			for (e : expression.actualArguments.filter(XAbstractFeatureCall)) {
-				if (!isUsed)
-					isUsed = isLocallyUsed(target, e)
-			}
-		}
-
-		return isUsed
 	}
 
 	def fromURItoFQN(URI resourceURI) {
@@ -241,7 +166,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 			XBlockExpression: {
 				val duplicates = parent.expressions.filter [ e |
 					switch (e) {
-						XVariableDeclaration: e.name.equals(namespace.name)
+						VariableDeclaration: e.name.equals(namespace.name)
 						Namespace: e.name.equals(namespace.name) && !e.equals(namespace)
 						default: false
 					}
@@ -262,7 +187,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 		val parent = event.eContainer.eContainer as Monitor
 		var duplicates = parent.body.expressions.filter [ e |
 			switch (e) {
-				XVariableDeclaration: e.name.equals(event.name)
+				VariableDeclaration: e.name.equals(event.name)
 				Event: e.name.equals(event.name) && !e.equals(event)
 				default: false
 			}
@@ -332,13 +257,13 @@ class PascaniValidator extends AbstractPascaniValidator {
 	}
 
 	@Check
-	def checkPascaniVariableDeclaration(XVariableDeclaration varDecl) {
+	def checkPascaniVariableDeclaration(VariableDeclaration varDecl) {
 		val parent = varDecl.eContainer.eContainer // the first parent is a XBlockExpression
 		switch (parent) {
 			Monitor: {
 				val duplicateVars = parent.body.expressions.filter [ v |
 					switch (v) {
-						XVariableDeclaration case v.name.equals(varDecl.name): {
+						VariableDeclaration case v.name.equals(varDecl.name): {
 							return !v.equals(varDecl)
 						}
 						default:
@@ -348,11 +273,11 @@ class PascaniValidator extends AbstractPascaniValidator {
 				val duplicateUsings = parent.usings.filter[n|n.name.equals(varDecl.name)]
 				if (!duplicateUsings.isEmpty) {
 					error("Local variable " + varDecl.name + " duplicates namespace " +
-						duplicateUsings.get(0).fullyQualifiedName, XbasePackage.Literals.XVARIABLE_DECLARATION__NAME,
+						duplicateUsings.get(0).fullyQualifiedName, PascaniPackage.Literals.VARIABLE_DECLARATION__NAME,
 						DUPLICATE_LOCAL_VARIABLE)
 				}
 				if (!duplicateVars.isEmpty) {
-					error("Duplicate local variable " + varDecl.name, XbasePackage.Literals.XVARIABLE_DECLARATION__NAME,
+					error("Duplicate local variable " + varDecl.name, PascaniPackage.Literals.VARIABLE_DECLARATION__NAME,
 						DUPLICATE_LOCAL_VARIABLE)
 				}
 			}
@@ -365,13 +290,13 @@ class PascaniValidator extends AbstractPascaniValidator {
 				if (!type.isPrimitive && type.getSuperType(Serializable) == null) {
 					error(
 						"Variables must be serializable",
-						XbasePackage.Literals.XVARIABLE_DECLARATION__TYPE,
+						PascaniPackage.Literals.VARIABLE_DECLARATION__TYPE,
 						NOT_SERIALIZABLE_TYPE
 					);
 				}
 				if (varDecl.type == null) {
 					error("Missing variable type", 
-						XbasePackage.Literals.XVARIABLE_DECLARATION__TYPE, MISSING_TYPE)
+						PascaniPackage.Literals.VARIABLE_DECLARATION__TYPE, MISSING_TYPE)
 				}
 			}
 		}

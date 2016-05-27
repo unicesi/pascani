@@ -34,7 +34,6 @@ import org.eclipse.xtext.common.types.JvmVisibility
 import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.XAbstractFeatureCall
 import org.eclipse.xtext.xbase.XExpression
-import org.eclipse.xtext.xbase.XVariableDeclaration
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
@@ -75,6 +74,7 @@ import org.pascani.dsl.lib.events.NewMonitorEvent
 import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQProducer
 import com.google.common.collect.Lists
 import org.pascani.dsl.lib.events.NewNamespaceEvent
+import org.pascani.dsl.pascani.VariableDeclaration
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -154,7 +154,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			
 			for (e : monitor.body.expressions) {
 				switch (e) {
-					XVariableDeclaration: {
+					VariableDeclaration: {
 						fields += e.toField(e.name, e.type) [
 							documentation = e.documentation
 							initializer = e.right
@@ -535,7 +535,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 	def JvmGenericType createClass(Namespace namespace, boolean isPreIndexingPhase, IJvmDeclaredTypeAcceptor acceptor) {
 		val namespaceImpl = namespace.toClass(namespace.fullyQualifiedName + "Namespace") [
 			if (!isPreIndexingPhase) {
-				val List<XVariableDeclaration> declarations = getVariableDeclarations(namespace)
+				val List<VariableDeclaration> declarations = getVariableDeclarations(namespace)
 				// More information on the Scope annotation: http://mail-archive.ow2.org/frascati/2011-02/msg00001.html
 				annotations += annotationRef(Scope, "COMPOSITE")
 				superTypes += typeRef(BasicNamespace)
@@ -583,14 +583,14 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		return namespaceImpl
 	}
 
-	def List<XVariableDeclaration> getVariableDeclarations(TypeDeclaration typeDecl) {
-		val List<XVariableDeclaration> variables = new ArrayList<XVariableDeclaration>()
+	def List<VariableDeclaration> getVariableDeclarations(TypeDeclaration typeDecl) {
+		val List<VariableDeclaration> variables = new ArrayList<VariableDeclaration>()
 		for (e : typeDecl.body.expressions) {
 			switch (e) {
 				TypeDeclaration: {
 					variables.addAll(getVariableDeclarations(e))
 				}
-				XVariableDeclaration: {
+				VariableDeclaration: {
 					variables.add(e)
 				}
 			}
@@ -623,7 +623,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				}
 				for (e : namespace.body.expressions) {
 					switch (e) {
-						XVariableDeclaration case e.name != null: {
+						VariableDeclaration case e.name != null: {
 							val name = e.fullyQualifiedName.toString
 							val type = e.type // ?: inferredType(e.right)
 							val cast = if(type != null) "(" + type.simpleName + ")"

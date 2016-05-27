@@ -54,7 +54,7 @@ MonitorBlockExpression returns XBlockExpression
 	;
 
 InternalMonitorDeclaration returns XExpression
-	:	XVariableDeclaration ->';'?
+	:	VariableDeclaration ->';'?
 	|	ConfigBlockExpression
 	|	EventDeclaration
 	|	HandlerDeclaration
@@ -69,8 +69,13 @@ NamespaceBlockExpression returns XBlockExpression
 	;
 
 InternalNamespaceDeclaration returns XExpression
-	:	XVariableDeclaration ->';'?
+	:	VariableDeclaration ->';'?
 	|	NamespaceDeclaration
+	;
+
+VariableDeclaration returns XExpression
+	:	{VariableDeclaration}
+		(writeable ?= 'var'|'val') (=> (type = JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)?
 	;
 
 ConfigBlockExpression returns XBlockExpression
