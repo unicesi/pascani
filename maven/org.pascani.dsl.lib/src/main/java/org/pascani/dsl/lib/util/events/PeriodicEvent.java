@@ -58,6 +58,7 @@ public class PeriodicEvent extends ManagedEvent {
 		return this.expression;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void updateExpression(CronExpression expression) {
 		List<Class<? extends Job>> tmp = this.classes;
 		this.classes = new ArrayList<Class<? extends Job>>();
@@ -67,29 +68,33 @@ public class PeriodicEvent extends ManagedEvent {
 			subscribe(clazz);
 		}
 	}
-
-	public void subscribe(final Class<? extends Job> jobClass) {
-		if (!this.classes.contains(jobClass)) {
-			this.classes.add(jobClass);
-			JobDataMap data = new JobDataMap();
-			data.put("expression", getExpression().getCronExpression());
+	
+	public void subscribe(final Class<? extends Job>... jobClasses) {
+		for (Class<? extends Job> jobClass : jobClasses) {
+			if (!this.classes.contains(jobClass)) {
+				this.classes.add(jobClass);
+				JobDataMap data = new JobDataMap();
+				data.put("expression", getExpression().getCronExpression());
+				try {
+					JobScheduler.schedule(jobClass, new CronExpression(
+							getExpression().getCronExpression()), data);
+				} catch (Exception e) {
+					Exceptions.sneakyThrow(e);
+				}
+			}
+		}
+	}
+	
+	public boolean unsubscribe(final Class<? extends Job>... jobClasses) {
+		boolean unsubscribed = false;
+		for (Class<? extends Job> jobClass : jobClasses) {
 			try {
-				JobScheduler.schedule(jobClass,
-						new CronExpression(getExpression().getCronExpression()),
-						data);
+				unsubscribed &= JobScheduler.unschedule(jobClass);
 			} catch (Exception e) {
 				Exceptions.sneakyThrow(e);
 			}
 		}
-	}
-
-	public boolean unsubscribe(final Class<? extends Job> jobClass) {
-		try {
-			return JobScheduler.unschedule(jobClass);
-		} catch (Exception e) {
-			Exceptions.sneakyThrow(e);
-		}
-		return false;
+		return unsubscribed;
 	}
 
 	/*
@@ -97,6 +102,7 @@ public class PeriodicEvent extends ManagedEvent {
 	 * 
 	 * @see pascani.lang.util.dsl.ManagedEvent#pause()
 	 */
+	@SuppressWarnings("unchecked")
 	@Override public synchronized void pause() {
 		if (isPaused())
 			return;
@@ -113,6 +119,7 @@ public class PeriodicEvent extends ManagedEvent {
 	 * 
 	 * @see pascani.lang.util.dsl.ManagedEvent#resume()
 	 */
+	@SuppressWarnings("unchecked")
 	@Override public synchronized void resume() {
 		if (!isPaused())
 			return;

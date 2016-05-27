@@ -83,12 +83,14 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 		};
 	}
 
-	public void subscribe(final EventObserver<T> eventObserver) {
-		addObserver(eventObserver);
+	public void subscribe(final EventObserver<T>... eventObservers) {
+		for (EventObserver<T> eventObserver : eventObservers)
+			addObserver(eventObserver);
 	}
 
-	public void unsubscribe(final EventObserver<T> eventObserver) {
-		deleteObserver(eventObserver);
+	public void unsubscribe(final EventObserver<T>... eventObservers) {
+		for (EventObserver<T> eventObserver : eventObservers)
+			deleteObserver(eventObserver);
 	}
 	
 	protected AbstractConsumer initializeConsumer(final Context context,
