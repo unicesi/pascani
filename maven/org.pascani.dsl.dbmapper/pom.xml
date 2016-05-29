@@ -27,7 +27,7 @@
 	</parent>
 	
 	<artifactId>org.pascani.dsl.dbmapper</artifactId>
-	<name>Namespace DB Mapper</name>
+	<name>Pascani Datastore Mapper</name>
 	
 	<properties>
 		<jar.name>${project.artifactId}-${project.version}</jar.name>
