@@ -22,6 +22,7 @@ import com.google.inject.Inject
 import java.io.Serializable
 import java.util.ArrayList
 import java.util.Arrays
+import java.util.Collections
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
@@ -42,7 +43,7 @@ import org.pascani.dsl.pascani.EventSpecifier
 import org.pascani.dsl.pascani.EventType
 import org.pascani.dsl.pascani.Handler
 import org.pascani.dsl.pascani.ImportEventDeclaration
-import org.pascani.dsl.pascani.ImportEventsSection
+import org.pascani.dsl.pascani.ImportNamespaceDeclaration
 import org.pascani.dsl.pascani.IncrementCronElement
 import org.pascani.dsl.pascani.Model
 import org.pascani.dsl.pascani.Monitor
@@ -100,6 +101,25 @@ class PascaniValidator extends AbstractPascaniValidator {
 			}
 		}
 		return isUsed || super.isLocallyUsed(target, containerToFindUsage)
+	}
+	
+	def importedEvents(Monitor monitor) {
+		if (monitor.extensions != null) {
+			return monitor.extensions.declarations
+				.filter(ImportEventDeclaration)
+				.map[d|d.events]
+				.flatten
+		}
+		return Collections.EMPTY_LIST
+	}
+	
+	def usedNamespaces(Monitor monitor) {
+		if (monitor.extensions != null) {
+			return monitor.extensions.declarations
+				.filter(ImportNamespaceDeclaration)
+				.map[d|d.namespace]
+		}
+		return Collections.EMPTY_LIST
 	}
 
 	def fromURItoFQN(URI resourceURI) {
@@ -184,7 +204,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 	 */
 	@Check
 	def checkEventNameIsUnique(Event event) {
-		val parent = event.eContainer.eContainer as Monitor
+		val parent = (EcoreUtil2.getRootContainer(event) as Model).typeDeclaration as Monitor
 		var duplicates = parent.body.expressions.filter [ e |
 			switch (e) {
 				VariableDeclaration: e.name.equals(event.name)
@@ -192,7 +212,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 				default: false
 			}
 		]
-		val importedEvents = parent.eventImports.importDeclarations.map[d|d.events].flatten.filter [ e |
+		val importedEvents = parent.importedEvents.filter [ e |
 			e.name.equals(event.name)
 		]
 		if (!duplicates.isEmpty || !importedEvents.isEmpty) {
@@ -207,8 +227,8 @@ class PascaniValidator extends AbstractPascaniValidator {
 	@Check
 	def checkEventInImportDeclaration(ImportEventDeclaration importDeclaration) {
 		// Event name is unique
-		val importSection = importDeclaration.eContainer as ImportEventsSection
-		val events = importSection.importDeclarations.toList.map[d|d.events].flatten
+		val monitor = (EcoreUtil2.getRootContainer(importDeclaration) as Model).typeDeclaration as Monitor
+		val events = monitor.importedEvents
 		for (event : importDeclaration.events) {
 			val count = events.filter[e|e.name.equals(event.name)].size
 			if (count > 1) {
@@ -270,7 +290,7 @@ class PascaniValidator extends AbstractPascaniValidator {
 							return false
 					}
 				]
-				val duplicateUsings = parent.usings.filter[n|n.name.equals(varDecl.name)]
+				val duplicateUsings = parent.usedNamespaces.filter[n|n.name.equals(varDecl.name)]
 				if (!duplicateUsings.isEmpty) {
 					error("Local variable " + varDecl.name + " duplicates namespace " +
 						duplicateUsings.get(0).fullyQualifiedName, PascaniPackage.Literals.VARIABLE_DECLARATION__NAME,

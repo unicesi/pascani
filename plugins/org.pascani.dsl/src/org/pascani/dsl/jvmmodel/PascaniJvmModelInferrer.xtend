@@ -75,6 +75,9 @@ import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQProducer
 import com.google.common.collect.Lists
 import org.pascani.dsl.lib.events.NewNamespaceEvent
 import org.pascani.dsl.pascani.VariableDeclaration
+import org.pascani.dsl.pascani.ImportNamespaceDeclaration
+import java.util.Collections
+import org.pascani.dsl.pascani.ImportEventDeclaration
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -105,6 +108,23 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		return typeRef("org.pascani.dsl.lib.events." + type.toString.toLowerCase.toFirstUpper + "Event")
 	}
 	
+	def eventImports(Monitor monitor) {
+		if (monitor.extensions != null) {
+			return monitor.extensions.declarations
+				.filter(ImportEventDeclaration)
+		}
+		return Collections.EMPTY_LIST
+	}
+	
+	def usedNamespaces(Monitor monitor) {
+		if (monitor.extensions != null) {
+			return monitor.extensions.declarations
+				.filter(ImportNamespaceDeclaration)
+				.map[d|d.namespace]
+		}
+		return Collections.EMPTY_LIST
+	}
+	
 	def void createClass(Monitor monitor, boolean isPreIndexingPhase, IJvmDeclaredTypeAcceptor acceptor) {
 		val monitorImpl = monitor.toClass(monitor.fullyQualifiedName)
 		if (monitorImpl == null)
@@ -126,28 +146,24 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			annotations += annotationRef(Scope, "COMPOSITE")
 			superTypes += typeRef(org.pascani.dsl.lib.infrastructure.Monitor)
 			
-			if (monitor.usings != null) {
-				for (namespace : monitor.usings.filter[n|n.name != null]) {
-					fields += namespace.toField(namespace.name, typeRef(namespace.fullyQualifiedName.toString)) [
-						^static = true
-					]
-				}
+			for (namespace : monitor.usedNamespaces.filter[n|n.name != null]) {
+				fields += namespace.toField(namespace.name, typeRef(namespace.fullyQualifiedName.toString)) [
+					^static = true
+				]
 			}
 			
-			if (monitor.eventImports != null) {
-				for (^import : monitor.eventImports.importDeclarations) {
-					for (event : ^import.events) {
-						if (event != null && event.emitter != null) {
-							val eventTypeRef = event.emitter.eventType.toEventType
-							val innerClass = event.createNonPeriodicClass(^import.monitor, eventTypeRef, true)
-							nestedTypes += innerClass
-							fields += event.toField(event.name, typeRef(NonPeriodicEvent, eventTypeRef)) [
-								^final = true
-								^static = true
-								initializer = '''new «innerClass.simpleName»()'''
-							]
-							events += event	
-						}
+			for (^import : monitor.eventImports) {
+				for (event : ^import.events) {
+					if (event != null && event.emitter != null) {
+						val eventTypeRef = event.emitter.eventType.toEventType
+						val innerClass = event.createNonPeriodicClass(^import.monitor, eventTypeRef, true)
+						nestedTypes += innerClass
+						fields += event.toField(event.name, typeRef(NonPeriodicEvent, eventTypeRef)) [
+							^final = true
+							^static = true
+							initializer = '''new «innerClass.simpleName»()'''
+						]
+						events += event	
 					}
 				}
 			}
@@ -235,7 +251,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				'''
 			]
 			methods += monitor.toMethod("run", typeRef(void)) [
-				val usings = monitor.usings.map[u|'''"«u.fullyQualifiedName»"'''].join(", ")
+				val usings = monitor.usedNamespaces.map[u|'''"«u.fullyQualifiedName»"'''].join(", ")
 				val periodicEvents = events.filter[e|e.periodical].map[e|'''"«e.name»"'''].join(", ")
 				val nonPeriodicEvents = events.filter[e|!e.periodical].map[e|'''"«e.name»"'''].join(", ")
 				body = '''
@@ -259,11 +275,9 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			methods += monitor.toMethod("initialize", typeRef(void)) [
 				visibility = JvmVisibility::PRIVATE
 				body = '''
-					«IF monitor.usings != null»
-						«FOR namespace : monitor.usings»
-							this.«namespace.name» = new «namespace.name»();
-						«ENDFOR»
-					«ENDIF»
+					«FOR namespace : monitor.usedNamespaces»
+						this.«namespace.name» = new «namespace.name»();
+					«ENDFOR»
 					«FOR event : events.filter[e|e.emitter.cronExpression != null]»
 						super.periodicEvents.put("«event.name»", this.«event.name»);
 					«ENDFOR»

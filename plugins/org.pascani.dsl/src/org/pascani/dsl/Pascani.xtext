@@ -35,18 +35,27 @@ TypeDeclaration
     ;
     
 MonitorDeclaration returns Monitor
-	:	eventImports = ImportEventsSection?
+	:	extensions = ExtensionSection?
 		'monitor' name = ValidID 
-		('using' usings += [Namespace | QualifiedName] (',' usings += [Namespace | QualifiedName])*)?  
 		body = MonitorBlockExpression
 	;
 
-ImportEventsSection
-	:	importDeclarations += ImportEventDeclaration+
+ExtensionSection
+	:	declarations += ExtensionDeclaration+
+	;
+
+ExtensionDeclaration
+	:	ImportEventDeclaration
+	|	ImportNamespaceDeclaration
 	;
 	
 ImportEventDeclaration
-	:	'from' monitor = [Monitor | QualifiedName] 'import' events += [Event | ID] (',' events += [Event | ID])*  ->';'?
+	:	'from' monitor = [Monitor | QualifiedName] 
+		'import' events += [Event | ID] (',' events += [Event | ID])* ->';'?
+	;
+
+ImportNamespaceDeclaration
+	:	'using' namespace = [Namespace | QualifiedName] ->';'?
 	;
 	
 MonitorBlockExpression returns XBlockExpression
