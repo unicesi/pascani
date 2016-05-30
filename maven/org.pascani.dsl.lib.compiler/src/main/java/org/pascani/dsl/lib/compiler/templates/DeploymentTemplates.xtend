@@ -123,7 +123,7 @@ class DeploymentTemplates {
 						cmd 'rm -rf «"«"»root»/«"«"»project»/source'
 			
 					compilation: prerequisites;
-						scp '«"«"»projectPath»/pascani-gen' to '«"«"»root»/«"«"»project»/source'
+						scp '«"«"»projectPath»/pascani' to '«"«"»root»/«"«"»project»/source'
 						compile '«"«"»project»/source' '«"«"»project»/«"«"»project»' -classpath classpath
 				}
 			}

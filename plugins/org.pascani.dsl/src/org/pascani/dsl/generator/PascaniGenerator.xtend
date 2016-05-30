@@ -80,7 +80,8 @@ class PascaniGenerator implements IGenerator {
 	override doGenerate(Resource resource, IFileSystemAccess fsa) {
 		// FIXME: This is Eclipse-dependent (dependency: org.eclipse.core.resources)
 		val currentProject = ResourcesPlugin.workspace.root.getProject(resource.URI.segmentsList.get(1))
-		val filePath = currentProject.getFile("pascani-gen/" + PORTS_FILE).locationURI.rawPath
+		val filePath = currentProject.getFile(PascaniOutputConfigurationProvider::PASCANI_OUTPUT 
+			+ File.separator + PORTS_FILE).locationURI.rawPath
 		
 		// Generate composite files
 		readPorts(filePath, fsa)
@@ -117,14 +118,14 @@ class PascaniGenerator implements IGenerator {
 		val subsystemsPackage = "deployment.subsystems"
 		val comps = decls.toMap[m|m.name].mapValues[m|m.port]
 		// Generate files
-		fsa.generateFile("Deployment".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::PASCANI_OUTPUT,
+		fsa.generateFile("Deployment".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::DEPLOYMENT_OUTPUT,
 			DeploymentTemplates.deployment('''^«deploymentPackage»''', #["Execution"], "Deployment"))
-		fsa.generateFile("Prerequisites".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::PASCANI_OUTPUT, 
+		fsa.generateFile("Prerequisites".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::DEPLOYMENT_OUTPUT, 
 			DeploymentTemplates.prerequisites('''^«deploymentPackage»''', projectPath, projectName))
-		fsa.generateFile("Execution".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::PASCANI_OUTPUT, 
+		fsa.generateFile("Execution".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::DEPLOYMENT_OUTPUT, 
 			DeploymentTemplates.subsystems('''^«deploymentPackage»''', '''^«deploymentPackage»''', '''Execution''', comps))
 		for (subsystem : comps.keySet) {
-			fsa.generateFile(subsystem.prepareFileName(subsystemsPackage), PascaniOutputConfigurationProvider::PASCANI_OUTPUT, 
+			fsa.generateFile(subsystem.prepareFileName(subsystemsPackage), PascaniOutputConfigurationProvider::DEPLOYMENT_OUTPUT, 
 				DeploymentTemplates.subsystem('''^«subsystemsPackage»''', '''^«deploymentPackage»''', subsystem, comps.get(subsystem)))
 		}
 	}

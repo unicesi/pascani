@@ -29,25 +29,26 @@ import java.util.Set
 class PascaniOutputConfigurationProvider implements IOutputConfigurationProvider {
 
 	public static val PASCANI_OUTPUT = "pascani"
+	public static val DEPLOYMENT_OUTPUT = "deployment"
 	public static val SCA_OUTPUT = "sca"
-	public static val TARGET_SYSTEM_OUTPUT = "target"
 
 	/**
 	 * @return a set of {@link OutputConfiguration} available for the generator
 	 */
 	override Set<OutputConfiguration> getOutputConfigurations() {
-		val defaultOutput = configure(IFileSystemAccess.DEFAULT_OUTPUT, "Output folder", "./src-gen")
-		val pascaniOutput = configure(PASCANI_OUTPUT, "Output folder for Pascani elements", "./pascani-gen")
-		val scaOutput = configure(SCA_OUTPUT, "Output folder for SCA elements", "./sca-gen")
-		val targetOutput = configure(TARGET_SYSTEM_OUTPUT, "Output folder for target-system components", "./src-gen-target")
-		return newHashSet(defaultOutput, pascaniOutput, scaOutput, targetOutput)
+		val defaultOutput = configure(IFileSystemAccess.DEFAULT_OUTPUT, "Output folder", "./src-gen", true)
+		val pascaniOutput = configure(PASCANI_OUTPUT, "Output folder for Pascani elements", "./pascani", true)
+		val scaOutput = configure(SCA_OUTPUT, "Output folder for SCA elements", "./sca", true)
+		val deploymentOutput = configure(DEPLOYMENT_OUTPUT, "Output folder for deployment elements", "./deployment", false)
+		return newHashSet(defaultOutput, pascaniOutput, scaOutput, deploymentOutput)
 	}
-	
-	def configure(String name, String description, String outputDirectory) {
+
+	def configure(String name, String description, String outputDirectory, 
+		boolean OverrideExistingResources) {
 		val outputConf = new OutputConfiguration(name)
 		outputConf.setDescription(description)
 		outputConf.setOutputDirectory(outputDirectory)
-		outputConf.setOverrideExistingResources(true)
+		outputConf.setOverrideExistingResources(OverrideExistingResources)
 		outputConf.setCreateOutputDirectory(true)
 		outputConf.setCleanUpDerivedResources(true)
 		outputConf.setSetDerivedProperty(true)
