@@ -36,21 +36,21 @@ class PascaniOutputConfigurationProvider implements IOutputConfigurationProvider
 	 * @return a set of {@link OutputConfiguration} available for the generator
 	 */
 	override Set<OutputConfiguration> getOutputConfigurations() {
-		val defaultOutput = configure(IFileSystemAccess.DEFAULT_OUTPUT, "Output folder", "./src-gen", true)
-		val pascaniOutput = configure(PASCANI_OUTPUT, "Output folder for Pascani elements", "./pascani", true)
-		val scaOutput = configure(SCA_OUTPUT, "Output folder for SCA elements", "./sca", true)
-		val deploymentOutput = configure(DEPLOYMENT_OUTPUT, "Output folder for deployment elements", "./deployment", false)
+		val defaultOutput = configure(IFileSystemAccess.DEFAULT_OUTPUT, "Output folder", "./src-gen", true, true)
+		val pascaniOutput = configure(PASCANI_OUTPUT, "Output folder for Pascani elements", "./pascani", true, true)
+		val scaOutput = configure(SCA_OUTPUT, "Output folder for SCA elements", "./sca", true, true)
+		val deploymentOutput = configure(DEPLOYMENT_OUTPUT, "Output folder for deployment elements", "./deployment", false, false)
 		return newHashSet(defaultOutput, pascaniOutput, scaOutput, deploymentOutput)
 	}
 
 	def configure(String name, String description, String outputDirectory, 
-		boolean OverrideExistingResources) {
+		boolean OverrideExistingResources, boolean cleanUpDerivedResources) {
 		val outputConf = new OutputConfiguration(name)
 		outputConf.setDescription(description)
 		outputConf.setOutputDirectory(outputDirectory)
 		outputConf.setOverrideExistingResources(OverrideExistingResources)
 		outputConf.setCreateOutputDirectory(true)
-		outputConf.setCleanUpDerivedResources(true)
+		outputConf.setCleanUpDerivedResources(cleanUpDerivedResources)
 		outputConf.setSetDerivedProperty(true)
 		return outputConf
 	}
