@@ -24,12 +24,17 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.script.ScriptException;
 
+import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 import org.pascani.dsl.lib.Event;
 import org.pascani.dsl.lib.PascaniRuntime;
 import org.pascani.dsl.lib.Probe;
@@ -391,19 +396,43 @@ public class PascaniUtils {
 			registeredScripts.put(bindingUri, scripts.size() > 0);
 		}
 	}
-
+	
 	/**
-	 * Registers the necessary properties to bind a SCA service
+	 * Creates a proxy to a remote REST service
 	 * 
-	 * @param properties
-	 *            A map containing the necessary data to bind the service
+	 * @param baseUri
+	 *            The service URI
 	 * @param clazz
 	 *            The service interface
-	 * @return null
+	 * @return an instance of the specified class bound to the remote REST
+	 *         service
 	 */
-	public static <T> T bindService(Map<String, Object> properties,
-			Class<T> clazz) {
-		throw new UnsupportedOperationException();
+	public static <T> T bindREST(URI baseUri, Class<T> clazz) {
+		return JAXRSClientFactory.create((URI) baseUri, clazz);
+	}
+	
+	/**
+	 * Creates a proxy to a remote RMI service
+	 * 
+	 * @param host
+	 *            The service URI
+	 * @param port
+	 *            The RMI registry port
+	 * @param serviceName
+	 *            The service name
+	 * @param clazz
+	 *            The service interface
+	 * @return an instance of the specified class bound to the remote RMI
+	 *         service
+	 * @throws RemoteException
+	 *             See {@link LocateRegistry#getRegistry(String)}
+	 * @throws NotBoundException
+	 *             See {@link Registry#lookup(String)}
+	 */
+	public static <T> T bindRMI(String host, int port, String serviceName,
+			Class<T> clazz) throws RemoteException, NotBoundException {
+		Registry registry = LocateRegistry.getRegistry(host, port);
+		return clazz.cast(registry.lookup(serviceName));
 	}
 
 }
