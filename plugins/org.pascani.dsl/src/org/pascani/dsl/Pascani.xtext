@@ -134,7 +134,7 @@ SimpleEventSpecifier returns EventSpecifier
 	;
 
 CronExpression
-	:	lsymbol = '«'
+	:	lsymbol = '`'
 			seconds 	= CronElement
 			minutes 	= CronElement
 			hours 		= CronElement
@@ -142,7 +142,7 @@ CronExpression
 			month 		= CronElement
 			dayOfWeek 	= CronElement
 			(year 		= CronElement)?
-		rsymbol = '»'
+		rsymbol = '`'
 	;
 
 CronElement
