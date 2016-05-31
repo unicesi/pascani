@@ -19,7 +19,14 @@
 package org.pascani.dsl.lib.util;
 
 import java.io.Serializable;
+import java.net.URI;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Map;
+
+import org.apache.cxf.jaxrs.client.JAXRSClientFactory;
 
 /**
  * Language utilities
@@ -27,9 +34,57 @@ import java.util.Map;
  * @author Miguel Jiménez - Initial contribution and API
  */
 public class LanguageUtils {
-	
-	public static <T extends Serializable> TaggedValue<T> tag(T value, Map<String, String> tags) {
+
+	/**
+	 * Tags a given value
+	 * 
+	 * @param value
+	 *            The new variable value
+	 * @param tags
+	 *            The value tags
+	 * @return The given value tagged
+	 */
+	public static <T extends Serializable> TaggedValue<T> tag(T value,
+			Map<String, String> tags) {
 		return new TaggedValue<T>(value, tags);
+	}
+
+	/**
+	 * Creates a proxy to a remote REST service
+	 * 
+	 * @param baseUri
+	 *            The service URI
+	 * @param clazz
+	 *            The service interface
+	 * @return an instance of the specified class bound to the remote REST
+	 *         service
+	 */
+	public static <T> T bindREST(URI baseUri, Class<T> clazz) {
+		return JAXRSClientFactory.create((URI) baseUri, clazz);
+	}
+
+	/**
+	 * Creates a proxy to a remote RMI service
+	 * 
+	 * @param host
+	 *            The service URI
+	 * @param port
+	 *            The RMI registry port
+	 * @param serviceName
+	 *            The service name
+	 * @param clazz
+	 *            The service interface
+	 * @return an instance of the specified class bound to the remote RMI
+	 *         service
+	 * @throws RemoteException
+	 *             See {@link LocateRegistry#getRegistry(String)}
+	 * @throws NotBoundException
+	 *             See {@link Registry#lookup(String)}
+	 */
+	public static <T> T bindRMI(String host, int port, String serviceName,
+			Class<T> clazz) throws RemoteException, NotBoundException {
+		Registry registry = LocateRegistry.getRegistry(host, port);
+		return clazz.cast(registry.lookup(serviceName));
 	}
 
 }
