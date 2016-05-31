@@ -47,6 +47,8 @@ public abstract class AbstractProbeImpl implements EventHandler, Resumable {
 	 * <li>probe: whether to use or not a local probe
 	 * <li>producer: whether to use or not an event producer
 	 * <li>routingkey: the routing key belonging to this probe
+	 * <li>shutdown: shutdowns probe, producer or both. Values are: probe,
+	 * producer, both
 	 * <li>pascani.*: Pascani properties. Where * can be replaced for a property
 	 * name
 	 */
@@ -102,6 +104,48 @@ public abstract class AbstractProbeImpl implements EventHandler, Resumable {
 			this.probe.recordEvent(event);
 		if (this.producer != null)
 			this.producer.produce(event);
+	}
+	
+	@Property public void setProperty(final String property) {
+		String[] data = property.split("=");
+		String name = data[0].trim();
+		String value = data[0].trim();
+		if (name.startsWith("pascani.")) {
+			System.setProperty(name, value);
+		} else if (name.equals("routingkey")) {
+			this.routingKey = value;
+			// This is done only the first time the routing key is set
+			// and in case it was set after updating properties
+			// resetProbe/resetProducer
+			if (this.useProbe && this.probe == null)
+				resetProbe();
+			if (this.useProducer && this.producer == null)
+				resetProducer();
+		} else if (name.equals("probe")) {
+			this.useProbe = Boolean.valueOf(value);
+			resetProbe();
+		} else if (name.equals("producer")) {
+			this.useProducer = Boolean.valueOf(value);
+			resetProducer();
+		} else if (name.equals("shutdown")) {
+			shutdown(value.equals("probe") || value.equals("both"),
+					value.equals("producer") || value.equals("both"));
+		}
+	}
+	
+	public void shutdown(final boolean probe, final boolean producer) {
+		try {
+			if (producer && this.producer != null) {
+				this.producer.shutdown();
+				this.producer = null;
+			}
+			if (probe && this.probe != null) {
+				this.probe.shutdown();
+				this.probe = null;
+			}
+		} catch (Exception e) {
+			Exceptions.sneakyThrow(e);
+		}
 	}
 
 	private void resetProbe() {
@@ -169,30 +213,6 @@ public abstract class AbstractProbeImpl implements EventHandler, Resumable {
 
 	public String routingKey() {
 		return this.routingKey;
-	}
-	
-	@Property public void setProperty(final String property) {
-		String[] data = property.split("=");
-		String name = data[0].trim();
-		String value = data[0].trim();
-		if (name.startsWith("pascani.")) {
-			System.setProperty(name, value);
-		} else if (name.equals("routingkey")) {
-			this.routingKey = value;
-			// This is done only the first time the routing key is set
-			// and in case it was set after updating properties
-			// resetProbe/resetProducer
-			if (this.useProbe && this.probe == null)
-				resetProbe();
-			if (this.useProducer && this.producer == null)
-				resetProducer();
-		} else if (name.equals("probe")) {
-			this.useProbe = Boolean.valueOf(value);
-			resetProbe();
-		} else if (name.equals("producer")) {
-			this.useProducer = Boolean.valueOf(value);
-			resetProducer();
-		}
 	}
 
 }

@@ -32,18 +32,20 @@ action pascani-add-intent(parent, target, intentName, routingKey) {
 	set-state($parent, "STARTED");
 }
 
-action pascani-remove-intent(parent, target, routingKey) {
+action pascani-remove-intent(parent, target, routingKey, randomName) {
 	-- 1. Remove the SCA intent
 	intent = $parent/scachild::$routingKey;
 	remove-scaintent($target, $intent);
-	
-	set-state($intent, "STOPPED");
-	set-state($parent, "STOPPED");
-	-- TODO: remove all SCA services? (intent)
-	
 	-- 2. Remove the intent component from the target's parent
-	remove-scachild($parent, $intent);
-	set-state($parent, "STARTED");
+	set-state($intent, "STOPPED");
+	-- FraSCAti freezes when stopping a top level component.
+	-- This is a requirement for removing child components though.
+	-- set-state($parent, "STOPPED");
+	-- remove-scachild($parent, $intent);
+	-- set-state($parent, "STARTED");
+	-- Instead of that, rename the component to a random name and shutdown probe & producer
+	pascani-probe-set($parent, $routingKey, "shutdown=both");
+	set-name($intent, $randomName);
 }
 
 action pascani-probe-set(parent, routingKey, key_value) {

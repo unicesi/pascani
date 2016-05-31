@@ -277,8 +277,12 @@ public class PascaniUtils {
 		registerPascaniScripts(bindingUri);
 		String[] data = target.split("/");
 		String parent = data[0] + "/" + data[1];
+		// A random name is necessary because FraSCAti 1.4 cannot stop a top
+		// level component. This is necessary to remove child components. See
+		// comments in pascani.fscript.
+		String randomName = "\"removed-intent-" + System.nanoTime() + "\"";
 		eval("pascani-remove-intent(" + parent + ", " + target + ", \""
-				+ routingKey + "\");", bindingUri);
+				+ routingKey + "\", " + randomName + ");", bindingUri);
 	}
 
 	/**
@@ -375,16 +379,20 @@ public class PascaniUtils {
 						"	set-state($intent, \"STARTED\");\n" +
 						"	set-state($parent, \"STARTED\");\n" +
 						"}\n" +
-						"action pascani-remove-intent(parent, target, routingKey) {\n" +
+						"action pascani-remove-intent(parent, target, routingKey, randomName) {\n" +
 						"	-- 1. Remove the SCA intent\n" +
 						"	intent = $parent/scachild::$routingKey;\n" +
 						"	remove-scaintent($target, $intent);\n" +
-						"	set-state($intent, \"STOPPED\");\n" +
-						"	set-state($parent, \"STOPPED\");\n" +
-						"	-- TODO: remove all SCA services? (intent)\n" +
 						"	-- 2. Remove the intent component from the target's parent\n" +
-						"	remove-scachild($parent, $intent);\n" +
-						"	set-state($parent, \"STARTED\");\n" +
+						"	set-state($intent, \"STOPPED\");\n" +
+						"	-- FraSCAti freezes when stopping a top level component.\n" +
+						"	-- This is a requirement for removing child components though.\n" +
+						"	-- set-state($parent, \"STOPPED\");\n" +
+						"	-- remove-scachild($parent, $intent);\n" +
+						"	-- set-state($parent, \"STARTED\");\n" +
+						"	-- Instead of that, rename the component to a random name and shutdown probe & producer\n" +
+						"	pascani-probe-set($parent, $routingKey, \"shutdown=both\");" +
+						"	set-name($intent, $randomName);\n" +
 						"}\n" +
 						"action pascani-probe-set(parent, routingKey, key_value) {\n" +
 						"	intent = $parent/scachild::$routingKey;\n" +
