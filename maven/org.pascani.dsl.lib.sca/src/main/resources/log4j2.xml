@@ -27,12 +27,12 @@
 			</Policies>
 			<DefaultRolloverStrategy max="20" />
 		</RollingFile>
-		<Pascani name="ScaLibrary" />
+		<!--<Pascani name="ScaLibrary" />-->
 	</Appenders>
 	<Loggers>
 		<Root level="info">
 			<AppenderRef ref="RollingFile" />
-			<AppenderRef ref="ScaLibrary" />
+			<!--<AppenderRef ref="ScaLibrary" />-->
 		</Root>
 	</Loggers>
 </Configuration>

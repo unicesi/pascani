@@ -27,12 +27,12 @@
 			</Policies>
 			<DefaultRolloverStrategy max="20" />
 		</RollingFile>
-		<Pascani name="RuntimeLibrary" />
+		<!--<Pascani name="RuntimeLibrary" />-->
 	</Appenders>
 	<Loggers>
 		<Root level="info">
 			<AppenderRef ref="RollingFile" />
-			<AppenderRef ref="RuntimeLibrary" />
+			<!--<AppenderRef ref="RuntimeLibrary" />-->
 		</Root>
 	</Loggers>
 </Configuration>
