@@ -114,19 +114,19 @@ class PascaniGenerator implements IGenerator {
 	
 	def void generateDeploymentArtifacts(List<TypeDeclaration> decls, String projectPath, String projectName,
 		IFileSystemAccess fsa) {
-		val deploymentPackage = "deployment"
-		val subsystemsPackage = "deployment.subsystems"
+		val deploymentPackage = "common"
 		val comps = decls.toMap[m|m.name].mapValues[m|m.port]
 		// Generate files
 		fsa.generateFile("Deployment".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::DEPLOYMENT_OUTPUT,
-			DeploymentTemplates.deployment('''^«deploymentPackage»''', #["Execution"], "Deployment"))
+			DeploymentTemplates.deployment(deploymentPackage, #["Execution"], "Deployment"))
 		fsa.generateFile("Prerequisites".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::DEPLOYMENT_OUTPUT, 
-			DeploymentTemplates.prerequisites('''^«deploymentPackage»''', projectPath, projectName))
+			DeploymentTemplates.prerequisites(deploymentPackage, projectPath, projectName))
 		fsa.generateFile("Execution".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::DEPLOYMENT_OUTPUT, 
-			DeploymentTemplates.subsystems('''^«deploymentPackage»''', '''^«deploymentPackage»''', '''Execution''', comps))
-		for (subsystem : comps.keySet) {
-			fsa.generateFile(subsystem.prepareFileName(subsystemsPackage), PascaniOutputConfigurationProvider::DEPLOYMENT_OUTPUT, 
-				DeploymentTemplates.subsystem('''^«subsystemsPackage»''', '''^«deploymentPackage»''', subsystem, comps.get(subsystem)))
+			DeploymentTemplates.subsystems(deploymentPackage, deploymentPackage, '''Execution''', comps))
+		for (subsystem : decls) {
+			val packageName = subsystem.fullyQualifiedName.skipLast(1).toString
+			fsa.generateFile(subsystem.name.prepareFileName(packageName), PascaniOutputConfigurationProvider::DEPLOYMENT_OUTPUT, 
+				DeploymentTemplates.subsystem(packageName, deploymentPackage, subsystem.name, comps.get(subsystem.name)))
 		}
 	}
 	
