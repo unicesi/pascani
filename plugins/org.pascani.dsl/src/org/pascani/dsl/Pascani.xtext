@@ -84,7 +84,8 @@ InternalNamespaceDeclaration returns XExpression
 
 VariableDeclaration returns XExpression
 	:	{VariableDeclaration}
-		(writeable ?= 'var'|'val') (=> (type = JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)?
+		(writeable ?= 'var'|'val')
+		(=> (type = JvmTypeReference name = ValidID) | name = ValidID) ('=' right = XExpression)?
 	;
 
 ConfigBlockExpression returns XBlockExpression
@@ -92,7 +93,9 @@ ConfigBlockExpression returns XBlockExpression
 	;
 
 HandlerDeclaration returns Handler
-	:	'handler' name = ValidID '(' param = FullJvmFormalParameter ')' body = XBlockExpression
+	:	'handler' name = ValidID 
+		'(' params += FullJvmFormalParameter (',' params += FullJvmFormalParameter)* ')'
+		body = XBlockExpression
 	;
 
 EventDeclaration returns Event

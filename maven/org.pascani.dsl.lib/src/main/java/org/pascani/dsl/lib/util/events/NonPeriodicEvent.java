@@ -37,7 +37,7 @@ import com.google.common.base.Function;
  * @author Miguel Jiménez - Initial contribution and API
  */
 public abstract class NonPeriodicEvent<T extends Event<?>>
-		extends ManagedEvent {
+		extends ManagedEvent<T> {
 	
 	/**
 	 * Indicates whether this event was defined in an external monitor
@@ -53,6 +53,10 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 	 * The URI where the FraSCAti runtime is running
 	 */
 	public URI bindingUri;
+	
+	public NonPeriodicEvent() {
+		super();
+	}
 
 	/**
 	 * @return The {@link Class} object corresponding to the event type
@@ -81,16 +85,6 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 				return true;
 			}
 		};
-	}
-
-	public void subscribe(final EventObserver<T>... eventObservers) {
-		for (EventObserver<T> eventObserver : eventObservers)
-			addObserver(eventObserver);
-	}
-
-	public void unsubscribe(final EventObserver<T>... eventObservers) {
-		for (EventObserver<T> eventObserver : eventObservers)
-			deleteObserver(eventObserver);
 	}
 	
 	protected AbstractConsumer initializeConsumer(final Context context,

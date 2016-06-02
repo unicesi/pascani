@@ -18,6 +18,7 @@
  */
 package org.pascani.dsl.lib.util.events;
 
+import java.util.Map;
 import java.util.Observer;
 
 import org.pascani.dsl.lib.Event;
@@ -29,6 +30,6 @@ import org.pascani.dsl.lib.Event;
  */
 public abstract class EventObserver<T extends Event<?>> implements Observer {
 	
-	public abstract void execute(T e);
+	public abstract void execute(T e, Map<String, Object> data);
 	
 }

@@ -74,14 +74,6 @@ class PascaniFormatter extends AbstractDeclarativeFormatter {
 			c.setNoSpace.before(comma);
 		}
 
-		// set empty line between two inner elements type declarations
-		c.setLinewrap(2).between(namespaceBlockExpressionAccess.leftCurlyBracketKeyword_1,
-			namespaceDeclarationAccess.namespaceKeyword_0)
-		c.setLinewrap(2).between(eventDeclarationAccess.emitterAssignment_5, handlerDeclarationAccess.bodyAssignment_5)
-
-		c.setLinewrap(2).between(eventDeclarationAccess.emitterAssignment_5, eventDeclarationAccess.emitterAssignment_5)
-		c.setLinewrap(2).between(handlerDeclarationAccess.bodyAssignment_5, handlerDeclarationAccess.bodyAssignment_5)
-
 		// EVENTS
 		c.setLinewrap(1).before(eventDeclarationAccess.eventKeyword_0)
 

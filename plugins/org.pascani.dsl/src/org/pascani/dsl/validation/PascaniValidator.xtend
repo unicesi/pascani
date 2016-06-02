@@ -323,10 +323,13 @@ class PascaniValidator extends AbstractPascaniValidator {
 	}
 
 	@Check
-	def checkHandlerParameter(Handler handler) {
-		if (handler.param.actualType.getSuperType(org.pascani.dsl.lib.Event) == null) {
-			error("The parameter type must be subclass of Event", PascaniPackage.Literals.HANDLER__PARAM,
-				INVALID_PARAMETER_TYPE)
+	def checkHandlerParameters(Handler handler) {
+		if (handler.params.size > 2) {
+			error("Handlers can have at most two parameters", PascaniPackage.Literals.HANDLER__PARAMS)
+		}
+		if (handler.params.get(0).actualType.getSuperType(org.pascani.dsl.lib.Event) == null) {
+			error('''The«IF handler.params.size > 1» first«ENDIF» parameter must be subclass of Event''', 
+				PascaniPackage.Literals.HANDLER__PARAMS, INVALID_PARAMETER_TYPE)
 		}
 	}
 	

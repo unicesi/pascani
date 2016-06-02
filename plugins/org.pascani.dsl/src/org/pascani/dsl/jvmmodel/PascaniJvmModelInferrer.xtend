@@ -78,6 +78,7 @@ import org.pascani.dsl.pascani.VariableDeclaration
 import org.pascani.dsl.pascani.ImportNamespaceDeclaration
 import java.util.Collections
 import org.pascani.dsl.pascani.ImportEventDeclaration
+import java.util.HashMap
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -208,15 +209,17 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 					
 					Handler: {
-						if (e.param !== null && e.param.parameterType != null) {
-							if (e.param.parameterType.type.qualifiedName.equals(IntervalEvent.canonicalName)) {
-								nestedTypes += e.createJobClass
+						if (e.params !== null) {
+							val eventParam = e.params.get(0)
+							val hasDataParam = e.params.size > 1
+							if (eventParam.parameterType.type.qualifiedName.equals(IntervalEvent.canonicalName)) {
+								nestedTypes += e.createJobClass(hasDataParam)
 							} else {
-								val innerClass = e.createNonPeriodicClass(monitor.name + "_")
+								val innerClass = e.createNonPeriodicClass(monitor.name + "_", hasDataParam)
 								nestedTypes += innerClass
 								fields +=
 									e.toField(e.name,
-										typeRef(EventObserver, typeRef(e.param.parameterType.type.qualifiedName))) [
+										typeRef(EventObserver, typeRef(eventParam.parameterType.type.qualifiedName))) [
 										^final = true
 										^static = true
 										initializer = '''new «innerClass.simpleName»()'''
@@ -370,8 +373,8 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		if (specifier.above) '''>''' else if (specifier.below) '''<''' else if (specifier.equal) '''=='''
 	}
 
-	def JvmGenericType createJobClass(Handler handler) {
-		val clazz = createNonPeriodicClass(handler, "")
+	def JvmGenericType createJobClass(Handler handler, boolean hasDataParam) {
+		val clazz = createNonPeriodicClass(handler, "", hasDataParam)
 		clazz.visibility = JvmVisibility::PUBLIC
 		clazz.superTypes += typeRef(Job)
 		clazz.members += handler.toMethod("execute", typeRef(void)) [
@@ -379,23 +382,28 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			parameters += handler.toParameter("context", typeRef(JobExecutionContext))
 			body = '''
 				«typeRef(JobDataMap)» data = context.getJobDetail().getJobDataMap();
-				execute(new «typeRef(IntervalEvent)»(«typeRef(UUID)».randomUUID(), (String) data.get("expression")));
+				«typeRef(IntervalEvent)» intervalEvent = new «typeRef(IntervalEvent)»(«typeRef(UUID)».randomUUID(), (String) data.get("expression"));
+				execute(intervalEvent, new «typeRef(HashMap, typeRef(String), typeRef(Object))»());
 			'''
 		]
 		return clazz
 	}
 
-	def JvmGenericType createNonPeriodicClass(Handler handler, String classPrefix) {
+	def JvmGenericType createNonPeriodicClass(Handler handler, String classPrefix, boolean hasDataParam) {
 		handler.toClass(classPrefix + handler.name) [
 			^static = true
 			visibility = JvmVisibility::PRIVATE
-			superTypes += typeRef(EventObserver, typeRef(handler.param.parameterType.type.qualifiedName))
+			superTypes += typeRef(EventObserver, typeRef(handler.params.get(0).parameterType.type.qualifiedName))
 			members += handler.toMethod("update", typeRef(void)) [
 				parameters += handler.toParameter("observable", typeRef(Observable))
 				parameters += handler.toParameter("argument", typeRef(Object))
+				val eventTypeFQN = handler.params.get(0).parameterType.type.qualifiedName
 				body = '''
-					if (argument instanceof «typeRef(handler.param.parameterType.type.qualifiedName)») {
-						execute((«typeRef(handler.param.parameterType.type.qualifiedName)») argument);
+					if (argument instanceof Object[]) {
+						Object[] args = (Object[]) argument;
+						«typeRef(eventTypeFQN)» event = («typeRef(eventTypeFQN)») args[0];
+						«typeRef(Map, typeRef(String), typeRef(Object))» data = («typeRef(Map, typeRef(String), typeRef(Object))») args[1];
+						execute(event, data);
 					}
 				'''
 			]
@@ -408,7 +416,12 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 			documentation = handler.documentation
 			annotations += annotationRef(Override)
 			parameters +=
-				handler.toParameter(handler.param.name, typeRef(handler.param.parameterType.type.qualifiedName))
+				handler.toParameter(handler.params.get(0).name, typeRef(handler.params.get(0).parameterType.type.qualifiedName))
+			if (handler.params.size > 1) {
+				parameters += handler.toParameter(handler.params.get(1).name, typeRef(Map, typeRef(String), typeRef(Object)))
+			} else {
+				parameters += handler.toParameter(prefix + "data", typeRef(Map, typeRef(String), typeRef(Object)))
+			}
 			body = handler.body
 		]
 	}

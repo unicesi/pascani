@@ -18,8 +18,11 @@
  */
 package org.pascani.dsl.lib.util.events;
 
-import java.util.Observable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Observer;
 
+import org.pascani.dsl.lib.Event;
 import org.pascani.dsl.lib.util.Resumable;
 
 /**
@@ -27,9 +30,61 @@ import org.pascani.dsl.lib.util.Resumable;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class ManagedEvent extends Observable implements Resumable {
+public abstract class ManagedEvent<T extends Event<?>> extends Observable
+		implements Resumable {
 
-	private volatile boolean paused = false;
+	/**
+	 * The variable holding the event state: is it paused?
+	 */
+	private volatile boolean paused;
+	
+	/**
+	 * Data bound to the subscription
+	 */
+	protected Map<Observer, Map<String, Object>> data;
+	
+	public ManagedEvent() {
+		this.paused = false;
+		this.data = new HashMap<Observer, Map<String,Object>>();
+	}
+	
+	public void subscribe(final EventObserver<T>... eventObservers) {
+		subscribe(eventObservers, new HashMap<String, Object>());
+	}
+
+	public void subscribe(final EventObserver<T>[] eventObservers,
+			final Map<String, Object> data) {
+		for (EventObserver<T> eventObserver : eventObservers) {
+			subscribe(eventObserver, data);
+		}
+	}
+	
+	public void subscribe(final EventObserver<T> eventObserver,
+			final Map<String, Object> data) {
+		this.data.put(eventObserver, data);
+		addObserver(eventObserver);
+	}
+
+	public void unsubscribe(final EventObserver<T>... eventObservers) {
+		for (EventObserver<T> eventObserver : eventObservers)
+			deleteObserver(eventObserver);
+	}
+	
+	@Override public void notifyObservers(Object e) {
+		Object[] localArray;
+		synchronized (this) {
+			if (!changed)
+				return;
+			localArray = obs.toArray();
+			clearChanged();
+		}
+		for (int i = localArray.length - 1; i >= 0; i--) {
+			Observer observer = (Observer) localArray[i];
+			Map<String, Object> bindingData = data(observer) == null
+					? new HashMap<String, Object>() : data(observer);
+			observer.update(this, new Object[] { e, bindingData });
+		}
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -56,6 +111,10 @@ public abstract class ManagedEvent extends Observable implements Resumable {
 	 */
 	public boolean isPaused() {
 		return this.paused;
+	}
+	
+	public Map<String, Object> data(Observer observer) {
+		return this.data.get(observer);
 	}
 
 }

@@ -22,6 +22,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.pascani.dsl.lib.events.IntervalEvent;
 import org.pascani.dsl.lib.util.CronConstant;
 import org.pascani.dsl.lib.util.Exceptions;
 import org.pascani.dsl.lib.util.JobScheduler;
@@ -34,7 +35,7 @@ import org.quartz.JobDataMap;
  * 
  * @author Miguel Jiménez - Initial contribution and API
  */
-public class PeriodicEvent extends ManagedEvent {
+public class PeriodicEvent extends ManagedEvent<IntervalEvent> {
 
 	protected CronExpression expression;
 	protected List<Class<? extends Job>> classes;
@@ -49,6 +50,7 @@ public class PeriodicEvent extends ManagedEvent {
 	}
 	
 	public PeriodicEvent(CronExpression cronExpression) {
+		super();
 		this.classes = new ArrayList<Class<? extends Job>>();
 		this.temporal = new ArrayList<Class<? extends Job>>();
 		this.expression = cronExpression;
