@@ -55,6 +55,7 @@ import org.pascani.dsl.pascani.RangeCronElement
 import org.pascani.dsl.pascani.TerminalCronElement
 import org.pascani.dsl.pascani.TypeDeclaration
 import org.pascani.dsl.pascani.VariableDeclaration
+import java.util.Map
 
 /**
  * This class contains custom validation rules. 
@@ -325,11 +326,21 @@ class PascaniValidator extends AbstractPascaniValidator {
 	@Check
 	def checkHandlerParameters(Handler handler) {
 		if (handler.params.size > 2) {
-			error("Handlers can have at most two parameters", PascaniPackage.Literals.HANDLER__PARAMS)
+			error("Event handlers cannot have more than two parameters", PascaniPackage.Literals.HANDLER__PARAMS)
 		}
 		if (handler.params.get(0).actualType.getSuperType(org.pascani.dsl.lib.Event) == null) {
 			error('''The«IF handler.params.size > 1» first«ENDIF» parameter must be subclass of Event''', 
-				PascaniPackage.Literals.HANDLER__PARAMS, INVALID_PARAMETER_TYPE)
+				PascaniPackage.Literals.HANDLER__NAME, INVALID_PARAMETER_TYPE)
+		}
+		if (handler.params.size > 1) {
+			val actualType = handler.params.get(1).actualType.getSuperType(Map)
+			val showError = actualType == null
+				|| actualType.typeArguments.size != 2
+				|| !actualType.typeArguments.get(0).identifier.equals(String.canonicalName)
+				|| !actualType.typeArguments.get(1).identifier.equals(Object.canonicalName)
+			if (showError)
+				error('''The second parameter must be of type Map<String, Object>''', 
+					PascaniPackage.Literals.HANDLER__NAME, INVALID_PARAMETER_TYPE)
 		}
 	}
 	
