@@ -19,11 +19,14 @@
 package org.pascani.dsl.jvmmodel
 
 import com.google.common.base.Function
+import com.google.common.collect.Lists
 import com.google.inject.Inject
 import java.io.Serializable
 import java.math.BigDecimal
 import java.util.ArrayList
+import java.util.Collections
 import java.util.List
+import java.util.Map
 import java.util.Observable
 import java.util.UUID
 import org.eclipse.xtext.common.types.JvmGenericType
@@ -38,47 +41,39 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.osoa.sca.annotations.Scope
+import org.pascani.dsl.lib.PascaniRuntime
 import org.pascani.dsl.lib.PascaniRuntime.Context
 import org.pascani.dsl.lib.events.ChangeEvent
-import org.pascani.dsl.lib.events.IntervalEvent
+import org.pascani.dsl.lib.events.NewMonitorEvent
+import org.pascani.dsl.lib.events.NewNamespaceEvent
 import org.pascani.dsl.lib.infrastructure.AbstractConsumer
+import org.pascani.dsl.lib.infrastructure.AbstractProducer
 import org.pascani.dsl.lib.infrastructure.BasicNamespace
 import org.pascani.dsl.lib.infrastructure.NamespaceProxy
 import org.pascani.dsl.lib.infrastructure.ProbeProxy
+import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQProducer
 import org.pascani.dsl.lib.sca.FrascatiUtils
 import org.pascani.dsl.lib.sca.PascaniUtils
+import org.pascani.dsl.lib.util.Exceptions
+import org.pascani.dsl.lib.util.TaggedValue
 import org.pascani.dsl.lib.util.events.EventObserver
 import org.pascani.dsl.lib.util.events.NonPeriodicEvent
 import org.pascani.dsl.lib.util.events.PeriodicEvent
 import org.pascani.dsl.outputconfiguration.OutputConfigurationAdapter
 import org.pascani.dsl.outputconfiguration.PascaniOutputConfigurationProvider
+import org.pascani.dsl.pascani.AndEventSpecifier
 import org.pascani.dsl.pascani.ConfigBlockExpression
 import org.pascani.dsl.pascani.Event
 import org.pascani.dsl.pascani.EventSpecifier
 import org.pascani.dsl.pascani.EventType
 import org.pascani.dsl.pascani.Handler
+import org.pascani.dsl.pascani.ImportEventDeclaration
+import org.pascani.dsl.pascani.ImportNamespaceDeclaration
 import org.pascani.dsl.pascani.Monitor
 import org.pascani.dsl.pascani.Namespace
-import org.pascani.dsl.pascani.TypeDeclaration
-import org.quartz.Job
-import org.quartz.JobDataMap
-import org.quartz.JobExecutionContext
-import org.quartz.JobExecutionException
 import org.pascani.dsl.pascani.OrEventSpecifier
-import org.pascani.dsl.pascani.AndEventSpecifier
-import org.pascani.dsl.lib.util.TaggedValue
-import java.util.Map
-import org.pascani.dsl.lib.PascaniRuntime
-import org.pascani.dsl.lib.infrastructure.AbstractProducer
-import org.pascani.dsl.lib.events.NewMonitorEvent
-import org.pascani.dsl.lib.infrastructure.rabbitmq.RabbitMQProducer
-import com.google.common.collect.Lists
-import org.pascani.dsl.lib.events.NewNamespaceEvent
+import org.pascani.dsl.pascani.TypeDeclaration
 import org.pascani.dsl.pascani.VariableDeclaration
-import org.pascani.dsl.pascani.ImportNamespaceDeclaration
-import java.util.Collections
-import org.pascani.dsl.pascani.ImportEventDeclaration
-import java.util.HashMap
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -211,20 +206,15 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					Handler: {
 						if (e.params !== null) {
 							val eventParam = e.params.get(0)
-							val hasDataParam = e.params.size > 1
-							if (eventParam.parameterType.type.qualifiedName.equals(IntervalEvent.canonicalName)) {
-								nestedTypes += e.createJobClass(hasDataParam)
-							} else {
-								val innerClass = e.createNonPeriodicClass(monitor.name + "_", hasDataParam)
-								nestedTypes += innerClass
-								fields +=
-									e.toField(e.name,
-										typeRef(EventObserver, typeRef(eventParam.parameterType.type.qualifiedName))) [
-										^final = true
-										^static = true
-										initializer = '''new «innerClass.simpleName»()'''
-									]
-							}	
+							val innerClass = e.createEventClass(monitor.name + "_")
+							nestedTypes += innerClass
+							fields +=
+								e.toField(e.name,
+									typeRef(EventObserver, typeRef(eventParam.parameterType.type.qualifiedName))) [
+									^final = true
+									^static = true
+									initializer = '''new «innerClass.simpleName»()'''
+								]
 						}
 					}
 					
@@ -249,7 +239,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						«ENDIF»
 						initializeEvents();
 					} catch(Exception e) {
-						«org.pascani.dsl.lib.util.Exceptions.canonicalName».sneakyThrow(e);
+						«Exceptions.canonicalName».sneakyThrow(e);
 					}
 				'''
 			]
@@ -271,7 +261,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						producer.produce(event);
 						producer.shutdown();
 					} catch (Exception e) {
-						«typeRef(org.pascani.dsl.lib.util.Exceptions)».sneakyThrow(e);
+						«typeRef(Exceptions)».sneakyThrow(e);
 					}
 				'''
 			]
@@ -373,23 +363,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 		if (specifier.above) '''>''' else if (specifier.below) '''<''' else if (specifier.equal) '''=='''
 	}
 
-	def JvmGenericType createJobClass(Handler handler, boolean hasDataParam) {
-		val clazz = createNonPeriodicClass(handler, "", hasDataParam)
-		clazz.visibility = JvmVisibility::PUBLIC
-		clazz.superTypes += typeRef(Job)
-		clazz.members += handler.toMethod("execute", typeRef(void)) [
-			exceptions += typeRef(JobExecutionException)
-			parameters += handler.toParameter("context", typeRef(JobExecutionContext))
-			body = '''
-				«typeRef(JobDataMap)» data = context.getJobDetail().getJobDataMap();
-				«typeRef(IntervalEvent)» intervalEvent = new «typeRef(IntervalEvent)»(«typeRef(UUID)».randomUUID(), (String) data.get("expression"));
-				execute(intervalEvent, new «typeRef(HashMap, typeRef(String), typeRef(Object))»());
-			'''
-		]
-		return clazz
-	}
-
-	def JvmGenericType createNonPeriodicClass(Handler handler, String classPrefix, boolean hasDataParam) {
+	def JvmGenericType createEventClass(Handler handler, String classPrefix) {
 		handler.toClass(classPrefix + handler.name) [
 			^static = true
 			visibility = JvmVisibility::PRIVATE
@@ -506,7 +480,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						this.«names.get("consumer")» = initializeConsumer(context, routingKey, consumerTag«IF isChangeEvent», variable«ENDIF»);
 						this.«names.get("consumer")».start();
 					} catch(Exception e) {
-						«typeRef(org.pascani.dsl.lib.util.Exceptions)».sneakyThrow(e);
+						«typeRef(Exceptions)».sneakyThrow(e);
 					}
 				'''
 			]
@@ -519,7 +493,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 								try {
 									«PascaniUtils».removeProbe(«names.get("emitter")», routingKey, bindingUri);
 								} catch (Exception e) {
-									«typeRef(org.pascani.dsl.lib.util.Exceptions)».sneakyThrow(e);
+									«typeRef(Exceptions)».sneakyThrow(e);
 								}
 							}
 						});
@@ -614,7 +588,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 						producer.produce(event);
 						producer.shutdown();
 					} catch (Exception e) {
-						«typeRef(org.pascani.dsl.lib.util.Exceptions)».sneakyThrow(e);
+						«typeRef(Exceptions)».sneakyThrow(e);
 					}
 					'''
 				]
@@ -697,7 +671,7 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 							try {
 								this.«namespace.name»Proxy = new «NamespaceProxy»("«namespace.fullyQualifiedName»");
 							} catch(«Exception» e) {
-								«org.pascani.dsl.lib.util.Exceptions.canonicalName».sneakyThrow(e);
+								«Exceptions.canonicalName».sneakyThrow(e);
 							}
 						'''
 					]

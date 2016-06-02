@@ -19,8 +19,7 @@
 package org.pascani.dsl.lib.util.events;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
 import org.pascani.dsl.lib.events.IntervalEvent;
 import org.pascani.dsl.lib.util.CronConstant;
@@ -29,6 +28,8 @@ import org.pascani.dsl.lib.util.JobScheduler;
 import org.quartz.CronExpression;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
 /**
  * <b>Note</b>: DSL-only intended use
@@ -38,65 +39,54 @@ import org.quartz.JobDataMap;
 public class PeriodicEvent extends ManagedEvent<IntervalEvent> {
 
 	protected CronExpression expression;
-	protected List<Class<? extends Job>> classes;
-	private List<Class<? extends Job>> temporal;
+
+	public static class InternalJob implements Job {
+		@Override public void execute(JobExecutionContext context)
+				throws JobExecutionException {
+			JobDataMap jobData = context.getJobDetail().getJobDataMap();
+			IntervalEvent event = new IntervalEvent(UUID.randomUUID(),
+					jobData.getString("expression"));
+			((PeriodicEvent) jobData.get("this")).notifyObservers(event);
+		}
+	}
 
 	public PeriodicEvent(String cronExpression) throws ParseException {
 		this(new CronExpression(cronExpression));
 	}
-	
+
 	public PeriodicEvent(CronConstant cronConstant) {
 		this(cronConstant.expression());
 	}
-	
+
 	public PeriodicEvent(CronExpression cronExpression) {
 		super();
-		this.classes = new ArrayList<Class<? extends Job>>();
-		this.temporal = new ArrayList<Class<? extends Job>>();
 		this.expression = cronExpression;
 	}
 
-	public CronExpression getExpression() {
-		return this.expression;
+	public void updateExpression(CronExpression newExpression) {
+		this.expression = newExpression;
+		unschedule();
+		schedule();
 	}
-
-	@SuppressWarnings("unchecked")
-	public void updateExpression(CronExpression expression) {
-		List<Class<? extends Job>> tmp = this.classes;
-		this.classes = new ArrayList<Class<? extends Job>>();
-		this.expression = expression;
-		for (Class<? extends Job> clazz : tmp) {
-			unsubscribe(clazz);
-			subscribe(clazz);
+	
+	private void schedule() {
+		try {
+			JobDataMap jobData = new JobDataMap();
+			jobData.put("expression", this.expression.getCronExpression());
+			jobData.put("this", this);
+			JobScheduler.schedule(InternalJob.class,
+					new CronExpression(this.expression.getCronExpression()), jobData);
+		} catch (Exception e) {
+			Exceptions.sneakyThrow(e);
 		}
 	}
 	
-	public void subscribe(final Class<? extends Job>... jobClasses) {
-		for (Class<? extends Job> jobClass : jobClasses) {
-			if (!this.classes.contains(jobClass)) {
-				this.classes.add(jobClass);
-				JobDataMap data = new JobDataMap();
-				data.put("expression", getExpression().getCronExpression());
-				try {
-					JobScheduler.schedule(jobClass, new CronExpression(
-							getExpression().getCronExpression()), data);
-				} catch (Exception e) {
-					Exceptions.sneakyThrow(e);
-				}
-			}
+	private void unschedule() {
+		try {
+			JobScheduler.unschedule(InternalJob.class);
+		} catch (Exception e) {
+			Exceptions.sneakyThrow(e);
 		}
-	}
-	
-	public boolean unsubscribe(final Class<? extends Job>... jobClasses) {
-		boolean unsubscribed = false;
-		for (Class<? extends Job> jobClass : jobClasses) {
-			try {
-				unsubscribed &= JobScheduler.unschedule(jobClass);
-			} catch (Exception e) {
-				Exceptions.sneakyThrow(e);
-			}
-		}
-		return unsubscribed;
 	}
 
 	/*
@@ -104,15 +94,10 @@ public class PeriodicEvent extends ManagedEvent<IntervalEvent> {
 	 * 
 	 * @see pascani.lang.util.dsl.ManagedEvent#pause()
 	 */
-	@SuppressWarnings("unchecked")
 	@Override public synchronized void pause() {
 		if (isPaused())
 			return;
-		this.temporal = this.classes;
-		this.classes = new ArrayList<Class<? extends Job>>();
-		for (Class<? extends Job> clazz : this.temporal) {
-			unsubscribe(clazz);
-		}
+		unschedule();
 		super.pause();
 	}
 
@@ -121,15 +106,15 @@ public class PeriodicEvent extends ManagedEvent<IntervalEvent> {
 	 * 
 	 * @see pascani.lang.util.dsl.ManagedEvent#resume()
 	 */
-	@SuppressWarnings("unchecked")
 	@Override public synchronized void resume() {
 		if (!isPaused())
 			return;
-		for (Class<? extends Job> clazz : this.temporal) {
-			subscribe(clazz);
-		}
-		this.temporal.clear();
+		schedule();
 		super.resume();
+	}
+
+	public CronExpression expression() {
+		return this.expression;
 	}
 
 }

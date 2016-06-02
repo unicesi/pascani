@@ -101,7 +101,7 @@ public abstract class Monitor
 		PeriodicEvent event = this.periodicEvents.get(eventName);
 		if (event == null)
 			throw new InvalidParameterException("The specified event does not exists");
-		return event.getExpression().toString();
+		return event.expression().toString();
 	}
 
 }
