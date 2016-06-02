@@ -114,7 +114,7 @@ class PascaniGenerator implements IGenerator {
 	
 	def void generateDeploymentArtifacts(List<TypeDeclaration> decls, String projectPath, String projectName,
 		IFileSystemAccess fsa) {
-		val deploymentPackage = "common"
+		val deploymentPackage = "amelia.common"
 		val comps = decls.toMap[m|m.name].mapValues[m|m.port]
 		// Generate files
 		fsa.generateFile("Deployment".prepareFileName(deploymentPackage), PascaniOutputConfigurationProvider::DEPLOYMENT_OUTPUT,
@@ -125,8 +125,8 @@ class PascaniGenerator implements IGenerator {
 			DeploymentTemplates.subsystems(deploymentPackage, deploymentPackage, '''Execution''', comps))
 		for (subsystem : decls) {
 			val packageName = subsystem.fullyQualifiedName.skipLast(1).toString
-			fsa.generateFile(subsystem.name.prepareFileName(packageName), PascaniOutputConfigurationProvider::DEPLOYMENT_OUTPUT, 
-				DeploymentTemplates.subsystem(packageName, deploymentPackage, subsystem.name, comps.get(subsystem.name)))
+			fsa.generateFile(subsystem.name.prepareFileName("amelia." + packageName), PascaniOutputConfigurationProvider::DEPLOYMENT_OUTPUT, 
+				DeploymentTemplates.subsystem("amelia." + packageName, deploymentPackage, subsystem.name, comps.get(subsystem.name)))
 		}
 	}
 	
