@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Pascani Eclipse IDE plugin
 Bundle-Vendor: Miguel Jiménez
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.6.6.qualifier
 Bundle-SymbolicName: org.pascani.dsl.ide;singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.pascani.dsl,
