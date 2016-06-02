@@ -52,7 +52,8 @@ public class PascaniUtils {
 	
 	/**
 	 * Introduces a new SCA intent in the specified FraSCAti runtime, bound to
-	 * the specified target.
+	 * the specified target. It also adds a shutdown hook for removing the probe
+	 * once execution terminates.
 	 * 
 	 * @param target
 	 *            A FPath selector
@@ -71,8 +72,8 @@ public class PascaniUtils {
 	 *             If there is a problem executing any of the scripts
 	 * @see FrascatiUtils#DEFAULT_BINDING_URI
 	 */
-	public static void newIntent(String target, String routingKey,
-			String intentName, URI bindingUri) throws IOException, ScriptException {
+	public static void newIntent(final String target, final String routingKey,
+			final String intentName, final URI bindingUri) throws IOException, ScriptException {
 		registerPascaniScripts(bindingUri);
 		String[] data = target.split("/");
 		String parent = data[0] + "/" + data[1];
@@ -82,6 +83,15 @@ public class PascaniUtils {
 		params.append("\"" + intentName + "\", ");
 		params.append("\"" + routingKey + "\"");
 		eval("pascani-add-intent(" + params.toString() + ");", bindingUri);
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				try {
+					PascaniUtils.removeProbe(target, routingKey, bindingUri);
+				} catch (Exception e) {
+					Exceptions.sneakyThrow(e);
+				}
+			}
+		});
 	}
 	
 	/**

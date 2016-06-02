@@ -462,7 +462,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 									bindingUri = «typeRef(FrascatiUtils)».DEFAULT_BINDING_URI;
 								final String intentName = «typeRef(PascaniUtils)».intentName(this.«names.get("type")»);
 								«typeRef(PascaniUtils)».newIntent(«names.get("emitter")», routingKey, intentName, bindingUri);
-								«prefix»addShutdownHook(routingKey);
 								«typeRef(PascaniUtils)».setProbeProperty(«names.get("emitter")», routingKey, "routingkey",
 									routingKey, bindingUri);
 								if (useProbe) {
@@ -484,22 +483,6 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 					}
 				'''
 			]
-			if (!isProxy && !isChangeEvent) {
-				members += e.emitter.toMethod(prefix + "addShutdownHook", typeRef(void)) [
-					parameters += e.emitter.toParameter("routingKey", typeRef(String))
-					body = '''
-						Runtime.getRuntime().addShutdownHook(new Thread() {
-							public void run() {
-								try {
-									«PascaniUtils».removeProbe(«names.get("emitter")», routingKey, bindingUri);
-								} catch (Exception e) {
-									«typeRef(Exceptions)».sneakyThrow(e);
-								}
-							}
-						});
-					'''
-				]	
-			}
 			members += e.emitter.toMethod("getType", eventClassRef) [
 				annotations += annotationRef(Override)
 				body = '''return this.«names.get("type")»;'''
