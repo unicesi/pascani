@@ -66,6 +66,9 @@ public class LanguageUtils {
 	/**
 	 * Creates a proxy to a remote RMI service
 	 * 
+	 * <b>Note</b>: This won't work with FraSCAti RMI bindings because FraSCAti
+	 * uses a generated interface.
+	 * 
 	 * @param host
 	 *            The service URI
 	 * @param port
