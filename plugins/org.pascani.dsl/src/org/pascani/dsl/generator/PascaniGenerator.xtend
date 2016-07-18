@@ -131,7 +131,7 @@ class PascaniGenerator implements IGenerator {
 	}
 	
 	def prepareFileName(String fileName, String packageName) {
-		return (packageName + "." + fileName).replaceAll("\\.", File.separator) + ".amelia"
+		return (packageName + "." + fileName).replace(".", File.separator) + ".amelia"
 	}
 	
 	def void infer(Monitor declaration, int initialPort, IFileSystemAccess fsa) {
