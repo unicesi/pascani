@@ -57,8 +57,8 @@ class DeploymentTemplates {
 			
 			subsystem «subsystemName» {
 				
-				val Iterable<String> libpath = classpath + #['«"«"»project»/«"«"»project».jar']
-				val Iterable<String> errors = #["Connection refused"]
+				var Iterable<String> libpath = classpath + #['«"«"»project»/«"«"»project».jar']
+				var Iterable<String> errors = #["Connection refused"]
 				
 				on host {
 					«FOR c : components.keySet»
@@ -93,13 +93,13 @@ class DeploymentTemplates {
 					'«"«"»dependencies»/org.pascani.dsl.lib.sca-1.0.0.jar'
 				]
 				
-				val List<String> downloads = #[
+				var List<String> downloads = #[
 					"http://central.maven.org/maven2/org/eclipse/xtext/org.eclipse.xtext.xbase.lib/2.9.2/org.eclipse.xtext.xbase.lib-2.9.2.jar",
 					"http://central.maven.org/maven2/org/pascani/org.pascani.dsl.lib/1.0.0/org.pascani.dsl.lib-1.0.0.jar",
 					"http://central.maven.org/maven2/org/pascani/org.pascani.dsl.lib.sca/1.0.0/org.pascani.dsl.lib.sca-1.0.0.jar"
 				]
-				val List<String> downloadErrors = #["Connection refused"]
-				val Integer _timeout = 3600 * 1000
+				var List<String> downloadErrors = #["Connection refused"]
+				var Integer _timeout = 3600 * 1000
 				
 				on host {
 					prerequisites:
