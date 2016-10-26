@@ -61,6 +61,7 @@ public class PeriodicEvent extends ManagedEvent<IntervalEvent> {
 	public PeriodicEvent(CronExpression cronExpression) {
 		super();
 		this.expression = cronExpression;
+		schedule();
 	}
 
 	public void updateExpression(CronExpression newExpression) {
@@ -104,7 +105,7 @@ public class PeriodicEvent extends ManagedEvent<IntervalEvent> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.util.dsl.ManagedEvent#resume()
+	 * @see pascani.lang.util.dsl.ManagedEvent#unpause()
 	 */
 	@Override public synchronized void unpause() {
 		if (!isPaused())
