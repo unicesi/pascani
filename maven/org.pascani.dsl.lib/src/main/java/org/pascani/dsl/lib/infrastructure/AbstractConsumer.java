@@ -107,9 +107,9 @@ public abstract class AbstractConsumer implements Resumable {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.util.Resumable#resume()
+	 * @see pascani.lang.util.Resumable#unpause()
 	 */
-	public void resume() {
+	public void unpause() {
 		this.paused = false;
 	}
 

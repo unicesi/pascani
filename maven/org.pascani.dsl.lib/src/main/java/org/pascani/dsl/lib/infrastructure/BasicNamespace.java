@@ -182,7 +182,7 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 			pause();
 			response = true;
 		} else if (request.operation().equals(RpcOperation.RESUME)) {
-			resume();
+			unpause();
 			response = true;
 		} else if (request.operation().equals(RpcOperation.IS_PAUSED)) {
 			response = isPaused();
@@ -251,7 +251,7 @@ public class BasicNamespace implements Namespace, RpcRequestHandler {
 	 * 
 	 * @see pascani.lang.util.Resumable#resume()
 	 */
-	public void resume() {
+	public void unpause() {
 		this.paused = false;
 	}
 

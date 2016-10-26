@@ -205,7 +205,7 @@ public class ProbeProxy implements Probe {
 	 * 
 	 * @see pascani.lang.util.Resumable#resume()
 	 */
-	public void resume() {
+	public void unpause() {
 		RpcRequest request = new RpcRequest(RpcOperation.RESUME);
 		makeActualCall(request, false); // true should be returned
 	}

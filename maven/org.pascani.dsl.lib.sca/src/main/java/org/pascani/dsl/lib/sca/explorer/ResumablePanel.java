@@ -91,7 +91,7 @@ public class ResumablePanel extends AbstractSelectionPanel<Resumable> {
 				resume.setEnabled(false);
 				pause.setEnabled(true);
 				status.setText(NOT_PAUSED);
-				selected.resume();
+				selected.unpause();
 			}
 		});
 		

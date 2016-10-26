@@ -106,11 +106,11 @@ public class PeriodicEvent extends ManagedEvent<IntervalEvent> {
 	 * 
 	 * @see pascani.lang.util.dsl.ManagedEvent#resume()
 	 */
-	@Override public synchronized void resume() {
+	@Override public synchronized void unpause() {
 		if (!isPaused())
 			return;
 		schedule();
-		super.resume();
+		super.unpause();
 	}
 
 	public CronExpression expression() {

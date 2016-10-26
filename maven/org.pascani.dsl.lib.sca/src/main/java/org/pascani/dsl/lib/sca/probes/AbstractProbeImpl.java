@@ -179,6 +179,10 @@ public abstract class AbstractProbeImpl implements EventHandler, Resumable {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.pascani.dsl.lib.util.Resumable#pause()
+	 */
 	public void pause() {
 		if (paused)
 			return;
@@ -189,16 +193,24 @@ public abstract class AbstractProbeImpl implements EventHandler, Resumable {
 			this.producer.pause();
 	}
 
-	public void resume() {
+	/*
+	 * (non-Javadoc)
+	 * @see org.pascani.dsl.lib.util.Resumable#unpause()
+	 */
+	public void unpause() {
 		if (!this.paused)
 			return;
 		this.paused = false;
 		if (this.probe != null)
-			this.probe.resume();
+			this.probe.unpause();
 		if (this.producer != null)
-			this.producer.resume();
+			this.producer.unpause();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.pascani.dsl.lib.util.Resumable#isPaused()
+	 */
 	public boolean isPaused() {
 		return this.paused;
 	}

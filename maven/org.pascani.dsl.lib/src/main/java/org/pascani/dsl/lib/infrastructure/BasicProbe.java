@@ -257,7 +257,7 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 			pause();
 			response = true;
 		} else if (request.operation().equals(RpcOperation.RESUME)) {
-			resume();
+			unpause();
 			response = true;
 		} else if (request.operation().equals(RpcOperation.IS_PAUSED)) {
 			response = isPaused();
@@ -280,7 +280,7 @@ public class BasicProbe implements Probe, RpcRequestHandler {
 	 * 
 	 * @see pascani.lang.util.Resumable#resume()
 	 */
-	public void resume() {
+	public void unpause() {
 		this.paused = false;
 	}
 	

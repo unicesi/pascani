@@ -136,13 +136,13 @@ public abstract class NonPeriodicEvent<T extends Event<?>>
 	 * 
 	 * @see pascani.lang.util.dsl.ManagedEvent#resume()
 	 */
-	@Override public synchronized void resume() {
+	@Override public synchronized void unpause() {
 		if (!isPaused())
 			return;
-		getConsumer().resume();
+		getConsumer().unpause();
 		if (!isProxyEvent)
-			getProbe().resume();
-		super.resume();
+			getProbe().unpause();
+		super.unpause();
 	}
 
 }

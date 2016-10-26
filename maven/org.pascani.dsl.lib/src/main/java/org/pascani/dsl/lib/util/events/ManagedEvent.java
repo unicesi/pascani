@@ -98,9 +98,9 @@ public abstract class ManagedEvent<T extends Event<?>> extends Observable
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see pascani.lang.util.Resumable#resume()
+	 * @see pascani.lang.util.Resumable#unpause()
 	 */
-	public void resume() {
+	public void unpause() {
 		this.paused = false;
 	}
 

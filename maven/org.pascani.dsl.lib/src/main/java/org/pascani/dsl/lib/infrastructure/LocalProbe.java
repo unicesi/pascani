@@ -216,8 +216,8 @@ public class LocalProbe implements Probe {
 	 * 
 	 * @see pascani.lang.util.Resumable#resume()
 	 */
-	public void resume() {
-		this.probe.resume();
+	public void unpause() {
+		this.probe.unpause();
 	}
 	
 	/*

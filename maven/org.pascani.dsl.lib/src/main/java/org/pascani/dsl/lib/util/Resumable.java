@@ -48,11 +48,13 @@ public interface Resumable {
 	public void pause();
 
 	/**
-	 * Resumes the regular behavior of this object
+	 * Resumes the regular behavior of this object.
+	 * The name has been chosen for avoiding conflicts with
+	 * method {@link Thread#resume()}
 	 */
 	@PUT
-	@Path("/resume/")
-	public void resume();
+	@Path("/unpause/")
+	public void unpause();
 
 	/**
 	 * 

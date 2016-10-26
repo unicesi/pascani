@@ -31,8 +31,8 @@ import org.quartz.CronExpression;
 /**
  * @author Miguel Jiménez - Initial contribution and API
  */
-public abstract class Monitor 
-	implements Runnable, Resumable, MonitorEventsService {
+public abstract class Monitor extends Thread
+	implements Resumable, MonitorEventsService {
 
 	/**
 	 * The variable representing the current state (stopped or not)
@@ -60,9 +60,9 @@ public abstract class Monitor
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.pascani.dsl.lib.util.Resumable#resume()
+	 * @see org.pascani.dsl.lib.util.Resumable#unpause()
 	 */
-	public void resume() {
+	public void unpause() {
 		this.paused = false;
 	}
 
