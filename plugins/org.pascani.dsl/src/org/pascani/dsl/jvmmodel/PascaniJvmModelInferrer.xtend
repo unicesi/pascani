@@ -298,13 +298,13 @@ class PascaniJvmModelInferrer extends AbstractModelInferrer {
 				'''
 			]
 
-			methods += monitor.toMethod("resume", typeRef(void)) [
+			methods += monitor.toMethod("unpause", typeRef(void)) [
 				annotations += annotationRef(Override)
 				body = '''
 					if (!isPaused())
 						return;
-					super.resume();
-					«events.map[e|e.name].join("\n", [e|e + ".resume();"])»
+					super.unpause();
+					«events.map[e|e.name].join("\n", [e|e + ".unpause();"])»
 				'''
 			]
 			
