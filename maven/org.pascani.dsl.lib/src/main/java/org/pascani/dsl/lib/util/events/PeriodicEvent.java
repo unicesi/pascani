@@ -18,6 +18,10 @@
  */
 package org.pascani.dsl.lib.util.events;
 
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
+
 import java.text.ParseException;
 import java.util.UUID;
 
@@ -28,8 +32,10 @@ import org.pascani.dsl.lib.util.JobScheduler;
 import org.quartz.CronExpression;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Trigger;
 
 /**
  * <b>Note</b>: DSL-only intended use
@@ -77,7 +83,10 @@ public class PeriodicEvent extends ManagedEvent<IntervalEvent> {
 			JobDataMap jobData = new JobDataMap();
 			jobData.put("expression", this.expression.getCronExpression());
 			jobData.put("this", this);
-			JobScheduler.schedule(InternalJob.class, this.expression, jobData);
+			JobDetail jobDetail = newJob(InternalJob.class).usingJobData(jobData).build();
+			Trigger trigger = newTrigger().startNow()
+					.withSchedule(cronSchedule(expression)).build();
+			JobScheduler.schedule(jobDetail, trigger);
 		} catch (Exception e) {
 			Exceptions.sneakyThrow(e);
 		}
