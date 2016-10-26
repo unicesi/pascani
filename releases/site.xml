@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<site>
-   <feature url="features/org.pascani.dsl.feature_0.0.0.jar" id="org.pascani.dsl.feature" version="0.0.0">
-      <category name="pascani"/>
-   </feature>
-   <category-def name="pascani" label="Pascani"/>
-</site>
