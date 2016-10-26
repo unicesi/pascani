@@ -46,7 +46,9 @@ public class PeriodicEvent extends ManagedEvent<IntervalEvent> {
 			JobDataMap jobData = context.getJobDetail().getJobDataMap();
 			IntervalEvent event = new IntervalEvent(UUID.randomUUID(),
 					jobData.getString("expression"));
-			((PeriodicEvent) jobData.get("this")).notifyObservers(event);
+			PeriodicEvent e = (PeriodicEvent) jobData.get("this");
+			e.setChanged();
+			e.notifyObservers(event);
 		}
 	}
 
@@ -75,8 +77,7 @@ public class PeriodicEvent extends ManagedEvent<IntervalEvent> {
 			JobDataMap jobData = new JobDataMap();
 			jobData.put("expression", this.expression.getCronExpression());
 			jobData.put("this", this);
-			JobScheduler.schedule(InternalJob.class,
-					new CronExpression(this.expression.getCronExpression()), jobData);
+			JobScheduler.schedule(InternalJob.class, this.expression, jobData);
 		} catch (Exception e) {
 			Exceptions.sneakyThrow(e);
 		}
