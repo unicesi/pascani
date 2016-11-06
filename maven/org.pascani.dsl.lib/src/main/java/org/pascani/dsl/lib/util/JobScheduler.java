@@ -130,6 +130,18 @@ public class JobScheduler {
 		return scheduler.unscheduleJob(
 				TriggerKey.triggerKey(jobClass.getCanonicalName(), jobGroup));
 	}
+	
+	/**
+	 * Removes the indicated job from the scheduler using a {@link TriggerKey}
+	 * 
+	 * @return whether the job was unscheduled or not
+	 * @throws SchedulerException
+	 *             if there is an internal Scheduler error.
+	 */
+	public static boolean unschedule(TriggerKey triggerKey) 
+			throws SchedulerException {
+		return scheduler.unscheduleJob(triggerKey);
+	}
 
 	/**
 	 * Halts the <code>Scheduler</code>'s firing of

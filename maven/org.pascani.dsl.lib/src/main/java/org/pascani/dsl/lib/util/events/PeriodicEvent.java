@@ -36,6 +36,7 @@ import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.Trigger;
+import org.quartz.TriggerKey;
 
 /**
  * <b>Note</b>: DSL-only intended use
@@ -45,6 +46,8 @@ import org.quartz.Trigger;
 public class PeriodicEvent extends ManagedEvent<IntervalEvent> {
 
 	protected CronExpression expression;
+	
+	private String triggerKey;
 
 	public static class InternalJob implements Job {
 		@Override public void execute(JobExecutionContext context)
@@ -80,11 +83,13 @@ public class PeriodicEvent extends ManagedEvent<IntervalEvent> {
 	
 	private void schedule() {
 		try {
+			this.triggerKey = this.expression.getCronExpression() + System.nanoTime();
 			JobDataMap jobData = new JobDataMap();
 			jobData.put("expression", this.expression.getCronExpression());
 			jobData.put("this", this);
 			JobDetail jobDetail = newJob(InternalJob.class).usingJobData(jobData).build();
 			Trigger trigger = newTrigger().startNow()
+					.withIdentity(this.triggerKey)
 					.withSchedule(cronSchedule(expression)).build();
 			JobScheduler.schedule(jobDetail, trigger);
 		} catch (Exception e) {
@@ -94,7 +99,7 @@ public class PeriodicEvent extends ManagedEvent<IntervalEvent> {
 	
 	private void unschedule() {
 		try {
-			JobScheduler.unschedule(InternalJob.class);
+			JobScheduler.unschedule(TriggerKey.triggerKey(this.triggerKey));
 		} catch (Exception e) {
 			Exceptions.sneakyThrow(e);
 		}
