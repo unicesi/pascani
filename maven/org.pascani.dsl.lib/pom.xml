@@ -102,6 +102,17 @@
 		</dependency>
 	</dependencies>
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.java</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -171,8 +182,6 @@
           				<configuration>
           					<tasks>
           						<copy file="target/${jar.name}-dependencies.jar" tofile="${bundle.dir}/${project.artifactId}-dependencies.jar"/>
-          						<delete file="${bundle.dir}/OSGI-OPT/src/${project.artifactId}"/>
-          						<unzip src="target/${jar.name}-sources.jar" dest="${bundle.dir}/OSGI-OPT/src/${project.artifactId}"/>
           					</tasks>
           				</configuration>
           			</execution>
