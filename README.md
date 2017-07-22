@@ -5,7 +5,7 @@ Pascani is a Domain Specific Language for specifying, compiling and deploying dy
 
 http://unicesi.github.io/pascani/releases
 
-Pascani requires [Amelia](https://github.com/unicesi/amelia), so please make sure you add the Amelia update site (http://unicesi.github.io/amelia/releases) before you install Pascani features.
+Pascani requires [Amelia](https://github.com/unicesi/amelia) and [Xtext](http://www.eclipse.org/Xtext/), so please make sure you add both update sites before you install Pascani features: http://unicesi.github.io/amelia/releases and http://download.eclipse.org/modeling/tmf/xtext/updates.
 
 ### Clone
 
